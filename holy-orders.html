@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Holy Orders Requests - San Jose Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="holy-orders.css">
+</head>
+<body>
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <button class="sidebar-toggle">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="church-logo">
+      <i class="fa-solid fa-church"></i>
+      <span>SJMP ADMIN</span>
+    </div>
+    <nav class="main-nav">
+      <ul class="nav-links">
+        <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
+        <li class="nav-dropdown open">
+          <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
+          <ul class="dropdown-menu">
+            <li><a href="baptism.html"><span>Baptism</span></a></li>
+            <li><a href="kumpil.html"><span>Confirmation</span></a></li>
+            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
+            <li><a href="confession.html"><span>Confession</span></a></li>
+            <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
+            <li><a href="holy-orders.html" class="active"><span>Holy Orders</span></a></li>
+            <li><a href="matrimony.html"><span>Matrimony</span></a></li>
+          </ul>
+        </li>
+          <li class="nav-dropdown open">
+          <a href="#"><i class="fa-solid fa-cross"></i><span>Other Services</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
+          <ul class="dropdown-menu">
+            <li><a href="pamisa.html"><span>Pamisa</span></a></li>
+            <li><a href="blessing.html"><span>Blessing</span></a></li>
+            <li><a href="pamisapatay.html"><span>Pamisa sa patay</span></a></li>
+          </ul>
+        </li>
+        <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
+        <li><a href="schedule.html"><i class="fa-solid fa-calendar-alt"></i><span>Schedule</span></a></li>
+        <li><a href="certificate.html"><i class="fa-solid fa-globe"></i><span>Certificate Request</span></a></li>
+        <li><a href="WebsiteManagement.html"><i class="fa-solid fa-globe"></i><span>Website Management</span></a></li>
+    <li class="nav-logout"><a href="#" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a></li>
+      </ul>
+    </nav>
+  </aside>
+    <main class="main-content">
+        <header class="header">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="headerSearch" placeholder="Search for a request...">
+            </div>
+            <div class="user-profile">
+                <i class="fa-solid fa-bell"></i>
+                <i class="fa-solid fa-comment-dots"></i>
+                <img src="images/LOGO.png" alt="User Profile">
+            </div>
+        </header>
+
+        <div class="dashboard-widgets">
+            <div class="widget-card card-blue">
+                <i class="fa-solid fa-list-check"></i>
+                <div class="widget-content">
+                    <h4>Total Requests</h4>
+                    <p id="totalRequests">0</p>
+                </div>
+            </div>
+            <div class="widget-card status-widget">
+                <h4>Requests by Status</h4>
+                <div class="status-count pending">
+                    <i class="fa-solid fa-clock"></i>
+                    <span id="pendingCount">0</span>
+                    <span>Pending</span>
+                </div>
+                <div class="status-count in-process">
+                    <i class="fa-solid fa-gears"></i>
+                    <span id="inProcessCount">0</span>
+                    <span>In Process</span>
+                </div>
+                <div class="status-count scheduled">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span id="scheduledCount">0</span>
+                    <span>Scheduled</span>
+                </div>
+                <div class="status-count completed">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span id="completedCount">0</span>
+                    <span>Completed</span>
+                </div>
+                <div class="status-count approved">
+                    <i class="fa-solid fa-thumbs-up"></i>
+                    <span id="approvedCount">0</span>
+                    <span>Approved</span>
+                </div>
+                <div class="status-count rejected">
+                    <i class="fa-solid fa-ban"></i>
+                    <span id="rejectedCount">0</span>
+                    <span>Rejected</span>
+                </div>
+                <div class="status-count cancelled">
+                    <i class="fa-solid fa-xmark"></i>
+                    <span id="cancelledCount">0</span>
+                    <span>Cancelled</span>
+                </div>
+            </div>
+            <div class="widget-card card-green">
+                <i class="fa-solid fa-calendar-days"></i>
+                <div class="widget-content">
+                    <h4>Upcoming Ordinations</h4>
+                    <p id="upcomingCount">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Workflow Guide -->
+        <div class="status-workflow">
+            <h4>Holy Orders Request Workflow</h4>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-icon pending"><i class="fa-solid fa-clock"></i></div>
+                    <div class="step-label">Pending</div>
+                </div>
+                <div class="workflow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="workflow-step">
+                    <div class="step-icon in-process"><i class="fa-solid fa-gears"></i></div>
+                    <div class="step-label">In Process</div>
+                </div>
+                <div class="workflow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="workflow-step">
+                    <div class="step-icon scheduled"><i class="fa-solid fa-calendar-check"></i></div>
+                    <div class="step-label">Scheduled</div>
+                </div>
+                <div class="workflow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="workflow-step">
+                    <div class="step-icon completed"><i class="fa-solid fa-check-circle"></i></div>
+                    <div class="step-label">Completed</div>
+                </div>
+                <div class="workflow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="workflow-step">
+                    <div class="step-icon approved"><i class="fa-solid fa-thumbs-up"></i></div>
+                    <div class="step-label">Approved</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="requests-section">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">All Holy Orders Requests</h3>
+                    <div class="search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="tableSearch" placeholder="Search for a request...">
+                    </div>
+                </div>
+                <div class="table-header-controls">
+                    <div class="table-actions">
+                        <button class="add-request-btn" id="addRequestBtn">
+                            <i class="fa-solid fa-plus"></i> Add Request
+                        </button>
+                        <div class="filter-buttons">
+                            <button class="active" data-status="all">All</button>
+                            <button data-status="pending">Pending</button>
+                            <button data-status="in-process">In Process</button>
+                            <button data-status="scheduled">Scheduled</button>
+                            <button data-status="completed">Completed</button>
+                            <button data-status="approved">Approved</button>
+                            <button data-status="rejected">Rejected</button>
+                            <button data-status="cancelled">Cancelled</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="holy-orders-table" id="requestsTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Contact Number</th>
+                                <th>Request Number</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="empty-state" id="emptyState">No holy orders requests found.</div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Add Request Modal -->
+<div id="addRequestModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add Holy Orders Request</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <form id="addRequestForm">
+            <h3 class="form-section-header">Candidate Information</h3>
+            <div class="form-row double">
+                <div class="form-group">
+                    <label for="candidateName">Full Name:</label>
+                    <input type="text" id="candidateName" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" required>
+                </div>
+            </div>
+            <div class="form-row double">
+                <div class="form-group">
+                    <label for="contactNumber">Contact Number:</label>
+                    <input type="tel" id="contactNumber" required>
+                </div>
+                
+            <button type="submit" class="submit-btn" id="submitAddBtn">Add Request</button>
+        </form>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Holy Orders Request Details</h2>
+            <span class="close-btn" id="closeDetails">&times;</span>
+        </div>
+        <div class="modal-body" id="detailsContent">
+            <!-- Details will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- Reason Modal (for cancellation/rejection) -->
+<div id="reasonModal" class="modal reason-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="reasonModalTitle">Provide Reason</h2>
+            <span class="close-btn" id="closeReason">&times;</span>
+        </div>
+        <form id="reasonForm">
+            <div class="form-group">
+                <label for="reason">Reason for <span id="actionType">action</span>:</label>
+                <textarea id="reason" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn" id="submitReasonBtn">Submit</button>
+        </form>
+    </div>
+</div>
+
+<div id="alertContainer" class="custom-alert-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sidebar toggle functionality - SAME AS KUMPIL
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+        this.querySelector('i').classList.toggle('fa-bars');
+        this.querySelector('i').classList.toggle('fa-times');
+    });
+
+    // Dropdown functionality - SAME AS KUMPIL
+    document.querySelectorAll('.nav-dropdown > a').forEach(function(dropdown) {
+        dropdown.addEventListener('click', function(e) {
+            e.preventDefault();
+            const parent = this.parentElement;
+            parent.classList.toggle('open');
+        });
+    });
+
+    const baseURL = "http://localhost:5000/api/holy-orders";
+    const addRequestBtn = document.getElementById('addRequestBtn');
+    const modal = document.getElementById('addRequestModal');
+    const closeBtn = document.querySelector('.modal .close-btn');
+    const addRequestForm = document.getElementById('addRequestForm');
+    const requestsTableBody = document.querySelector('#requestsTable tbody');
+    const emptyState = document.getElementById('emptyState');
+    const filterButtons = document.querySelectorAll('.filter-buttons button');
+    const totalRequestsCount = document.getElementById('totalRequests');
+    const pendingCount = document.getElementById('pendingCount');
+    const inProcessCount = document.getElementById('inProcessCount');
+    const scheduledCount = document.getElementById('scheduledCount');
+    const completedCount = document.getElementById('completedCount');
+    const approvedCount = document.getElementById('approvedCount');
+    const rejectedCount = document.getElementById('rejectedCount');
+    const cancelledCount = document.getElementById('cancelledCount');
+    const upcomingCount = document.getElementById('upcomingCount');
+    const headerSearchInput = document.getElementById('headerSearch');
+    const tableSearchInput = document.getElementById('tableSearch');
+
+    const detailsModal = document.getElementById('detailsModal');
+    const closeDetails = document.getElementById('closeDetails');
+    const detailsContent = document.getElementById('detailsContent');
+
+    const reasonModal = document.getElementById('reasonModal');
+    const closeReason = document.getElementById('closeReason');
+    const reasonForm = document.getElementById('reasonForm');
+    const reasonInput = document.getElementById('reason');
+    const actionTypeSpan = document.getElementById('actionType');
+    const reasonModalTitle = document.getElementById('reasonModalTitle');
+
+    let requests = [];
+    let currentAction = { id: null, type: null };
+    let currentFilter = 'all';
+    let currentSearchTerm = '';
+
+    // Define status workflow - SAME AS KUMPIL
+    const statusWorkflow = {
+        'pending': ['in-process', 'rejected', 'cancelled'],
+        'in-process': ['scheduled', 'rejected', 'cancelled'],
+        'scheduled': ['completed', 'cancelled'],
+        'completed': ['approved', 'rejected'],
+        'approved': [],
+        'rejected': ['pending'],
+        'cancelled': ['pending']
+    };
+
+    // Date formatting functions - SAME AS KUMPIL
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            
+            return date.toLocaleDateString('en-PH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return dateString;
+        }
+    }
+
+    function formatTime(timeString) {
+        if (!timeString) return 'N/A';
+        try {
+            if (timeString.includes(':')) {
+                const [hours, minutes] = timeString.split(':');
+                const hour = parseInt(hours);
+                const minute = parseInt(minutes);
+                
+                if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+                    const period = hour >= 12 ? 'PM' : 'AM';
+                    const displayHour = hour % 12 || 12;
+                    return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+                }
+            }
+            return timeString;
+        } catch (e) {
+            return timeString;
+        }
+    }
+
+    // Fix data based on your database structure
+    function fixNullValues(data) {
+        return data.map(request => ({
+            _id: request._id || '',
+            sacrament: request.sacrament || 'Holy Orders',
+            name: request.name || '',
+            email: request.email || '',
+            contactNumber: request.contactNumber || '',
+            status: request.status || 'pending',
+            submittedByEmail: request.submittedByEmail || '',
+            requestNumber: request.requestNumber || '',
+            // Use the correct field names from your database
+            ordinationType: request.ordinationType || 'deacon',
+            seminaryName: request.seminaryName || '',
+            seminaryYears: request.seminaryYears || '',
+            ordinationDate: request.ordinationDate || '',
+            ordinationTime: request.ordinationTime || '',
+            ordinationPlace: request.ordinationPlace || '',
+            sponsorName: request.sponsorName || '',
+            sponsorContact: request.sponsorContact || '',
+            // REASON SYSTEM FIELDS - USE CORRECT NAMES FROM SERVER
+            cancellation_reason: request.cancellation_reason || '',
+            rejection_reason: request.rejection_reason || '',
+            cancelled_by: request.cancelled_by || '',
+            rejected_by: request.rejected_by || '',
+            cancelled_at: request.cancelled_at || '',
+            rejected_at: request.rejected_at || '',
+            createdAt: request.createdAt || '',
+            lastUpdated: request.lastUpdated || '',
+            references: request.references || []
+        }));
+    }
+
+    async function fetchRequests() {
+        try {
+            console.log("🔄 Fetching holy orders requests from:", baseURL);
+            const res = await fetch(baseURL);
+            
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            
+            const data = await res.json();
+            requests = fixNullValues(data);
+            
+            console.log("✅ Fetched requests:", requests);
+            applyFiltersAndSearch();
+        } catch (err) { 
+            console.error("❌ Failed to fetch requests:", err);
+            showNotification('Failed to fetch requests from server.', 'error');
+        }
+    }
+
+    async function addRequest(request) {
+        try {
+            const res = await fetch(baseURL, {
+                method:'POST', 
+                headers:{'Content-Type':'application/json'}, 
+                body: JSON.stringify(request)
+            });
+            
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            
+            const result = await res.json();
+            console.log("✅ Added request:", result);
+            showNotification('New holy orders request added successfully!');
+            fetchRequests();
+        } catch (err) {
+            console.error("❌ Failed to add request:", err);
+            showNotification('Failed to add request.', 'error');
+        }
+    }
+
+    // FIXED: Update with correct field names for reason system
+    async function updateRequestStatus(id, status, reason = null) {
+        try {
+            const updateData = { status };
+            
+            // Use the correct field names from server schema
+            if (status === 'cancelled' && reason) {
+                updateData.cancellation_reason = reason;
+            } else if (status === 'rejected' && reason) {
+                updateData.rejection_reason = reason;
+            }
+            
+            console.log("🔄 Updating request with data:", updateData);
+            const res = await fetch(`${baseURL}/${id}`, {
+                method:'PUT', 
+                headers:{'Content-Type':'application/json'}, 
+                body: JSON.stringify(updateData)
+            });
+            
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            
+            const result = await res.json();
+            console.log("✅ Update result:", result);
+            showNotification(`Request status updated to ${status}!`);
+            fetchRequests();
+        } catch (err) {
+            console.error("❌ Failed to update request:", err);
+            showNotification('Failed to update request.', 'error');
+        }
+    }
+
+    function getAvailableActions(currentStatus) {
+        return statusWorkflow[currentStatus] || [];
+    }
+
+    function applyFiltersAndSearch() {
+        let filteredData = [...requests];
+        
+        // Apply status filter
+        if (currentFilter !== 'all') {
+            filteredData = filteredData.filter(r => r.status === currentFilter);
+        }
+        
+        // Apply search term
+        if (currentSearchTerm) {
+            const term = currentSearchTerm.toLowerCase();
+            filteredData = filteredData.filter(r => 
+                (r.name && r.name.toLowerCase().includes(term)) || 
+                (r.email && r.email.toLowerCase().includes(term)) ||
+                (r.contactNumber && r.contactNumber.includes(term)) ||
+                (r.requestNumber && r.requestNumber.toLowerCase().includes(term)) ||
+                (r.status && r.status.toLowerCase().includes(term))
+            );
+        }
+        
+        renderTable(filteredData);
+    }
+
+    function renderTable(data) {
+        requestsTableBody.innerHTML = '';
+        
+        if(data.length === 0){ 
+            emptyState.style.display = 'block'; 
+        } else {
+            emptyState.style.display = 'none';
+            data.forEach(request => {
+                const row = document.createElement('tr');
+                row.dataset.id = request._id;
+                const availableActions = getAvailableActions(request.status);
+                
+                row.innerHTML = `
+                    <td>${request.name || 'N/A'}</td>
+                    <td>${request.email || 'N/A'}</td>
+                    <td>${request.contactNumber || 'N/A'}</td>
+                    <td>${request.requestNumber || 'N/A'}</td>
+                    <td><span class="status-badge ${request.status}">${request.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            ${availableActions.includes('in-process') ? 
+                                `<button class="process-btn" title="Mark as In Process">
+                                    <i class="fa-solid fa-gears"></i> Process
+                                </button>` : ''}
+                            ${availableActions.includes('scheduled') ? 
+                                `<button class="schedule-btn" title="Mark as Scheduled">
+                                    <i class="fa-solid fa-calendar-check"></i> Schedule
+                                </button>` : ''}
+                            ${availableActions.includes('completed') ? 
+                                `<button class="complete-btn" title="Mark as Completed">
+                                    <i class="fa-solid fa-check-circle"></i> Complete
+                                </button>` : ''}
+                            ${availableActions.includes('approved') ? 
+                                `<button class="approve-btn" title="Approve">
+                                    <i class="fa-solid fa-thumbs-up"></i> Approve
+                                </button>` : ''}
+                            ${availableActions.includes('rejected') ? 
+                                `<button class="reject-btn" title="Reject">
+                                    <i class="fa-solid fa-ban"></i> Reject
+                                </button>` : ''}
+                            ${availableActions.includes('cancelled') ? 
+                                `<button class="cancel-btn" title="Cancel">
+                                    <i class="fa-solid fa-xmark"></i> Cancel
+                                </button>` : ''}
+                            ${availableActions.includes('pending') ? 
+                                `<button class="reset-btn" title="Reset to Pending">
+                                    <i class="fa-solid fa-rotate-left"></i> Reset
+                                </button>` : ''}
+                        </div>
+                    </td>
+                `;
+                requestsTableBody.appendChild(row);
+            });
+        }
+        updateCounts(data);
+    }
+
+    function updateCounts(data){
+        totalRequestsCount.textContent = data.length;
+        pendingCount.textContent = data.filter(r => r.status === 'pending').length;
+        inProcessCount.textContent = data.filter(r => r.status === 'in-process').length;
+        scheduledCount.textContent = data.filter(r => r.status === 'scheduled').length;
+        completedCount.textContent = data.filter(r => r.status === 'completed').length;
+        approvedCount.textContent = data.filter(r => r.status === 'approved').length;
+        rejectedCount.textContent = data.filter(r => r.status === 'rejected').length;
+        cancelledCount.textContent = data.filter(r => r.status === 'cancelled').length;
+        
+        // For upcoming ordinations
+        upcomingCount.textContent = data.filter(r => {
+            if (!r.ordinationDate) return false;
+            try {
+                const ordinationDate = new Date(r.ordinationDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return ordinationDate >= today && (r.status === 'scheduled' || r.status === 'in-process');
+            } catch (e) {
+                return false;
+            }
+        }).length;
+    }
+
+    function showNotification(message, type='success'){
+        const alert = document.createElement('div');
+        alert.className = `custom-alert ${type}`;
+        alert.innerHTML = `<span>${message}</span><button class="close-notif">&times;</button>`;
+        document.getElementById('alertContainer').appendChild(alert);
+        setTimeout(()=>{
+            alert.classList.add('hide'); 
+            setTimeout(() => alert.remove(), 300);
+        }, 3000);
+        alert.querySelector('.close-notif').addEventListener('click',()=>alert.remove());
+    }
+
+    // Modal handling - SAME AS KUMPIL
+    addRequestBtn.addEventListener('click', ()=>modal.classList.add('show'));
+    closeBtn.addEventListener('click', ()=>{
+        modal.classList.remove('show'); 
+        addRequestForm.reset();
+    });
+    window.addEventListener('click', (e)=>{
+        if(e.target===modal){
+            modal.classList.remove('show'); 
+            addRequestForm.reset();
+        }
+    });
+
+    addRequestForm.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        // Generate a unique request number
+        const timestamp = Date.now();
+        const randomString = Math.random().toString(36).substring(2, 10);
+        
+        const newRequest = {
+            sacrament: 'Holy Orders',
+            name: document.getElementById('candidateName').value,
+            email: document.getElementById('email').value,
+            contactNumber: document.getElementById('contactNumber').value,
+            ordinationType: document.getElementById('ordinationType').value,
+            seminaryName: document.getElementById('seminaryName').value,
+            seminaryYears: document.getElementById('seminaryYears').value,
+            ordinationDate: document.getElementById('ordinationDate').value,
+            ordinationTime: document.getElementById('ordinationTime').value,
+            ordinationPlace: document.getElementById('ordinationPlace').value,
+            sponsorName: document.getElementById('sponsorName').value,
+            sponsorContact: document.getElementById('sponsorContact').value,
+            status:'pending',
+            requestNumber: `HOLY-${timestamp}-${randomString}`,
+            submittedByEmail: 'admin@sjmp.com'
+        };
+        
+        console.log("📤 Submitting new request:", newRequest);
+        addRequest(newRequest);
+        modal.classList.remove('show'); 
+        addRequestForm.reset();
+    });
+
+    filterButtons.forEach(button=>{
+        button.addEventListener('click', ()=>{
+            filterButtons.forEach(btn=>btn.classList.remove('active'));
+            button.classList.add('active');
+            currentFilter = button.dataset.status;
+            applyFiltersAndSearch();
+        });
+    });
+
+    // Search functionality for both search bars - SAME AS KUMPIL
+    function handleSearchInput(e) {
+        currentSearchTerm = e.target.value;
+        applyFiltersAndSearch();
+    }
+
+    headerSearchInput.addEventListener('input', handleSearchInput);
+    tableSearchInput.addEventListener('input', handleSearchInput);
+
+    // Reason modal handling - SAME AS KUMPIL
+    closeReason.addEventListener('click', ()=>{
+        reasonModal.classList.remove('show');
+        reasonForm.reset();
+    });
+    
+    window.addEventListener('click', (e)=>{
+        if(e.target===reasonModal){
+            reasonModal.classList.remove('show');
+            reasonForm.reset();
+        }
+    });
+    
+    reasonForm.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const reason = reasonInput.value.trim();
+        if(reason){
+            console.log("📤 Submitting reason:", reason, "for action:", currentAction);
+            updateRequestStatus(currentAction.id, currentAction.type, reason);
+            reasonModal.classList.remove('show');
+            reasonForm.reset();
+        }
+    });
+
+    requestsTableBody.addEventListener('click',(e)=>{
+        const row = e.target.closest('tr'); 
+        if(!row || !row.dataset.id) return;
+        const id = row.dataset.id; 
+        const request = requests.find(r=>r._id===id);
+        
+        // Handle action buttons - SAME AS KUMPIL
+        if(e.target.closest('.process-btn')) { 
+            updateRequestStatus(id,'in-process'); 
+            return; 
+        }
+        if(e.target.closest('.schedule-btn')) { 
+            updateRequestStatus(id,'scheduled'); 
+            return; 
+        }
+        if(e.target.closest('.complete-btn')) { 
+            updateRequestStatus(id,'completed'); 
+            return; 
+        }
+        if(e.target.closest('.approve-btn')) { 
+            updateRequestStatus(id,'approved'); 
+            return; 
+        }
+        if(e.target.closest('.reject-btn')) { 
+            currentAction = { id, type: 'rejected' };
+            actionTypeSpan.textContent = 'rejection';
+            reasonModalTitle.textContent = 'Reason for Rejection';
+            reasonModal.classList.add('show');
+            return; 
+        }
+        if(e.target.closest('.cancel-btn')) { 
+            currentAction = { id, type: 'cancelled' };
+            actionTypeSpan.textContent = 'cancellation';
+            reasonModalTitle.textContent = 'Reason for Cancellation';
+            reasonModal.classList.add('show');
+            return; 
+        }
+        if(e.target.closest('.reset-btn')) { 
+            updateRequestStatus(id,'pending'); 
+            return; 
+        }
+        
+        // Show details modal - SAME AS KUMPIL
+        if(request){
+            let detailsHTML = `
+                <div class="details-section">
+                    <h3 class="details-section-header">Candidate Information</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Full Name:</span>
+                            <div class="detail-value">${request.name || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Email Address:</span>
+                            <div class="detail-value">${request.email || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Contact Number:</span>
+                            <div class="detail-value">${request.contactNumber || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Request Number:</span>
+                            <div class="detail-value">${request.requestNumber || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Ordination Type:</span>
+                            <div class="detail-value">${request.ordinationType || 'deacon'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h3 class="details-section-header">Seminary Information</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Seminary Name:</span>
+                            <div class="detail-value">${request.seminaryName || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Years in Seminary:</span>
+                            <div class="detail-value">${request.seminaryYears || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h3 class="details-section-header">Ordination Details</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Proposed Ordination Date:</span>
+                            <div class="detail-value">${formatDate(request.ordinationDate) || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Proposed Ordination Time:</span>
+                            <div class="detail-value">${formatTime(request.ordinationTime) || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Proposed Ordination Place:</span>
+                            <div class="detail-value">${request.ordinationPlace || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h3 class="details-section-header">Sponsor Information</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Sponsor Name:</span>
+                            <div class="detail-value">${request.sponsorName || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Sponsor Contact:</span>
+                            <div class="detail-value">${request.sponsorContact || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h3 class="details-section-header">Status Information</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <div class="detail-value"><span class="status-badge ${request.status}">${request.status}</span></div>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Submitted By:</span>
+                            <div class="detail-value">${request.submittedByEmail || 'N/A'}</div>
+                        </div>
+                        ${request.createdAt ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Submitted On:</span>
+                                <div class="detail-value">${formatDate(request.createdAt)}</div>
+                            </div>
+                        ` : ''}
+                        ${request.lastUpdated ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Last Updated:</span>
+                                <div class="detail-value">${formatDate(request.lastUpdated)}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Add reason if exists - USE CORRECT FIELD NAMES
+            if (request.cancellation_reason) {
+                detailsHTML += `
+                    <div class="details-section">
+                        <h3 class="details-section-header">Cancellation Details</h3>
+                        <div class="details-grid">
+                            <div class="detail-item full-width">
+                                <span class="detail-label">Cancellation Reason:</span>
+                                <div class="detail-textarea">${request.cancellation_reason}</div>
+                            </div>
+                            ${request.cancelled_by ? `
+                                <div class="detail-item">
+                                    <span class="detail-label">Cancelled By:</span>
+                                    <div class="detail-value">${request.cancelled_by}</div>
+                                </div>
+                            ` : ''}
+                            ${request.cancelled_at ? `
+                                <div class="detail-item">
+                                    <span class="detail-label">Cancelled At:</span>
+                                    <div class="detail-value">${formatDate(request.cancelled_at)} ${formatTime(request.cancelled_at)}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (request.rejection_reason) {
+                detailsHTML += `
+                    <div class="details-section">
+                        <h3 class="details-section-header">Rejection Details</h3>
+                        <div class="details-grid">
+                            <div class="detail-item full-width">
+                                <span class="detail-label">Rejection Reason:</span>
+                                <div class="detail-textarea">${request.rejection_reason}</div>
+                            </div>
+                            ${request.rejected_by ? `
+                                <div class="detail-item">
+                                    <span class="detail-label">Rejected By:</span>
+                                    <div class="detail-value">${request.rejected_by}</div>
+                                </div>
+                            ` : ''}
+                            ${request.rejected_at ? `
+                                <div class="detail-item">
+                                    <span class="detail-label">Rejected At:</span>
+                                    <div class="detail-value">${formatDate(request.rejected_at)} ${formatTime(request.rejected_at)}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            detailsContent.innerHTML = detailsHTML;
+            detailsModal.classList.add('show');
+        }
+    });
+
+    closeDetails.addEventListener('click',()=>detailsModal.classList.remove('show'));
+    window.addEventListener('click',(e)=>{if(e.target===detailsModal) detailsModal.classList.remove('show');});
+
+    // Initial fetch
+    fetchRequests();
+
+    // Logout - SAME AS KUMPIL
+    const logoutLink = document.getElementById("logoutLink");
+    logoutLink.addEventListener("click",(e)=>{
+        e.preventDefault();
+        Swal.fire({
+            title:'Are you sure you want to log out?',
+            text:"You will be redirected to the login page.",
+            icon:'warning',
+            showCancelButton:true,
+            confirmButtonColor:'#3085d6',
+            cancelButtonColor:'#d33',
+            confirmButtonText:'Yes, log me out!'
+        }).then((result)=>{
+            if(result.isConfirmed){window.location.href="index.html";}
+        });
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parish Admin Login</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --secondary-color: #0056b3;
+      --accent-color: #6c757d;
+      --bg-light: #f8f9fa;
+      --text-dark: #212529;
+      --text-light: #fff;
+      --border-color: #ced4da;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --input-padding: 14px 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .login-container {
+      display: flex;
+      background: var(--text-light);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      width: 900px;
+      max-width: 95%;
+      overflow: hidden;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .login-left {
+      flex: 1.2;
+      position: relative;
+      padding: 50px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: #f1f5f9;
+      color: var(--text-dark);
+      user-select: none;
+    }
+
+    .login-left::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/St._John_the_Baptist_Parish_Church_%28Calamba%29.jpg/1280px-St._John_the_Baptist_Parish_Church_%28Calamba%29.jpg") no-repeat center center/cover;
+      opacity: 0.08;
+    }
+
+    .login-left > * { position: relative; z-index: 1; }
+
+    .login-left .logo {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .login-left .logo:hover { transform: scale(1.05); }
+
+    .login-left h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--primary-color);
+    }
+
+    .login-left p {
+      font-size: 0.95rem;
+      max-width: 300px;
+      opacity: 0.9;
+    }
+
+    .login-right {
+      flex: 1;
+      padding: 50px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .login-right h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 30px;
+      color: var(--primary-color);
+    }
+
+    .form-group { margin-bottom: 25px; }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .input-wrapper { position: relative; }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: var(--input-padding);
+      padding-left: 50px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+    
+    .input-wrapper .icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent-color);
+      transition: color 0.3s ease;
+    }
+    
+    .input-wrapper input:focus + .icon { color: var(--primary-color); }
+
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-light);
+      background-color: var(--primary-color);
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      margin-top: 10px;
+    }
+
+    .login-btn:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-btn:active { transform: translateY(0); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .login-container { flex-direction: column; width: 85%; }
+      .login-left, .login-right { padding: 40px 30px; }
+    }
+
+    @media (max-width: 500px) {
+      .login-right h2 { font-size: 1.8rem; }
+      .login-left h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-left">
+      <img class="logo" src="images/LOGO.png" alt="Parish Logo">
+      <h1>Welcome, Admin!</h1>
+      <p>Securely manage all parish records and activities from one central dashboard.</p>
+    </div>
+    
+    <div class="login-right">
+      <h2>Admin Login</h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrapper">
+            <input type="text" id="username" placeholder="Enter your username" required>
+            <i class="fas fa-user icon"></i>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <i class="fas fa-lock icon"></i>
+          </div>
+        </div>
+        
+        <button type="submit" class="login-btn">Log In</button>
+
+        <div class="signup-link">
+          <p>Don't have an account? <a href="register.html">Sign Up</a></p>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const loginForm = document.getElementById("loginForm");
+      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+      
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        try {
+          const res = await fetch("http://localhost:5000/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Login Successful!',
+              text: `Welcome ${data.user.name} (${data.user.role})`,
+              showConfirmButton: false,
+              timer: 2000
+            }).then(() => {
+              window.location.href = "dashboard.html";
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Login Failed!',
+              text: data.message || 'Invalid username or password.',
+              confirmButtonColor: primaryColor
+            });
+          }
+        } catch (err) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Could not connect to the server. Make sure backend is running.',
+            confirmButtonColor: primaryColor
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

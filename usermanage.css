@@ -1,0 +1,759 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* --- Variable Definitions --- */
+:root {
+    --color-primary: #1B5E20; /* Richer Forest Green */
+    --color-secondary: #4CAF50; /* Brighter Green */
+    --color-tertiary: #5e35b1; /* Deep Purple (for View - default color) */
+    --color-warning: #ffb300; /* Amber */
+    --color-error: #D32F2F; /* Red for errors and delete actions */
+    
+    --color-text-primary: #263238;
+    --color-text-secondary: #757575;
+    
+    --color-background: #F4F6F9; 
+    --color-card-background: #ffffff;
+    --color-border: #e0e0e0;
+    --color-hover: rgba(76, 175, 80, 0.1); /* Light Green Hover Background */
+    --color-delete-bg: #ffebee; /* Lighter red for delete button icon */
+
+    /* Spacing & Sizing */
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-xxl: 3rem;
+
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+
+    /* Shadows */
+    --shadow-sm: 0 4px 6px rgba(0,0,0,0.08);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+/* --- Base Styles --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* --- Layout Container --- */
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    width: 280px;
+    background-color: var(--color-card-background);
+    padding: var(--space-xl) var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--color-border);
+}
+
+.church-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: var(--space-xl);
+    color: var(--color-primary);
+}
+
+.main-nav {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-links {
+    list-style: none;
+    width: 100%;
+}
+
+.nav-links li a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-sm);
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease-in-out;
+}
+
+/* 🟢 Sidebar Hover - Green */
+.nav-links li a:hover {
+    background-color: var(--color-hover);
+    color: var(--color-primary);
+    transform: translateX(2px);
+}
+
+.nav-links li a.active {
+    background-color: var(--color-primary);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+    transform: translateX(4px);
+}
+
+.nav-dropdown > a {
+    position: relative;
+}
+
+.dropdown-icon {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+
+.nav-dropdown.open .dropdown-icon {
+    transform: rotate(-180deg);
+}
+
+.dropdown-menu {
+    list-style: none;
+    padding-left: var(--space-lg);
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s ease-in-out;
+}
+
+.nav-dropdown.open .dropdown-menu {
+    max-height: 300px;
+}
+
+.dropdown-menu li a {
+    padding-left: calc(var(--space-md) + var(--space-lg));
+}
+
+.nav-logout {
+    margin-top: auto;
+}
+
+/* --- Main Content --- */
+.main-content {
+    flex: 1;
+    padding: var(--space-xl);
+}
+
+/* --- Header --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-card-background);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.search-bar {
+    position: relative;
+    width: 400px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 1px solid var(--color-border);
+    border-radius: 25px;
+    background-color: var(--color-background);
+    transition: all 0.2s ease;
+}
+
+/* 🟢 Search Input Focus - Green Border */
+.search-bar input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+}
+
+.search-bar i {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-secondary);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.user-profile i {
+    color: var(--color-text-secondary);
+    font-size: 1.2rem;
+    transition: color 0.2s ease;
+}
+
+/* 🟢 User Profile Icons Hover - Green */
+.user-profile i:hover {
+    color: var(--color-primary);
+}
+
+.user-profile img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-primary);
+}
+
+/* --- User Management Section --- */
+.user-management-section {
+    margin-top: var(--space-xl);
+}
+
+.box {
+    background-color: var(--color-card-background);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+}
+
+.box-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--space-lg);
+}
+
+.table-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.search-filter {
+    position: relative;
+}
+
+.search-filter input {
+    padding: 10px 15px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-background);
+}
+
+.add-user-btn {
+    background: var(--color-primary);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+/* 🟢 Add User Button Hover - Green */
+.add-user-btn:hover {
+    background: var(--color-secondary); /* Brighter Green */
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 var(--space-md);
+}
+
+.user-table thead th {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    text-align: left;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.user-table tbody tr {
+    background: var(--color-card-background);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease-in-out;
+}
+
+/* 🟢 Table Row Hover - Green Border */
+.user-table tbody tr:hover {
+    transform: translateY(-4px); 
+    box-shadow: var(--shadow-md); 
+    border-left: 5px solid var(--color-primary);
+}
+
+.user-table td {
+    padding: var(--space-md);
+    vertical-align: middle;
+}
+
+.user-profile-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.user-profile-cell img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-primary);
+}
+
+/* --- Action Button Defaults --- */
+.action-buttons {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.action-buttons button {
+    border: none;
+    padding: 0.6rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-btn {
+    background: rgba(94, 53, 177, 0.1); /* Purple/Tertiary default background */
+    color: var(--color-tertiary);
+}
+
+.edit-btn {
+    background: var(--color-hover);
+    color: var(--color-primary);
+}
+
+.delete-btn {
+    background: var(--color-delete-bg);
+    color: var(--color-error);
+}
+
+.action-buttons button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* 🟢 Action Button Hover - Full Green on View and Edit */
+.view-btn:hover {
+    background: var(--color-primary); /* Green Hover */
+    color: #fff;
+}
+
+.edit-btn:hover {
+    background: var(--color-primary); /* Green Hover */
+    color: #fff;
+}
+
+/* 🔴 Delete Button Hover - Red */
+.delete-btn:hover {
+    background: var(--color-error);
+    color: #fff;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--color-text-secondary);
+    padding: var(--space-xl);
+    font-size: 1.1rem;
+}
+
+/* --- Modal Styles --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.show {
+    display: flex; /* Eto ang nagpapa-display ng modal */
+}
+
+.modal-content {
+    background: var(--color-card-background);
+    padding: var(--space-xl);
+    border-radius: var(--radius-md);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    animation: fadeIn .3s ease-out;
+}
+
+/* 🌟 Delete Confirmation Modal Specific Styles 🌟 */
+.modal-content.small-modal {
+    max-width: 400px; /* Mas maliit para sa confirmation */
+    padding: var(--space-lg);
+}
+
+.modal-header.delete-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.modal-header.delete-header h2 {
+    margin: 5px 0 0 0;
+    font-size: 1.2rem;
+    color: var(--color-text-primary);
+}
+
+.member-profile-pic {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 5px;
+    border: 2px solid var(--color-primary);
+}
+
+.modal-body.text-center {
+    text-align: center;
+}
+
+.modal-body.text-center p {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+.yes-btn {
+    background: var(--color-error); /* Red for Yes/Delete */
+    color: #fff;
+}
+
+/* 🔴 Yes Delete Hover - Darker Red */
+.yes-btn:hover {
+    background: #b71c1c; 
+    transform: translateY(-1px);
+}
+
+.no-btn {
+    background: var(--color-border); /* Gray/Neutral for Cancel/No */
+    color: var(--color-text-primary);
+}
+
+/* 🟢 Cancel/No Hover - Green */
+.no-btn:hover {
+    background: var(--color-hover); 
+    color: var(--color-primary);
+    transform: translateY(-1px);
+}
+/* 🌟 END Delete Confirmation Modal Styles 🌟 */
+
+
+.modal-lg .modal-content {
+    max-width: 800px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 1.8rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.modal-content h3 {
+    margin-bottom: var(--space-lg);
+    font-size: 1.5rem;
+}
+
+/* User Details Modal Specific Styles */
+.modal-profile-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.modal-profile-header img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--color-primary);
+}
+
+.modal-profile-info h4 {
+    font-size: 1.8rem;
+    margin: 0;
+}
+.modal-profile-info p {
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+
+.tab-container {
+    border-bottom: 2px solid var(--color-border);
+    margin-bottom: var(--space-lg);
+    display: flex;
+}
+.tab-button {
+    background: none;
+    border: none;
+    padding: var(--space-md) var(--space-lg);
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    border-bottom: 2px solid transparent;
+    transition: border-bottom 0.2s ease, color 0.2s ease;
+}
+/* 🟢 Tab Button Active/Hover - Green */
+.tab-button.active, .tab-button:hover {
+    color: var(--color-primary);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+
+.user-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-sm) var(--space-md);
+}
+.user-info-grid span {
+    display: block;
+}
+.user-info-grid .label {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+.user-info-grid .value {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--space-md);
+}
+.history-table th, .history-table td {
+    padding: var(--space-sm) var(--space-md);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+.history-table thead th {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+.history-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Form Modal Specific Styles */
+.form-group {
+    margin-bottom: var(--space-md);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-weight: 500;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 0.75rem var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-background);
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+.form-actions button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.cancel-btn {
+    background: var(--color-hover);
+    color: var(--color-text-secondary);
+}
+
+/* 🟢 Save Button Default/Hover - Green */
+.save-btn {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.save-btn:hover {
+    background: var(--color-secondary);
+}
+
+.confirm-modal-content {
+    text-align: center;
+}
+
+.confirm-modal-content i {
+    font-size: 3rem;
+    color: var(--color-error);
+    margin-bottom: var(--space-md);
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+}
+
+/* --- Alert Styles (Updated) --- */
+.custom-alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1002;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+}
+
+.custom-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    min-width: 300px;
+    border-radius: var(--radius-md);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    animation: slideInRight .5s ease-out forwards;
+}
+
+.custom-alert.success { 
+    background: #4CAF50; /* Green */
+}
+.custom-alert.error { 
+    background: #D32F2F; /* Red */
+}
+
+.custom-alert-icon {
+    font-size: 1.2rem;
+    margin-right: var(--space-md);
+}
+
+.custom-alert-message {
+    flex-grow: 1;
+}
+
+.custom-alert-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.custom-alert-close:hover {
+    opacity: 1;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .dashboard-container { flex-direction: column; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--color-border); height: auto; position: static; }
+    .main-content { padding: var(--space-lg); }
+    .header { flex-direction: column; align-items: flex-start; }
+    .search-bar { width: 100%; order: 2; }
+    .user-profile { order: 1; margin-bottom: var(--space-md); }
+    .table-header-controls { flex-direction: column; align-items: stretch; }
+    .table-actions { width: 100%; justify-content: space-between; }
+    .user-table thead { display: none; }
+    .user-table tbody, .user-table tr, .user-table td { display: block; width: 100%; }
+    .user-table td { text-align: right; border: none; padding: var(--space-sm) 0; position: relative; }
+    .user-table td:before { content: attr(data-label); position: absolute; left: var(--space-md); width: 50%; padding-left: 15px; font-weight: 600; text-align: left; }
+    .action-buttons { justify-content: flex-end; }
+    .user-table tbody tr { margin-bottom: var(--space-md); }
+    .modal-content { padding: var(--space-lg); }
+    .custom-alert-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+    }
+}
