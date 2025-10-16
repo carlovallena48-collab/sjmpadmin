@@ -42,68 +42,103 @@
             min-height: 100vh;
         }
 
-        /* Sidebar Styles */
+        /* Enhanced Sidebar - Matching Pamisa Page */
         .sidebar {
             width: 260px;
-            background: var(--primary);
-            color: white;
-            padding: 1.5rem 0;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
+            color: #fff;
             transition: all 0.3s ease;
-            box-shadow: var(--shadow);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
             z-index: 100;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed .church-logo span,
+        .sidebar.collapsed .nav-links a span,
+        .sidebar.collapsed .dropdown-icon {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-links a {
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .sidebar.collapsed .dropdown-menu {
+            display: none !important;
         }
 
         .church-logo {
             display: flex;
             align-items: center;
-            padding: 0 1.5rem 1.5rem;
+            padding: 20px 15px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 1rem;
+            transition: all 0.3s ease;
         }
 
         .church-logo i {
-            font-size: 1.8rem;
-            margin-right: 0.8rem;
+            font-size: 24px;
+            margin-right: 10px;
+            color: #4CAF50;
         }
 
         .church-logo span {
-            font-size: 1.2rem;
             font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s ease;
         }
 
-        .main-nav ul {
+        .main-nav {
+            padding: 15px 0;
+        }
+
+        .nav-links {
             list-style: none;
         }
 
-        .main-nav li {
-            margin-bottom: 0.2rem;
+        .nav-links li {
+            position: relative;
         }
 
-        .main-nav a {
+        .nav-links a {
             display: flex;
             align-items: center;
-            padding: 0.8rem 1.5rem;
+            padding: 12px 20px;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
-            transition: all 0.2s ease;
-            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .main-nav a:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            padding-left: 25px;
         }
 
-        .main-nav a.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border-left: 4px solid white;
+        .nav-links a.active {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border-left: 4px solid #4CAF50;
         }
 
-        .main-nav a i {
-            margin-right: 0.8rem;
+        .nav-links a i {
+            margin-right: 12px;
+            font-size: 18px;
             width: 20px;
             text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover i {
+            transform: scale(1.1);
         }
 
         .nav-dropdown {
@@ -120,25 +155,64 @@
         }
 
         .dropdown-menu {
+            list-style: none;
+            background-color: rgba(0, 0, 0, 0.2);
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease;
-            background: var(--primary-dark);
+            transition: max-height 0.4s ease;
         }
 
         .nav-dropdown.open .dropdown-menu {
-            max-height: 500px;
+            max-height: 300px;
         }
 
         .dropdown-menu li a {
-            padding-left: 3rem;
-            font-size: 0.9rem;
+            padding-left: 50px;
+            font-size: 14px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .dropdown-menu li a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
 
         .nav-logout {
-            margin-top: 1.5rem;
+            margin-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 1rem;
+        }
+
+        .nav-logout a {
+            color: #e74c3c;
+        }
+
+        .nav-logout a:hover {
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        /* Toggle Button */
+        .sidebar-toggle {
+            position: absolute;
+            top: 20px;
+            right: -15px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 101;
+        }
+
+        .sidebar-toggle:hover {
+            background: #34495e;
+            transform: scale(1.1);
         }
 
         /* Main Content Styles */
@@ -146,6 +220,14 @@
             flex: 1;
             padding: 2rem;
             overflow-y: auto;
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: 70px;
+            width: calc(100% - 70px);
         }
 
         .header {
@@ -510,6 +592,10 @@
         .anointing { background: #e0f2f1; color: #00695c; }
         .holy-orders { background: #f3e5f5; color: #7b1fa2; }
         .matrimony { background: #fff8e1; color: #f57f17; }
+        .pamisa { background: #e8f5e8; color: #2e7d32; }
+        .funeral { background: #f5f5f5; color: #616161; }
+        .blessing { background: #e3f2fd; color: #1565c0; }
+        .certificate { background: #fff3e0; color: #ef6c00; }
 
         /* No events message */
         .no-events {
@@ -528,6 +614,12 @@
             .sidebar {
                 width: 100%;
                 height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
             }
             
             .main-nav ul {
@@ -592,47 +684,47 @@
     </style>
 </head>
 <body>
-   <div class="dashboard-container">
-  <aside class="sidebar">
-    <button class="sidebar-toggle">
-      <i class="fas fa-bars"></i>
-    </button>
-    <div class="church-logo">
-      <i class="fa-solid fa-church"></i>
-      <span>SJMP ADMIN</span>
-    </div>
-    <nav class="main-nav">
-      <ul class="nav-links">
-        <li><a href="dashboard.html" class="active"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
-        <li class="nav-dropdown open">
-          <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
-          <ul class="dropdown-menu">
-            <li><a href="baptism.html"><span>Baptism</span></a></li>
-            <li><a href="kumpil.html"><span>Confirmation</span></a></li>
-            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
-            <li><a href="confession.html"><span>Confession</span></a></li>
-            <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
-            <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
-            <li><a href="matrimony.html"><span>Matrimony</span></a></li>
-          </ul>
-        </li>
-          <li class="nav-dropdown open">
-          <a href="#"><i class="fa-solid fa-cross"></i><span>Other Services</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
-          <ul class="dropdown-menu">
-            <li><a href="pamisa.html"><span>Pamisa</span></a></li>
-            <li><a href="blessing.html"><span>Blessing</span></a></li>
-            <li><a href="pamisapatay.html"><span>Pamisa sa patay</span></a></li>
-          
-          </ul>
-        </li>
-        <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
-        <li><a href="schedule.html"><i class="fa-solid fa-calendar-alt"></i><span>Schedule</span></a></li>
-        <li><a href="certificate.html"><i class="fa-solid fa-globe"></i><span>Certificate Request</span></a></li>
-        <li><a href="WebsiteManagement.html"><i class="fa-solid fa-globe"></i><span>Website Management</span></a></li>
-    <li class="nav-logout"><a href="#" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a></li>
-      </ul>
-    </nav>
-  </aside>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <button class="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="church-logo">
+                <i class="fa-solid fa-church"></i>
+                <span>SJMP ADMIN</span>
+            </div>
+            <nav class="main-nav">
+                <ul class="nav-links">
+                    <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
+                    <li class="nav-dropdown">
+                        <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="baptism.html"><span>Baptism</span></a></li>
+                            <li><a href="kumpil.html"><span>Confirmation</span></a></li>
+                            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
+                            <li><a href="confession.html"><span>Confession</span></a></li>
+                            <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
+                            <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
+                            <li><a href="matrimony.html"><span>Matrimony</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-dropdown">
+                        <a href="#"><i class="fa-solid fa-hands-praying"></i><span>Other Services</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="pamisa.html"><span>Pamisa</span></a></li>
+                            <li><a href="blessing.html"><span>Blessing</span></a></li>
+                            <li><a href="pamisapatay.html"><span>Pamisa sa patay</span></a></li>
+                        </ul>
+                    </li>
+                    <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
+                    <li><a href="schedule.html" class="active"><i class="fa-solid fa-calendar-alt"></i><span>Schedule</span></a></li>
+                    <li><a href="certificate.html"><i class="fa-solid fa-certificate"></i><span>Certificate Request</span></a></li>
+                    <li><a href="WebsiteManagement.html"><i class="fa-solid fa-globe"></i><span>Website Management</span></a></li>
+                    <li class="nav-logout"><a href="#" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+        
         <main class="main-content">
             <div class="header">
                 <h1>Sacrament Schedule</h1>
@@ -703,6 +795,10 @@
                                 <option value="Anointing of the Sick">Anointing of the Sick</option>
                                 <option value="Holy Orders">Holy Orders</option>
                                 <option value="Matrimony">Matrimony</option>
+                                <option value="Pamisa">Pamisa</option>
+                                <option value="Funeral Service">Funeral Service</option>
+                                <option value="Blessing">Blessing</option>
+                                <option value="Certificate">Certificate</option>
                             </select>
                         </div>
                     </div>
@@ -763,6 +859,25 @@
     <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar toggle functionality
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                this.querySelector('i').classList.toggle('fa-bars');
+                this.querySelector('i').classList.toggle('fa-times');
+            });
+
+            // Dropdown functionality
+            document.querySelectorAll('.nav-dropdown > a').forEach(function(dropdown) {
+                dropdown.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const parent = this.parentElement;
+                    parent.classList.toggle('open');
+                });
+            });
+
             const monthYear = document.getElementById("month-year");
             const daysContainer = document.getElementById("calendar-days");
             const prevBtn = document.getElementById("prev");
@@ -801,15 +916,17 @@
             // Load all sacrament schedules from database
             async function loadAllSchedules() {
                 try {
+                    console.log("📅 Loading all schedules from server...");
+                    
                     // Fetch from all sacrament endpoints
                     const endpoints = [
                         '/api/baptism-schedules',
                         '/api/confirmation-schedules',
-                        '/api/eucharist-schedules',
-                        '/api/confession-schedules',
-                        '/api/anointing-schedules',
                         '/api/holy-orders-schedules',
-                        '/api/matrimony-schedules'
+                        '/api/pamisa-schedules',
+                        '/api/funeral-schedules',
+                        '/api/blessing-schedules',
+                        '/api/certificate-schedules'
                     ];
 
                     const allPromises = endpoints.map(endpoint => 
@@ -829,11 +946,22 @@
                     // Combine all schedules
                     events = {};
                     allResults.forEach((schedules, index) => {
-                        const sacramentType = endpoints[index].split('-')[1]; // Extract sacrament type from endpoint
+                        const endpoint = endpoints[index];
+                        let sacramentType = '';
+                        
+                        // Extract sacrament type from endpoint
+                        if (endpoint.includes('baptism')) sacramentType = 'Baptism';
+                        else if (endpoint.includes('confirmation')) sacramentType = 'Confirmation';
+                        else if (endpoint.includes('holy-orders')) sacramentType = 'Holy Orders';
+                        else if (endpoint.includes('pamisa')) sacramentType = 'Pamisa';
+                        else if (endpoint.includes('funeral')) sacramentType = 'Funeral Service';
+                        else if (endpoint.includes('blessing')) sacramentType = 'Blessing';
+                        else if (endpoint.includes('certificate')) sacramentType = 'Certificate';
                         
                         if (schedules && schedules.length > 0) {
+                            console.log(`✅ Found ${schedules.length} ${sacramentType} schedules`);
                             schedules.forEach(schedule => {
-                                // Normalize date format to YYYY-MM-DD without extra zeros
+                                // Normalize date format to YYYY-MM-DD
                                 let dateStr = normalizeDate(schedule);
                                 if (!dateStr) return; // Skip if no valid date
                                 
@@ -846,11 +974,12 @@
                         }
                     });
 
+                    console.log("📊 Total events loaded:", Object.keys(events).reduce((sum, date) => sum + events[date].length, 0));
+                    
                     renderCalendar(currentMonth, currentYear);
                     const initialDate = formatDateForStorage(today);
                     updateEventsSection(initialDate);
                     
-                    console.log('✅ Loaded schedules:', events);
                 } catch (err) {
                     console.error("❌ Failed to load schedules:", err);
                     // Fallback to sample data if database is not available
@@ -861,28 +990,35 @@
                 }
             }
 
-            // Normalize date to YYYY-MM-DD format without extra zeros
+            // Normalize date to YYYY-MM-DD format
             function normalizeDate(schedule) {
                 let dateStr = '';
                 
+                // Check different possible date fields
                 if (schedule.date) {
                     dateStr = schedule.date;
                 } else if (schedule.baptismDate) {
                     dateStr = schedule.baptismDate;
                 } else if (schedule.kumpilDate) {
                     dateStr = schedule.kumpilDate;
-                } else if (schedule.schedule_date) {
-                    dateStr = schedule.schedule_date;
+                } else if (schedule.scheduleDate) {
+                    dateStr = schedule.scheduleDate;
+                } else if (schedule.ordinationDate) {
+                    dateStr = schedule.ordinationDate;
+                } else if (schedule.scheduledDate) {
+                    dateStr = schedule.scheduledDate;
+                } else if (schedule.requestDate) {
+                    dateStr = schedule.requestDate;
                 }
                 
-                if (!dateStr) return null;
+                if (!dateStr || dateStr === 'TBA') return null;
                 
                 // Remove time part if present
                 if (dateStr.includes('T')) {
                     dateStr = dateStr.split('T')[0];
                 }
                 
-                // Parse and reformat to remove leading zeros
+                // Parse and reformat to YYYY-MM-DD
                 const date = new Date(dateStr);
                 if (isNaN(date.getTime())) return null;
                 
@@ -892,48 +1028,62 @@
             // Create complete event object with all information
             function createEventObject(schedule, sacramentType) {
                 const baseEvent = {
-                    id: schedule.id || schedule._id || Date.now(),
-                    name: schedule.name || schedule.confirmandName || schedule.full_name || 'Unknown',
-                    type: sacramentType.charAt(0).toUpperCase() + sacramentType.slice(1),
+                    id: schedule._id || schedule.id || Date.now(),
+                    name: schedule.name || schedule.confirmandName || schedule.names?.[0] || schedule.nameOfDeceased || schedule.fullName || 'Unknown',
+                    type: sacramentType,
                     date: normalizeDate(schedule),
-                    time: schedule.time || schedule.baptismTime || schedule.kumpilTime || schedule.schedule_time || '09:00',
-                    contact: schedule.contact || schedule.contactNo || schedule.phone || schedule.contact_number || 'N/A',
-                    address: schedule.address || schedule.currentAddress || 'N/A',
-                    notes: schedule.notes || schedule.additional_info || ''
+                    time: schedule.time || schedule.baptismTime || schedule.kumpilTime || schedule.scheduleTime || schedule.ordinationTime || 'TBA',
+                    contact: schedule.contact || schedule.contactNo || schedule.contactNumber || schedule.submittedByEmail || 'N/A',
+                    address: schedule.address || schedule.currentAddress || schedule.residence || 'N/A',
+                    notes: schedule.notes || schedule.intention || schedule.purpose || ''
                 };
 
                 // Add sacrament-specific fields
-                if (sacramentType === 'baptism') {
+                if (sacramentType === 'Baptism') {
                     baseEvent.fatherName = schedule.fatherName || 'N/A';
                     baseEvent.motherName = schedule.motherName || 'N/A';
                     baseEvent.godfather = schedule.godfather || 'N/A';
                     baseEvent.godmother = schedule.godmother || 'N/A';
                     baseEvent.birthDate = formatDateForDisplay(schedule.birthDate) || 'N/A';
                     baseEvent.birthPlace = schedule.birthPlace || 'N/A';
-                } else if (sacramentType === 'confirmation') {
+                } else if (sacramentType === 'Confirmation') {
                     baseEvent.age = schedule.age || 'N/A';
                     baseEvent.baptismDate = formatDateForDisplay(schedule.baptismDate) || 'N/A';
                     baseEvent.baptismChurch = schedule.baptismChurch || 'N/A';
                     baseEvent.fatherName = schedule.fatherName || 'N/A';
                     baseEvent.motherName = schedule.motherName || 'N/A';
-                    baseEvent.godfather = schedule.godfather || 'N/A';
-                    baseEvent.godmother = schedule.godmother || 'N/A';
+                    baseEvent.godfather = schedule.godfatherName || 'N/A';
+                    baseEvent.godmother = schedule.godmotherName || 'N/A';
+                } else if (sacramentType === 'Holy Orders') {
+                    baseEvent.ordinationType = schedule.ordinationType || 'N/A';
+                    baseEvent.seminaryName = schedule.seminaryName || 'N/A';
+                } else if (sacramentType === 'Pamisa') {
+                    baseEvent.intention = schedule.intention || 'N/A';
+                    baseEvent.massSponsor = schedule.massSponsor || 'N/A';
+                } else if (sacramentType === 'Funeral Service') {
+                    baseEvent.causeOfDeath = schedule.causeOfDeath || 'N/A';
+                    baseEvent.age = schedule.age || 'N/A';
+                } else if (sacramentType === 'Blessing') {
+                    baseEvent.blessingType = schedule.blessingType || 'N/A';
+                } else if (sacramentType === 'Certificate') {
+                    baseEvent.certificateType = schedule.certificateType || 'N/A';
+                    baseEvent.purpose = schedule.purpose || 'N/A';
                 }
 
                 return baseEvent;
             }
 
-            // Format date for storage (YYYY-MM-DD without leading zeros)
+            // Format date for storage (YYYY-MM-DD)
             function formatDateForStorage(date) {
                 const year = date.getFullYear();
-                const month = date.getMonth() + 1; // No leading zero
-                const day = date.getDate(); // No leading zero
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
                 return `${year}-${month}-${day}`;
             }
 
-            // Format date for display (Month Day, Year) - FIXED DATE FORMATTING
+            // Format date for display (Month Day, Year)
             function formatDateForDisplay(dateStr) {
-                if (!dateStr || dateStr === 'N/A') return 'N/A';
+                if (!dateStr || dateStr === 'N/A' || dateStr === 'TBA') return 'N/A';
                 
                 try {
                     // Handle different date formats
@@ -958,6 +1108,24 @@
                 } catch (e) {
                     console.warn('Date formatting error:', e, dateStr);
                     return 'Invalid Date';
+                }
+            }
+
+            // Format time for display
+            function formatTimeForDisplay(timeStr) {
+                if (!timeStr || timeStr === 'N/A' || timeStr === 'TBA') return 'N/A';
+                
+                try {
+                    if (timeStr.includes(':')) {
+                        const [hours, minutes] = timeStr.split(':');
+                        const hour = parseInt(hours);
+                        const period = hour >= 12 ? 'PM' : 'AM';
+                        const displayHour = hour % 12 || 12;
+                        return `${displayHour}:${minutes} ${period}`;
+                    }
+                    return timeStr;
+                } catch (e) {
+                    return timeStr;
                 }
             }
 
@@ -1020,7 +1188,7 @@
                 }
 
                 for (let day = 1; day <= daysInMonth; day++) {
-                    let dateStr = `${year}-${month + 1}-${day}`;
+                    let dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                     
                     let dayDiv = document.createElement("div");
                     dayDiv.classList.add("day");
@@ -1063,14 +1231,14 @@
                         eventItem.classList.add('event-item');
                         
                         // Create sacrament type badge
-                        const badgeClass = event.type.toLowerCase().replace(' ', '-');
+                        const badgeClass = event.type.toLowerCase().replace(' ', '-').replace('service', '');
                         const badge = `<span class="sacrament-badge ${badgeClass}">${event.type}</span>`;
                         
                         // Only show basic info in the list
                         const basicInfoHTML = `
                             ${badge}
                             <p><span class="label">Name:</span> ${event.name}</p>
-                            <p><span class="label">Time:</span> ${event.time}</p>
+                            <p><span class="label">Time:</span> ${formatTimeForDisplay(event.time)}</p>
                             <p><span class="label">Contact:</span> ${event.contact}</p>
                         `;
                         
@@ -1091,7 +1259,7 @@
             // Show event details in modal
             function showEventDetails(event) {
                 // Create sacrament type badge
-                const badgeClass = event.type.toLowerCase().replace(' ', '-');
+                const badgeClass = event.type.toLowerCase().replace(' ', '-').replace('service', '');
                 const badge = `<span class="sacrament-badge ${badgeClass}">${event.type}</span>`;
                 
                 let detailsHTML = `
@@ -1108,7 +1276,7 @@
                     
                     <div class="event-detail-item">
                         <div class="event-detail-label">Time</div>
-                        <div class="event-detail-value">${event.time}</div>
+                        <div class="event-detail-value">${formatTimeForDisplay(event.time)}</div>
                     </div>
                     
                     <div class="event-detail-item">
@@ -1192,6 +1360,61 @@
                             <div class="event-detail-value">${event.godmother || 'N/A'}</div>
                         </div>
                     `;
+                } else if (event.type === 'Holy Orders') {
+                    detailsHTML += `
+                        <div class="event-detail-item">
+                            <div class="event-detail-label">Ordination Type</div>
+                            <div class="event-detail-value">${event.ordinationType || 'N/A'}</div>
+                        </div>
+                        
+                        <div class="event-detail-item">
+                            <div class="event-detail-label">Seminary</div>
+                            <div class="event-detail-value">${event.seminaryName || 'N/A'}</div>
+                        </div>
+                    `;
+                } else if (event.type === 'Pamisa') {
+                    detailsHTML += `
+                        <div class="event-detail-item">
+                            <div class="event-detail-label">Intention</div>
+                            <div class="event-detail-value">${event.intention || 'N/A'}</div>
+                        </div>
+                        
+                        <div class="event-detail-item">
+                            <div class="event-detail-label">Mass Sponsor</div>
+                            <div class="event-detail-value">${event.massSponsor || 'N/A'}</div>
+                        </div>
+                    `;
+                } else if (event.type === 'Funeral Service') {
+                    detailsHTML += `
+                        <div class="event-detail-item">
+                            <div class="event-detail-label">Age at Death</div>
+                            <div class="event-detail-value">${event.age || 'N/A'}</div>
+                        </div>
+                        
+                        <div class="event-detail-item">
+                            <div class="event-detail-label">Cause of Death</div>
+                            <div class="event-detail-value">${event.causeOfDeath || 'N/A'}</div>
+                        </div>
+                    `;
+                } else if (event.type === 'Blessing') {
+                    detailsHTML += `
+                        <div class="event-detail-item">
+                            <div class="event-detail-label">Blessing Type</div>
+                            <div class="event-detail-value">${event.blessingType || 'N/A'}</div>
+                        </div>
+                    `;
+                } else if (event.type === 'Certificate') {
+                    detailsHTML += `
+                        <div class="event-detail-item">
+                            <div class="event-detail-label">Certificate Type</div>
+                            <div class="event-detail-value">${event.certificateType || 'N/A'}</div>
+                        </div>
+                        
+                        <div class="event-detail-item">
+                            <div class="event-detail-label">Purpose</div>
+                            <div class="event-detail-value">${event.purpose || 'N/A'}</div>
+                        </div>
+                    `;
                 }
                 
                 // Add notes if available
@@ -1217,7 +1440,7 @@
                         eventItem.classList.add('event-item');
                         
                         // Create sacrament type badge
-                        const badgeClass = result.type.toLowerCase().replace(' ', '-');
+                        const badgeClass = result.type.toLowerCase().replace(' ', '-').replace('service', '');
                         const badge = `<span class="sacrament-badge ${badgeClass}">${result.type}</span>`;
                         
                         // Only show basic info in search results
@@ -1225,7 +1448,7 @@
                             ${badge}
                             <p><span class="label">Name:</span> ${result.name}</p>
                             <p><span class="label">Date:</span> ${formatDateForDisplay(result.date)}</p>
-                            <p><span class="label">Time:</span> ${result.time}</p>
+                            <p><span class="label">Time:</span> ${formatTimeForDisplay(result.time)}</p>
                             <p><span class="label">Contact:</span> ${result.contact}</p>
                         `;
                         
@@ -1293,6 +1516,10 @@
                         case 'Anointing of the Sick': endpoint = '/api/anointing'; break;
                         case 'Holy Orders': endpoint = '/api/holy-orders'; break;
                         case 'Matrimony': endpoint = '/api/matrimony'; break;
+                        case 'Pamisa': endpoint = '/api/pamisa'; break;
+                        case 'Funeral Service': endpoint = '/api/funeralrequests'; break;
+                        case 'Blessing': endpoint = '/api/blessing'; break;
+                        case 'Certificate': endpoint = '/api/certificates'; break;
                         default: endpoint = '/api/schedules'; break;
                     }
 
