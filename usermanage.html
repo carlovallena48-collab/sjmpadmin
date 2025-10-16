@@ -242,7 +242,65 @@
     width: 90%;
 }
 
-/* Enhanced Sidebar with Animations - FROM DASHBOARD */
+/* Enhanced Green Theme - FROM CERTIFICATE PAGE */
+:root {
+    --color-primary: #1B5E20;
+    --color-primary-light: #2E7D32;
+    --color-primary-dark: #0D3C11;
+    --color-secondary: #4CAF50;
+    --color-secondary-light: #66BB6A;
+    --color-tertiary: #5e35b1;
+    --color-warning: #FFA000;
+    --color-error: #D32F2F;
+    
+    --color-text-primary: #263238;
+    --color-text-secondary: #546E7A;
+    
+    --color-background: #F8FDF8;
+    --color-card-background: #ffffff;
+    --color-border: #E8F5E9;
+    --color-hover: rgba(76, 175, 80, 0.1);
+    --color-delete-bg: #ffebee;
+
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-xxl: 3rem;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+
+    --shadow-sm: 0 4px 6px rgba(27, 94, 32, 0.08);
+    --shadow-md: 0 8px 24px rgba(27, 94, 32, 0.1);
+    --shadow-lg: 0 12px 32px rgba(27, 94, 32, 0.15);
+
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Enhanced Sidebar - FROM CERTIFICATE PAGE */
 .sidebar {
     width: 260px;
     background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
@@ -528,6 +586,352 @@
     margin-bottom: 10px;
     color: #007bff;
 }
+
+/* User Management Specific Styles */
+.user-management-section {
+    padding: 0 30px 30px;
+    flex: 1;
+}
+
+.box {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    animation: slideUp 0.5s ease;
+}
+
+.box:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.box-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.table-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.add-user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-medium);
+    box-shadow: var(--shadow-sm);
+}
+
+.add-user-btn:hover {
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 var(--space-md);
+}
+
+.user-table thead th {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    text-align: left;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.user-table tbody tr {
+    background: var(--color-card-background);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-medium);
+    cursor: pointer;
+    animation: fadeIn 0.5s ease;
+}
+
+.user-table tbody tr:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-left: 5px solid var(--color-primary);
+}
+
+.user-table td {
+    padding: var(--space-md);
+    vertical-align: middle;
+}
+
+.user-profile-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-profile-cell img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-buttons button {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.view-btn {
+    background: #2196F3;
+    color: white;
+}
+
+.edit-btn {
+    background: #FF9800;
+    color: white;
+}
+
+.delete-btn {
+    background: #f44336;
+    color: white;
+}
+
+.action-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--color-text-secondary);
+    padding: var(--space-xl);
+    font-size: 1.1rem;
+    display: none;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
+    display: block;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: var(--radius-md);
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.4s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.modal-close:hover,
+.modal-close:focus {
+    color: var(--color-primary);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: var(--space-md);
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.cancel-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.save-btn {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.yes-btn {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.no-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Custom Alert Styles */
+.custom-alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.custom-alert {
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease-in-out;
+    animation: slideInRight 0.5s ease-out forwards;
+}
+
+.custom-alert.success {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+}
+
+.custom-alert.error {
+    background: linear-gradient(135deg, var(--color-error), #E53935);
+}
+
+.custom-alert-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.custom-alert-close:hover {
+    transform: scale(1.2);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
 </style>
 </head>
 <body>
@@ -542,7 +946,7 @@
     </div>
     <nav class="main-nav">
       <ul class="nav-links">
-        <li><a href="dashboard.html" class="active"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
+        <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
         <li class="nav-dropdown open">
           <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
           <ul class="dropdown-menu">
@@ -561,10 +965,9 @@
             <li><a href="pamisa.html"><span>Pamisa</span></a></li>
             <li><a href="blessing.html"><span>Blessing</span></a></li>
             <li><a href="pamisapatay.html"><span>Pamisa sa patay</span></a></li>
-          
           </ul>
         </li>
-        <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
+        <li><a href="usermanage.html" class="active"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
         <li><a href="schedule.html"><i class="fa-solid fa-calendar-alt"></i><span>Schedule</span></a></li>
         <li><a href="certificate.html"><i class="fa-solid fa-globe"></i><span>Certificate Request</span></a></li>
         <li><a href="WebsiteManagement.html"><i class="fa-solid fa-globe"></i><span>Website Management</span></a></li>
@@ -780,6 +1183,14 @@ const API_URL = "http://localhost:5000/api/users";
 const LOG_URL = "http://localhost:5000/api/dashboard/activity-log";
 const BAPTISM_API = "http://localhost:5000/api/baptism";
 const CONFIRMATION_API = "http://localhost:5000/api/confirmation";
+const MATRIMONY_API = "http://localhost:5000/api/matrimony";
+const EUCHARIST_API = "http://localhost:5000/api/eucharist";
+const HOLY_ORDERS_API = "http://localhost:5000/api/holy-orders";
+const PAMISA_API = "http://localhost:5000/api/pamisa";
+const FUNERAL_API = "http://localhost:5000/api/funeralrequests";
+const BLESSING_API = "http://localhost:5000/api/blessing";
+const CERTIFICATE_API = "http://localhost:5000/api/certificates";
+
 let users = [];
 let deleteId = null;
 let currentUserHistory = [];
@@ -791,7 +1202,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("userForm").addEventListener("submit", handleFormSubmit);
     document.getElementById("confirmDeleteBtn").addEventListener("click", deleteUser);
     
-    // Sidebar toggle functionality - FROM DASHBOARD
+    // Sidebar toggle functionality - FROM CERTIFICATE PAGE
     const sidebarToggle = document.querySelector('.sidebar-toggle');
     const sidebar = document.querySelector('.sidebar');
     
@@ -801,7 +1212,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         this.querySelector('i').classList.toggle('fa-times');
     });
 
-    // Dropdown functionality - FROM DASHBOARD
+    // Dropdown functionality - FROM CERTIFICATE PAGE
     document.querySelectorAll('.nav-dropdown > a').forEach(function(dropdown) {
         dropdown.addEventListener('click', function(e) {
             e.preventDefault();
@@ -834,21 +1245,105 @@ async function getUserScheduleCount(userEmail) {
     try {
         let totalCount = 0;
         
-        // Fetch baptism schedules - FIXED: Use submittedByEmail
+        // Fetch baptism schedules
         const baptismRes = await fetch(BAPTISM_API);
         const baptismData = await baptismRes.json();
         const baptismCount = baptismData.filter(schedule => 
             schedule.submittedByEmail && schedule.submittedByEmail === userEmail
         ).length;
         
-        // Fetch confirmation schedules - FIXED: Use submittedByEmail
+        // Fetch confirmation schedules
         const confirmationRes = await fetch(CONFIRMATION_API);
         const confirmationData = await confirmationRes.json();
         const confirmationCount = confirmationData.filter(schedule => 
             schedule.submittedByEmail && schedule.submittedByEmail === userEmail
         ).length;
         
-        totalCount = baptismCount + confirmationCount;
+        // Fetch matrimony schedules
+        try {
+            const matrimonyRes = await fetch(MATRIMONY_API);
+            const matrimonyData = await matrimonyRes.json();
+            const matrimonyCount = matrimonyData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).length;
+            totalCount += matrimonyCount;
+        } catch (error) {
+            console.warn("Matrimony API not available:", error);
+        }
+        
+        // Fetch eucharist schedules
+        try {
+            const eucharistRes = await fetch(EUCHARIST_API);
+            const eucharistData = await eucharistRes.json();
+            const eucharistCount = eucharistData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).length;
+            totalCount += eucharistCount;
+        } catch (error) {
+            console.warn("Eucharist API not available:", error);
+        }
+        
+        // Fetch holy orders schedules
+        try {
+            const holyOrdersRes = await fetch(HOLY_ORDERS_API);
+            const holyOrdersData = await holyOrdersRes.json();
+            const holyOrdersCount = holyOrdersData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).length;
+            totalCount += holyOrdersCount;
+        } catch (error) {
+            console.warn("Holy Orders API not available:", error);
+        }
+        
+        // Fetch pamisa schedules
+        try {
+            const pamisaRes = await fetch(PAMISA_API);
+            const pamisaData = await pamisaRes.json();
+            const pamisaCount = pamisaData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).length;
+            totalCount += pamisaCount;
+        } catch (error) {
+            console.warn("Pamisa API not available:", error);
+        }
+        
+        // Fetch funeral schedules
+        try {
+            const funeralRes = await fetch(FUNERAL_API);
+            const funeralData = await funeralRes.json();
+            const funeralCount = funeralData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).length;
+            totalCount += funeralCount;
+        } catch (error) {
+            console.warn("Funeral API not available:", error);
+        }
+        
+        // Fetch blessing schedules
+        try {
+            const blessingRes = await fetch(BLESSING_API);
+            const blessingData = await blessingRes.json();
+            const blessingCount = blessingData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).length;
+            totalCount += blessingCount;
+        } catch (error) {
+            console.warn("Blessing API not available:", error);
+        }
+        
+        // Fetch certificate requests
+        try {
+            const certificateRes = await fetch(CERTIFICATE_API);
+            const certificateData = await certificateRes.json();
+            const certificateCount = certificateData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).length;
+            totalCount += certificateCount;
+        } catch (error) {
+            console.warn("Certificate API not available:", error);
+        }
+        
+        totalCount = baptismCount + confirmationCount + totalCount;
         return totalCount;
         
     } catch (error) {
@@ -1010,12 +1505,10 @@ async function loadUserScheduleHistory(userEmail) {
 
         let allSchedules = [];
 
-        // Fetch baptism schedules - FIXED: Use submittedByEmail
+        // Fetch baptism schedules
         try {
             const baptismRes = await fetch(BAPTISM_API);
             const baptismData = await baptismRes.json();
-            console.log("Baptism data for", userEmail, ":", baptismData); // Debug
-            
             const userBaptismSchedules = baptismData.filter(schedule => 
                 schedule.submittedByEmail && schedule.submittedByEmail === userEmail
             ).map(schedule => ({
@@ -1026,19 +1519,15 @@ async function loadUserScheduleHistory(userEmail) {
                 status: schedule.status || 'pending',
                 type: 'baptism'
             }));
-            
-            console.log("User baptism schedules:", userBaptismSchedules); // Debug
             allSchedules = [...allSchedules, ...userBaptismSchedules];
         } catch (error) {
             console.error("Error fetching baptism schedules:", error);
         }
 
-        // Fetch confirmation schedules - FIXED: Use submittedByEmail
+        // Fetch confirmation schedules
         try {
             const confirmationRes = await fetch(CONFIRMATION_API);
             const confirmationData = await confirmationRes.json();
-            console.log("Confirmation data for", userEmail, ":", confirmationData); // Debug
-            
             const userConfirmationSchedules = confirmationData.filter(schedule => 
                 schedule.submittedByEmail && schedule.submittedByEmail === userEmail
             ).map(schedule => ({
@@ -1049,14 +1538,145 @@ async function loadUserScheduleHistory(userEmail) {
                 status: schedule.status || 'pending',
                 type: 'confirmation'
             }));
-            
-            console.log("User confirmation schedules:", userConfirmationSchedules); // Debug
             allSchedules = [...allSchedules, ...userConfirmationSchedules];
         } catch (error) {
             console.error("Error fetching confirmation schedules:", error);
         }
 
-        console.log("All schedules for", userEmail, ":", allSchedules); // Debug
+        // Fetch matrimony schedules
+        try {
+            const matrimonyRes = await fetch(MATRIMONY_API);
+            const matrimonyData = await matrimonyRes.json();
+            const userMatrimonySchedules = matrimonyData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).map(schedule => ({
+                sacrament: 'Matrimony',
+                name: schedule.groomName && schedule.brideName ? `${schedule.groomName} & ${schedule.brideName}` : 'N/A',
+                date: schedule.marriageDate || schedule.date,
+                time: schedule.marriageTime || schedule.time,
+                status: schedule.status || 'pending',
+                type: 'matrimony'
+            }));
+            allSchedules = [...allSchedules, ...userMatrimonySchedules];
+        } catch (error) {
+            console.warn("Matrimony API not available:", error);
+        }
+
+        // Fetch eucharist schedules
+        try {
+            const eucharistRes = await fetch(EUCHARIST_API);
+            const eucharistData = await eucharistRes.json();
+            const userEucharistSchedules = eucharistData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).map(schedule => ({
+                sacrament: 'Eucharist',
+                name: schedule.name || 'N/A',
+                date: schedule.date,
+                time: schedule.time,
+                status: schedule.status || 'pending',
+                type: 'eucharist'
+            }));
+            allSchedules = [...allSchedules, ...userEucharistSchedules];
+        } catch (error) {
+            console.warn("Eucharist API not available:", error);
+        }
+
+        // Fetch holy orders schedules
+        try {
+            const holyOrdersRes = await fetch(HOLY_ORDERS_API);
+            const holyOrdersData = await holyOrdersRes.json();
+            const userHolyOrdersSchedules = holyOrdersData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).map(schedule => ({
+                sacrament: 'Holy Orders',
+                name: schedule.name || 'N/A',
+                date: schedule.ordinationDate || schedule.date,
+                time: schedule.ordinationTime || schedule.time,
+                status: schedule.status || 'pending',
+                type: 'holy-orders'
+            }));
+            allSchedules = [...allSchedules, ...userHolyOrdersSchedules];
+        } catch (error) {
+            console.warn("Holy Orders API not available:", error);
+        }
+
+        // Fetch pamisa schedules
+        try {
+            const pamisaRes = await fetch(PAMISA_API);
+            const pamisaData = await pamisaRes.json();
+            const userPamisaSchedules = pamisaData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).map(schedule => ({
+                sacrament: 'Pamisa',
+                name: schedule.names && schedule.names.length > 0 ? schedule.names[0] : 'N/A',
+                date: schedule.date,
+                time: schedule.time,
+                status: schedule.status || 'pending',
+                type: 'pamisa'
+            }));
+            allSchedules = [...allSchedules, ...userPamisaSchedules];
+        } catch (error) {
+            console.warn("Pamisa API not available:", error);
+        }
+
+        // Fetch funeral schedules
+        try {
+            const funeralRes = await fetch(FUNERAL_API);
+            const funeralData = await funeralRes.json();
+            const userFuneralSchedules = funeralData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).map(schedule => ({
+                sacrament: 'Funeral Service',
+                name: schedule.nameOfDeceased || 'N/A',
+                date: schedule.scheduleDate,
+                time: schedule.scheduleTime,
+                status: schedule.status || 'pending',
+                type: 'funeral'
+            }));
+            allSchedules = [...allSchedules, ...userFuneralSchedules];
+        } catch (error) {
+            console.warn("Funeral API not available:", error);
+        }
+
+        // Fetch blessing schedules
+        try {
+            const blessingRes = await fetch(BLESSING_API);
+            const blessingData = await blessingRes.json();
+            const userBlessingSchedules = blessingData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).map(schedule => ({
+                sacrament: 'Blessing',
+                name: schedule.name || 'N/A',
+                date: schedule.date,
+                time: schedule.time,
+                status: schedule.status || 'pending',
+                type: 'blessing'
+            }));
+            allSchedules = [...allSchedules, ...userBlessingSchedules];
+        } catch (error) {
+            console.warn("Blessing API not available:", error);
+        }
+
+        // Fetch certificate requests
+        try {
+            const certificateRes = await fetch(CERTIFICATE_API);
+            const certificateData = await certificateRes.json();
+            const userCertificateSchedules = certificateData.filter(schedule => 
+                schedule.submittedByEmail && schedule.submittedByEmail === userEmail
+            ).map(schedule => ({
+                sacrament: 'Certificate - ' + schedule.certificateType,
+                name: schedule.fullName || 'N/A',
+                date: schedule.scheduledDate || schedule.requestDate,
+                time: 'N/A',
+                status: schedule.status || 'pending',
+                type: 'certificate'
+            }));
+            allSchedules = [...allSchedules, ...userCertificateSchedules];
+        } catch (error) {
+            console.warn("Certificate API not available:", error);
+        }
+
+        console.log("All schedules for", userEmail, ":", allSchedules);
         currentUserHistory = allSchedules;
         updateHistoryStats(allSchedules);
         renderHistoryTable(allSchedules);
@@ -1078,13 +1698,20 @@ async function loadUserScheduleHistory(userEmail) {
 function updateHistoryStats(schedules) {
     const baptismCount = schedules.filter(s => s.type === 'baptism').length;
     const confirmationCount = schedules.filter(s => s.type === 'confirmation').length;
-    const eucharistCount = schedules.filter(s => s.sacrament === 'Eucharist').length;
-    const matrimonyCount = schedules.filter(s => s.sacrament === 'Matrimony').length;
+    const eucharistCount = schedules.filter(s => s.type === 'eucharist').length;
+    const matrimonyCount = schedules.filter(s => s.type === 'matrimony').length;
+    const holyOrdersCount = schedules.filter(s => s.type === 'holy-orders').length;
+    const pamisaCount = schedules.filter(s => s.type === 'pamisa').length;
+    const funeralCount = schedules.filter(s => s.type === 'funeral').length;
+    const blessingCount = schedules.filter(s => s.type === 'blessing').length;
+    const certificateCount = schedules.filter(s => s.type === 'certificate').length;
 
     document.getElementById('baptismCount').textContent = baptismCount;
     document.getElementById('confirmationCount').textContent = confirmationCount;
     document.getElementById('eucharistCount').textContent = eucharistCount;
     document.getElementById('matrimonyCount').textContent = matrimonyCount;
+
+    // You can add more stat cards for other sacraments if needed
 }
 
 // Render history table

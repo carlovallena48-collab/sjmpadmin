@@ -279,6 +279,45 @@ const blessingSchema = new mongoose.Schema({
 const BlessingRequest = mongoose.model('BlessingRequest', blessingSchema, 'blessingrequests');
 
 /* =========================================================
+  CERTIFICATE REQUEST SCHEMA - FIXED WITH READY STATUS
+  ========================================================= */
+const certificateSchema = new mongoose.Schema({
+  certificateType: { type: String, required: true },
+  fullName: { type: String, required: true },
+  dateOfSacrament: String,
+  purpose: { type: String, required: true },
+  contactNumber: { type: String, required: true },
+  address: { type: String, required: true },
+  requestedCopies: { type: Number, default: 1 },
+  status: { type: String, default: "pending" },
+  certificateNumber: String,
+  submittedByEmail: { type: String, required: true },
+  requestDate: { type: String, required: true },
+  scheduledDate: String,
+  
+  // REASON SYSTEM FIELDS
+  cancellation_reason: String,
+  rejection_reason: String,
+  cancelled_by: String,
+  rejected_by: String,
+  cancelled_at: Date,
+  rejected_at: Date,
+  
+  // Approval fields
+  approved_by: String,
+  approved_at: Date,
+  
+  // Ready fields - FIXED: Added proper ready fields
+  ready_by: String,
+  ready_at: Date,
+  
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, { suppressReservedKeysWarning: true });
+
+const CertificateRequest = mongoose.model("CertificateRequest", certificateSchema, "certificaterequests");
+
+/* =========================================================
   HELPER FUNCTIONS
   ========================================================= */
 async function logActivity(action, collectionName, fullName, email) {
@@ -1094,6 +1133,195 @@ app.delete("/api/blessing/:id", async (req, res) => {
 });
 
 /* =========================================================
+  CERTIFICATE REQUEST ROUTES - FIXED READY STATUS
+  ========================================================= */
+
+// CREATE Certificate Request
+app.post("/api/certificates", async (req, res) => {
+  try {
+    console.log("📥 Received certificate request:", req.body);
+    
+    // Generate certificate number based on type
+    const prefixMap = {
+      'Baptismal Certificate': 'BAP',
+      'Confirmation Certificate': 'CON', 
+      'Marriage Certificate': 'MAR',
+      'Death Certificate': 'DTH',
+      'Good Moral Certificate': 'GMC'
+    };
+    
+    const prefix = prefixMap[req.body.certificateType] || 'CER';
+    const year = new Date().getFullYear();
+    const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const certificateNumber = `${prefix}-${year}-${randomNum}`;
+    
+    const requestData = {
+      certificateType: req.body.certificateType,
+      fullName: req.body.fullName,
+      dateOfSacrament: req.body.dateOfSacrament || '',
+      purpose: req.body.purpose,
+      contactNumber: req.body.contactNumber,
+      address: req.body.address,
+      requestedCopies: parseInt(req.body.requestedCopies) || 1,
+      status: 'pending',
+      certificateNumber: certificateNumber,
+      submittedByEmail: req.body.submittedByEmail || 'admin@sjmp.com',
+      requestDate: req.body.requestDate,
+      scheduledDate: req.body.scheduledDate || req.body.requestDate,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    const newRequest = await CertificateRequest.create(requestData);
+    await logActivity("CREATE", "certificaterequests", newRequest.fullName, newRequest.submittedByEmail);
+    console.log("✅ Certificate request created:", newRequest);
+    res.status(201).json(newRequest);
+  } catch (err) {
+    console.error("❌ Failed to create certificate request:", err.message);
+    res.status(400).json({ message: "Failed to create certificate request: " + err.message });
+  }
+});
+
+// GET all Certificate Requests
+app.get("/api/certificates", async (req, res) => {
+  try {
+    console.log("📤 Fetching all certificate requests...");
+    const requests = await CertificateRequest.find().sort({ createdAt: -1 }).lean();
+    console.log(`✅ Found ${requests.length} certificate requests`);
+    res.json(requests);
+  } catch (err) {
+    console.error("❌ Failed to fetch certificate requests:", err.message);
+    res.status(500).json({ message: "Failed to fetch certificate requests: " + err.message });
+  }
+});
+
+// GET single Certificate Request
+app.get("/api/certificates/:id", async (req, res) => {
+  try {
+    console.log("📤 Fetching certificate request:", req.params.id);
+    const request = await CertificateRequest.findById(req.params.id);
+    if (!request) {
+      console.log("❌ Certificate request not found:", req.params.id);
+      return res.status(404).json({ message: "Certificate request not found" });
+    }
+    console.log("✅ Certificate request found:", request.fullName);
+    res.json(request);
+  } catch (err) {
+    console.error("❌ Failed to fetch certificate request:", err.message);
+    res.status(500).json({ message: "Failed to fetch certificate request: " + err.message });
+  }
+});
+
+// UPDATE Certificate Status - FIXED READY STATUS
+app.put("/api/certificates/:id", async (req, res) => {
+  try {
+    console.log("🔄 Updating certificate request:", req.params.id, req.body);
+    
+    const updateData = { 
+      ...req.body,
+      updatedAt: new Date()
+    };
+    const actionBy = 'admin';
+    
+    // REASON SYSTEM HANDLING - FIXED READY STATUS
+    if (updateData.status === 'cancelled' && updateData.cancellation_reason) {
+      updateData.cancelled_by = actionBy;
+      updateData.cancelled_at = new Date();
+      updateData.rejection_reason = '';
+      updateData.rejected_by = '';
+      updateData.rejected_at = null;
+      updateData.approved_by = '';
+      updateData.approved_at = null;
+      updateData.ready_by = '';
+      updateData.ready_at = null;
+    } else if (updateData.status === 'rejected' && updateData.rejection_reason) {
+      updateData.rejected_by = actionBy;
+      updateData.rejected_at = new Date();
+      updateData.cancellation_reason = '';
+      updateData.cancelled_by = '';
+      updateData.cancelled_at = null;
+      updateData.approved_by = '';
+      updateData.approved_at = null;
+      updateData.ready_by = '';
+      updateData.ready_at = null;
+    } else if (updateData.status === 'approved') {
+      updateData.approved_by = actionBy;
+      updateData.approved_at = new Date();
+      updateData.cancellation_reason = '';
+      updateData.rejection_reason = '';
+      updateData.cancelled_by = '';
+      updateData.rejected_by = '';
+      updateData.cancelled_at = null;
+      updateData.rejected_at = null;
+      updateData.ready_by = '';
+      updateData.ready_at = null;
+    } else if (updateData.status === 'ready') {
+      // FIXED: Properly handle ready status
+      updateData.ready_by = actionBy;
+      updateData.ready_at = new Date();
+      updateData.cancellation_reason = '';
+      updateData.rejection_reason = '';
+      updateData.cancelled_by = '';
+      updateData.rejected_by = '';
+      updateData.cancelled_at = null;
+      updateData.rejected_at = null;
+      // Keep approved data if exists
+      if (!updateData.approved_by) {
+        updateData.approved_by = actionBy;
+        updateData.approved_at = new Date();
+      }
+    } else if (updateData.status === 'pending') {
+      updateData.cancellation_reason = '';
+      updateData.rejection_reason = '';
+      updateData.cancelled_by = '';
+      updateData.rejected_by = '';
+      updateData.cancelled_at = null;
+      updateData.rejected_at = null;
+      updateData.approved_by = '';
+      updateData.approved_at = null;
+      updateData.ready_by = '';
+      updateData.ready_at = null;
+    }
+    
+    const updatedRequest = await CertificateRequest.findByIdAndUpdate(
+      req.params.id, 
+      updateData, 
+      { new: true }
+    );
+    
+    if (!updatedRequest) {
+      console.log("❌ Certificate request not found:", req.params.id);
+      return res.status(404).json({ message: "Certificate request not found" });
+    }
+    
+    await logActivity("UPDATE", "certificaterequests", updatedRequest.fullName, updatedRequest.submittedByEmail);
+    console.log("✅ Certificate request updated:", updatedRequest);
+    res.json(updatedRequest);
+  } catch (err) {
+    console.error("❌ Failed to update certificate request:", err.message);
+    res.status(400).json({ message: "Failed to update certificate request: " + err.message });
+  }
+});
+
+// DELETE Certificate Request
+app.delete("/api/certificates/:id", async (req, res) => {
+  try {
+    console.log("🗑️ Deleting certificate request:", req.params.id);
+    const deletedRequest = await CertificateRequest.findByIdAndDelete(req.params.id);
+    if (!deletedRequest) {
+      console.log("❌ Certificate request not found:", req.params.id);
+      return res.status(404).json({ message: "Certificate request not found" });
+    }
+    await logActivity("DELETE", "certificaterequests", deletedRequest.fullName, deletedRequest.submittedByEmail);
+    console.log("✅ Certificate request deleted:", deletedRequest.fullName);
+    res.json({ message: "Certificate request deleted successfully" });
+  } catch (err) {
+    console.error("❌ Failed to delete certificate request:", err.message);
+    res.status(400).json({ message: "Failed to delete certificate request" });
+  }
+});
+
+/* =========================================================
   USER MANAGEMENT ROUTES
   ========================================================= */
 app.post("/api/users", async (req, res) => {
@@ -1272,6 +1500,30 @@ app.get("/api/blessing-schedules", async (req, res) => {
   } catch (err) {
     console.error("❌ Failed to fetch blessing schedules:", err.message);
     res.status(500).json({ message: "Failed to fetch blessing schedules: " + err.message });
+  }
+});
+
+// GET Certificate Schedules
+app.get("/api/certificate-schedules", async (req, res) => {
+  try {
+    console.log("📅 Fetching certificate schedules...");
+    const certificateSchedules = await CertificateRequest.find().lean();
+
+    const formatted = certificateSchedules.map(req => ({
+      name: req.fullName,
+      type: "Certificate - " + req.certificateType,
+      date: req.scheduledDate || req.requestDate,
+      time: "N/A",
+      contact: req.contactNumber,
+      address: req.address,
+      notes: `Purpose: ${req.purpose ? req.purpose.substring(0, 50) + '...' : 'N/A'}`
+    }));
+
+    console.log(`✅ Found ${formatted.length} certificate schedules`);
+    res.json(formatted);
+  } catch (err) {
+    console.error("❌ Failed to fetch certificate schedules:", err.message);
+    res.status(500).json({ message: "Failed to fetch certificate schedules: " + err.message });
   }
 });
 
@@ -1538,6 +1790,88 @@ app.get("/api/dashboard/monthly-blessing", async (req, res) => {
   } catch (err) { 
     console.error("❌ Error generating monthly blessing report:", err.message);
     res.status(500).json({ message: "Error generating monthly blessing report" }); 
+  }
+});
+
+/* =========================================================
+  DASHBOARD ROUTES FOR CERTIFICATES
+  ========================================================= */
+app.get("/api/dashboard/total-certificates", async (req, res) => {
+  try { 
+    const total = await CertificateRequest.countDocuments(); 
+    res.json({ total }); 
+  } catch (err) { 
+    console.error("❌ Error fetching total certificates:", err.message);
+    res.status(500).json({ message: "Error fetching total certificates" }); 
+  }
+});
+
+app.get("/api/dashboard/monthly-certificates", async (req, res) => {
+  try {
+    const report = await CertificateRequest.aggregate([
+      { 
+        $group: { 
+          _id: { 
+            year: { $year: "$createdAt" }, 
+            month: { $month: "$createdAt" } 
+          }, 
+          count: { $sum: 1 } 
+        } 
+      }, 
+      { 
+        $sort: { "_id.year": 1, "_id.month": 1 } 
+      }, 
+      { 
+        $project: { 
+          month: { $toInt: "$_id.month" }, 
+          count: 1, 
+          _id: 0 
+        } 
+      }
+    ]);
+    
+    const months = Array(12).fill(0); 
+    report.forEach(r => { 
+      if (r.month >= 1 && r.month <= 12) months[r.month - 1] = r.count; 
+    });
+    
+    res.json(months.map((count, idx) => ({ month: idx + 1, count })));
+  } catch (err) { 
+    console.error("❌ Error generating monthly certificates report:", err.message);
+    res.status(500).json({ message: "Error generating monthly certificates report" }); 
+  }
+});
+
+// Get certificate statistics by status
+app.get("/api/dashboard/certificate-stats", async (req, res) => {
+  try {
+    const stats = await CertificateRequest.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    
+    const result = {
+      pending: 0,
+      approved: 0,
+      ready: 0,
+      rejected: 0,
+      cancelled: 0
+    };
+    
+    stats.forEach(stat => {
+      if (result.hasOwnProperty(stat._id)) {
+        result[stat._id] = stat.count;
+      }
+    });
+    
+    res.json(result);
+  } catch (err) {
+    console.error("❌ Error fetching certificate stats:", err.message);
+    res.status(500).json({ message: "Error fetching certificate statistics" });
   }
 });
 
