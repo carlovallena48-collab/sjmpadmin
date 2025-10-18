@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pamisa Requests - San Jose Dashboard</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<!-- Add jsPDF library for export functionality -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+/* Your existing CSS styles remain the same */
 /* Enhanced Green Theme */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -793,6 +796,29 @@ body {
     box-shadow: none;
 }
 
+/* Export Button */
+.export-form-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #FF6F00, #FF8F00);
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-medium);
+    box-shadow: var(--shadow-sm);
+    margin-left: auto;
+}
+
+.export-form-btn:hover {
+    background: linear-gradient(135deg, #FF8F00, #FFA000);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
 /* Modal Styles */
 .modal {
     display: none;
@@ -1261,6 +1287,150 @@ body {
     background: #20c997;
     color: white;
 }
+
+/* Print-specific styles for form export */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    
+    .form-export-container, .form-export-container * {
+        visibility: visible;
+    }
+    
+    .form-export-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* Form export container styles */
+.form-export-container {
+    width: 210mm; /* A4 width */
+    min-height: 297mm; /* A4 height */
+    padding: 20mm;
+    margin: 0 auto;
+    background: white;
+    font-family: 'Inter', sans-serif;
+    color: #000;
+}
+
+.form-export-header {
+    text-align: center;
+    margin-bottom: 10mm;
+    border-bottom: 2px solid #1B5E20;
+    padding-bottom: 5mm;
+}
+
+.form-export-header h1 {
+    color: #1B5E20;
+    margin-bottom: 2mm;
+    font-size: 24pt;
+}
+
+.form-export-header p {
+    color: #546E7A;
+    font-size: 11pt;
+}
+
+.form-export-section {
+    margin-bottom: 8mm;
+}
+
+.form-export-section h3 {
+    color: #1B5E20;
+    border-bottom: 1px solid #1B5E20;
+    padding-bottom: 2mm;
+    margin-bottom: 4mm;
+    font-size: 14pt;
+}
+
+.form-export-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4mm;
+}
+
+.form-export-item {
+    margin-bottom: 3mm;
+}
+
+.form-export-label {
+    font-weight: bold;
+    margin-bottom: 1mm;
+    font-size: 10pt;
+    color: #37474F;
+}
+
+.form-export-value {
+    padding: 2mm;
+    border: 1px solid #B0BEC5;
+    border-radius: 2mm;
+    background: #FAFAFA;
+    font-size: 10pt;
+    min-height: 6mm;
+}
+
+.form-export-textarea {
+    padding: 2mm;
+    border: 1px solid #B0BEC5;
+    border-radius: 2mm;
+    background: #FAFAFA;
+    min-height: 20mm;
+    font-size: 10pt;
+    white-space: pre-wrap;
+}
+
+.form-export-full-width {
+    grid-column: 1 / -1;
+}
+
+.form-export-footer {
+    margin-top: 15mm;
+    text-align: center;
+    font-size: 9pt;
+    color: #78909C;
+    border-top: 1px solid #B0BEC5;
+    padding-top: 5mm;
+}
+
+.form-export-signature {
+    margin-top: 10mm;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10mm;
+}
+
+.form-export-signature-line {
+    border-top: 1px solid #000;
+    padding-top: 15mm;
+    text-align: center;
+    font-size: 10pt;
+}
+
+/* Modal header with export button */
+.modal-header-with-export {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.modal-header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
 </style>
 </head>
 <body>
@@ -1516,9 +1686,14 @@ body {
 <!-- Details Modal -->
 <div id="detailsModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header-with-export">
             <h2>Pamisa Request Details</h2>
-            <span class="close-btn" id="closeDetails">&times;</span>
+            <div class="modal-header-actions">
+                <button class="export-form-btn" id="exportFormBtn">
+                    <i class="fa-solid fa-file-export"></i> Export Form
+                </button>
+                <span class="close-btn" id="closeDetails">&times;</span>
+            </div>
         </div>
         <div class="modal-body" id="detailsContent">
             <!-- Details will be populated by JavaScript -->
@@ -1592,10 +1767,16 @@ body {
     </div>
 </div>
 
+<!-- Hidden export container for form PDF generation -->
+<div id="formExportContainer" style="display: none;"></div>
+
 <div id="alertContainer" class="custom-alert-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// Initialize jsPDF
+const { jsPDF } = window.jspdf;
+
 document.addEventListener('DOMContentLoaded', function() {
     // Sidebar toggle functionality
     const sidebarToggle = document.querySelector('.sidebar-toggle');
@@ -1618,6 +1799,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const baseURL = "http://localhost:5000/api/pamisa";
     const addRequestBtn = document.getElementById('addRequestBtn');
+    const exportFormBtn = document.getElementById('exportFormBtn');
     const modal = document.getElementById('addRequestModal');
     const closeBtn = document.querySelector('.modal .close-btn');
     const addRequestForm = document.getElementById('addRequestForm');
@@ -1655,11 +1837,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentName = document.getElementById('paymentName');
     const paymentType = document.getElementById('paymentType');
 
+    const formExportContainer = document.getElementById('formExportContainer');
+
     let requests = [];
     let currentAction = { id: null, type: null };
     let currentPaymentRequest = null;
     let currentFilter = 'all';
     let currentSearchTerm = '';
+    let currentRequestForExport = null;
 
     // Define status workflow
     const statusWorkflow = {
@@ -2042,6 +2227,293 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Export form functionality
+    exportFormBtn.addEventListener('click', function() {
+        if (currentRequestForExport) {
+            exportRequestForm(currentRequestForExport);
+        } else {
+            showNotification('No request selected for export.', 'error');
+        }
+    });
+
+    // Export individual request form to PDF
+    function exportRequestForm(request) {
+        showNotification('Generating form PDF...', 'success');
+        
+        // Create PDF document
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        // Set initial position
+        let yPosition = 20;
+        
+        // Add header
+        doc.setFontSize(20);
+        doc.setTextColor(27, 94, 32); // Primary green color
+        doc.text('PAMISA REQUEST FORM', 105, yPosition, { align: 'center' });
+        
+        yPosition += 8;
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        doc.text('San Jose Manggagawa Parish', 105, yPosition, { align: 'center' });
+        
+        yPosition += 5;
+        doc.text(`Generated on: ${new Date().toLocaleDateString('en-PH')}`, 105, yPosition, { align: 'center' });
+        
+        yPosition += 15;
+        
+        // Request Information Section
+        doc.setFontSize(14);
+        doc.setTextColor(27, 94, 32);
+        doc.text('REQUEST INFORMATION', 20, yPosition);
+        
+        yPosition += 8;
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        
+        // Request details in a table-like format
+        const requestDetails = [
+            ['Request Number:', request.requestNumber || 'N/A'],
+            ['Request Status:', request.status.toUpperCase()],
+            ['Date Submitted:', request.createdAt ? formatDate(request.createdAt) : 'N/A'],
+            ['Last Updated:', request.lastUpdated ? formatDate(request.lastUpdated) : 'N/A']
+        ];
+        
+        requestDetails.forEach(([label, value]) => {
+            doc.setFont(undefined, 'bold');
+            doc.text(label, 20, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(value, 60, yPosition);
+            yPosition += 5;
+        });
+        
+        yPosition += 5;
+        
+        // Requester Information Section
+        doc.setFontSize(14);
+        doc.setTextColor(27, 94, 32);
+        doc.text('REQUESTER INFORMATION', 20, yPosition);
+        
+        yPosition += 8;
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        
+        const requesterDetails = [
+            ['Name:', request.requesterName],
+            ['Contact:', request.requesterContact],
+            ['Address:', request.requesterAddress],
+            ['Email:', request.submittedByEmail || 'N/A']
+        ];
+        
+        requesterDetails.forEach(([label, value]) => {
+            doc.setFont(undefined, 'bold');
+            doc.text(label, 20, yPosition);
+            doc.setFont(undefined, 'normal');
+            
+            // Handle long text by splitting into multiple lines
+            const maxWidth = 120;
+            const lines = doc.splitTextToSize(value || 'N/A', maxWidth);
+            doc.text(lines, 60, yPosition);
+            yPosition += (lines.length * 5);
+        });
+        
+        yPosition += 5;
+        
+        // Check if we need a new page
+        if (yPosition > 200) {
+            doc.addPage();
+            yPosition = 20;
+        }
+        
+        // Pamisa Details Section
+        doc.setFontSize(14);
+        doc.setTextColor(27, 94, 32);
+        doc.text('PAMISA DETAILS', 20, yPosition);
+        
+        yPosition += 8;
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        
+        const pamisaDetails = [
+            ['Pamisa Date:', formatDate(request.date)],
+            ['Pamisa Time:', formatTime(request.time)],
+            ['Pamisa Type:', (request.pamisaType || 'regular').toUpperCase()],
+            ['Donation Amount:', `₱${request.donation || '0'}.00`]
+        ];
+        
+        pamisaDetails.forEach(([label, value]) => {
+            doc.setFont(undefined, 'bold');
+            doc.text(label, 20, yPosition);
+            doc.setFont(undefined, 'normal');
+            doc.text(value, 60, yPosition);
+            yPosition += 5;
+        });
+        
+        yPosition += 5;
+        
+        // Intention
+        doc.setFont(undefined, 'bold');
+        doc.text('Intention:', 20, yPosition);
+        yPosition += 5;
+        doc.setFont(undefined, 'normal');
+        const intentionLines = doc.splitTextToSize(request.intention || 'N/A', 170);
+        doc.text(intentionLines, 20, yPosition);
+        yPosition += (intentionLines.length * 5) + 5;
+        
+        // Special Requests
+        if (request.specialRequests && request.specialRequests.trim() !== '') {
+            doc.setFont(undefined, 'bold');
+            doc.text('Special Requests:', 20, yPosition);
+            yPosition += 5;
+            doc.setFont(undefined, 'normal');
+            const specialRequestsLines = doc.splitTextToSize(request.specialRequests, 170);
+            doc.text(specialRequestsLines, 20, yPosition);
+            yPosition += (specialRequestsLines.length * 5) + 5;
+        }
+        
+        // Check if we need a new page for additional sections
+        if (yPosition > 180) {
+            doc.addPage();
+            yPosition = 20;
+        }
+        
+        // Payment Information Section (if available)
+        if (request.paymentStatus === 'paid' || request.paymentDate) {
+            doc.setFontSize(14);
+            doc.setTextColor(27, 94, 32);
+            doc.text('PAYMENT INFORMATION', 20, yPosition);
+            
+            yPosition += 8;
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            
+            const paymentDetails = [
+                ['Payment Status:', request.paymentStatus?.toUpperCase() || 'N/A'],
+                ['Payment Date:', request.paymentDate ? formatDate(request.paymentDate) : 'N/A'],
+                ['Payment Method:', request.paymentMethod || 'N/A'],
+                ['Reference Number:', request.paymentReference || 'N/A']
+            ];
+            
+            paymentDetails.forEach(([label, value]) => {
+                doc.setFont(undefined, 'bold');
+                doc.text(label, 20, yPosition);
+                doc.setFont(undefined, 'normal');
+                doc.text(value, 60, yPosition);
+                yPosition += 5;
+            });
+            
+            if (request.paymentNotes && request.paymentNotes.trim() !== '') {
+                yPosition += 2;
+                doc.setFont(undefined, 'bold');
+                doc.text('Payment Notes:', 20, yPosition);
+                yPosition += 5;
+                doc.setFont(undefined, 'normal');
+                const paymentNotesLines = doc.splitTextToSize(request.paymentNotes, 170);
+                doc.text(paymentNotesLines, 20, yPosition);
+                yPosition += (paymentNotesLines.length * 5);
+            }
+            
+            yPosition += 5;
+        }
+        
+        // Reason Information Sections (if available)
+        if (request.cancellation_reason) {
+            if (yPosition > 150) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            
+            doc.setFontSize(14);
+            doc.setTextColor(27, 94, 32);
+            doc.text('CANCELLATION DETAILS', 20, yPosition);
+            
+            yPosition += 8;
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('Cancellation Reason:', 20, yPosition);
+            yPosition += 5;
+            doc.setFont(undefined, 'normal');
+            const cancellationLines = doc.splitTextToSize(request.cancellation_reason, 170);
+            doc.text(cancellationLines, 20, yPosition);
+            yPosition += (cancellationLines.length * 5) + 3;
+            
+            if (request.cancelled_by) {
+                doc.setFont(undefined, 'bold');
+                doc.text('Cancelled By:', 20, yPosition);
+                doc.setFont(undefined, 'normal');
+                doc.text(request.cancelled_by, 60, yPosition);
+                yPosition += 5;
+            }
+            
+            if (request.cancelled_at) {
+                doc.setFont(undefined, 'bold');
+                doc.text('Cancelled At:', 20, yPosition);
+                doc.setFont(undefined, 'normal');
+                doc.text(formatDate(request.cancelled_at), 60, yPosition);
+                yPosition += 5;
+            }
+        }
+        
+        if (request.rejection_reason) {
+            if (yPosition > 150) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            
+            doc.setFontSize(14);
+            doc.setTextColor(27, 94, 32);
+            doc.text('REJECTION DETAILS', 20, yPosition);
+            
+            yPosition += 8;
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('Rejection Reason:', 20, yPosition);
+            yPosition += 5;
+            doc.setFont(undefined, 'normal');
+            const rejectionLines = doc.splitTextToSize(request.rejection_reason, 170);
+            doc.text(rejectionLines, 20, yPosition);
+            yPosition += (rejectionLines.length * 5) + 3;
+            
+            if (request.rejected_by) {
+                doc.setFont(undefined, 'bold');
+                doc.text('Rejected By:', 20, yPosition);
+                doc.setFont(undefined, 'normal');
+                doc.text(request.rejected_by, 60, yPosition);
+                yPosition += 5;
+            }
+            
+            if (request.rejected_at) {
+                doc.setFont(undefined, 'bold');
+                doc.text('Rejected At:', 20, yPosition);
+                doc.setFont(undefined, 'normal');
+                doc.text(formatDate(request.rejected_at), 60, yPosition);
+                yPosition += 5;
+            }
+        }
+        
+        // Add footer
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
+            doc.text(`Generated by SJMP Admin System - Confidential`, 105, 295, { align: 'center' });
+        }
+        
+        // Save the PDF
+        const fileName = `pamisa-request-${request.requestNumber || request._id.substring(0, 8)}.pdf`;
+        doc.save(fileName);
+        showNotification('Form exported successfully!', 'success');
+    }
+
     // Update form submission to match your database structure
     addRequestForm.addEventListener('submit', (e)=>{
         e.preventDefault();
@@ -2202,6 +2674,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show details modal - DISPLAY ONLY WHAT'S IN DATABASE
         if(request){
+            currentRequestForExport = request; // Store for export
             showRequestDetails(request);
         }
     });

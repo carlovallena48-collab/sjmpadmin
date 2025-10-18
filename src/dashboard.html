@@ -341,7 +341,7 @@
     /* Main Sections */
     .main-sections {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 25px;
     }
 
@@ -533,38 +533,6 @@
       font-size: 14px;
     }
 
-    /* Small Charts Container */
-    .small-charts-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .small-chart-box {
-      background: #fff;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s ease;
-    }
-
-    .small-chart-box:hover {
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .small-chart-box h4 {
-      margin-bottom: 10px;
-      font-size: 16px;
-      color: #2c3e50;
-      text-align: center;
-    }
-
-    .small-chart-container {
-      width: 100%;
-      height: 200px;
-    }
-
     /* Responsive Design */
     @media (max-width: 992px) {
       .main-sections {
@@ -603,10 +571,6 @@
       
       .search-bar {
         width: 100%;
-      }
-      
-      .small-charts-container {
-        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -716,38 +680,8 @@
         </article>
       </div>
 
-      <!-- Report Filters -->
-      <div class="report-filters">
-        <div class="filter-group">
-          <label for="time-period">Time Period</label>
-          <select id="time-period">
-            <option value="week">This Week</option>
-            <option value="month" selected>This Month</option>
-            <option value="quarter">This Quarter</option>
-            <option value="year">This Year</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="sacrament-type">Sacrament Type</label>
-          <select id="sacrament-type">
-            <option value="all">All Sacraments</option>
-            <option value="Baptism">Baptism</option>
-            <option value="Confirmation">Confirmation</option>
-            <option value="Holy Orders">Holy Orders</option>
-            <option value="Pamisa">Pamisa</option>
-            <option value="Funeral Service">Funeral Service</option>
-            <option value="Blessing">Blessing</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="date-from">From</label>
-          <input type="date" id="date-from">
-        </div>
-        <div class="filter-group">
-          <label for="date-to">To</label>
-          <input type="date" id="date-to">
-        </div>
-      </div>
+     
+     
 
       <div class="main-sections">
         <div class="section-left">
@@ -755,13 +689,6 @@
             <h3>Monthly Sacraments Report</h3>
             <div class="chart-container">
               <canvas id="monthly-sacrament-chart"></canvas>
-            </div>
-          </div>
-
-          <div class="box">
-            <h3>Weekly Sacraments Report</h3>
-            <div class="chart-container">
-              <canvas id="weekly-sacrament-chart"></canvas>
             </div>
           </div>
 
@@ -795,39 +722,10 @@
           </div>
 
           <div class="box">
-            <h3>Sacraments Distribution</h3>
-            <div class="chart-container">
-              <canvas id="sacrament-distribution-chart"></canvas>
-            </div>
-          </div>
-
-          <div class="box">
             <h3>Recent Activity Log</h3>
             <div class="activity-log-container" id="activity-log-container">
               <p style="text-align:center;">Loading activities...</p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Small Charts Section -->
-      <div class="small-charts-container">
-        <div class="small-chart-box">
-          <h4>Weekly Baptism Trend</h4>
-          <div class="small-chart-container">
-            <canvas id="weekly-baptism-chart"></canvas>
-          </div>
-        </div>
-        <div class="small-chart-box">
-          <h4>Weekly Confirmation Trend</h4>
-          <div class="small-chart-container">
-            <canvas id="weekly-confirmation-chart"></canvas>
-          </div>
-        </div>
-        <div class="small-chart-box">
-          <h4>Request Status Distribution</h4>
-          <div class="small-chart-container">
-            <canvas id="request-status-chart"></canvas>
           </div>
         </div>
       </div>
@@ -1223,320 +1121,6 @@ async function fetchDashboardData() {
       });
     } catch (error) {
       console.error("Error creating sacrament chart:", error);
-    }
-
-    // --- Weekly Sacraments Chart ---
-    try {
-      // Get current year and week
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentWeek = getWeekNumber(currentDate);
-      
-      // Initialize arrays for each sacrament type for the last 8 weeks
-      const weeks = [];
-      const weekLabels = [];
-      
-      for (let i = 7; i >= 0; i--) {
-        const weekNum = currentWeek - i;
-        const weekRange = getWeekRange(weekNum, currentYear);
-        weeks.push(weekNum);
-        weekLabels.push(`Week ${weekNum}`);
-      }
-      
-      const weeklySacramentCounts = {
-        'Baptism': Array(8).fill(0),
-        'Confirmation': Array(8).fill(0),
-        'Holy Orders': Array(8).fill(0),
-        'Pamisa': Array(8).fill(0),
-        'Funeral Service': Array(8).fill(0),
-        'Blessing': Array(8).fill(0)
-      };
-
-      // Count sacraments by week
-      allSacraments.forEach(item => {
-        if (item.createdAt) {
-          try {
-            const createdDate = new Date(item.createdAt);
-            const itemWeek = getWeekNumber(createdDate);
-            const itemYear = createdDate.getFullYear();
-            
-            // Only count items from current year
-            if (itemYear === currentYear) {
-              const weekIndex = weeks.indexOf(itemWeek);
-              if (weekIndex !== -1) {
-                const sacramentType = item.sacrament;
-                if (weeklySacramentCounts[sacramentType]) {
-                  weeklySacramentCounts[sacramentType][weekIndex]++;
-                }
-              }
-            }
-          } catch (e) {
-            console.warn("Invalid date format:", item.createdAt);
-          }
-        }
-      });
-
-      const ctxWeekly = document.getElementById("weekly-sacrament-chart").getContext("2d");
-      if (window.weeklySacramentChart) window.weeklySacramentChart.destroy();
-      window.weeklySacramentChart = new Chart(ctxWeekly, {
-        type: "line",
-        data: {
-          labels: weekLabels,
-          datasets: [
-            {
-              label: "Baptism",
-              data: weeklySacramentCounts['Baptism'],
-              borderColor: "#1cc88a",
-              backgroundColor: "rgba(28,200,138,0.1)",
-              fill: true,
-              tension: 0.3,
-              borderWidth: 2
-            },
-            {
-              label: "Confirmation",
-              data: weeklySacramentCounts['Confirmation'],
-              borderColor: "#36b9cc",
-              backgroundColor: "rgba(54,185,204,0.1)",
-              fill: true,
-              tension: 0.3,
-              borderWidth: 2
-            },
-            {
-              label: "Pamisa",
-              data: weeklySacramentCounts['Pamisa'],
-              borderColor: "#f6c23e",
-              backgroundColor: "rgba(246,194,62,0.1)",
-              fill: true,
-              tension: 0.3,
-              borderWidth: 2
-            }
-          ]
-        },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false,
-          plugins: {
-            title: { display: true, text: 'Weekly Sacraments Trend' }
-          },
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
-      });
-    } catch (error) {
-      console.error("Error creating weekly sacrament chart:", error);
-    }
-
-    // --- Sacrament Distribution Chart ---
-    try {
-      const sacramentTotals = {};
-      
-      allSacraments.forEach(item => {
-        const sacramentType = item.sacrament;
-        sacramentTotals[sacramentType] = (sacramentTotals[sacramentType] || 0) + 1;
-      });
-      
-      const ctxDistribution = document.getElementById("sacrament-distribution-chart").getContext("2d");
-      if (window.sacramentDistributionChart) window.sacramentDistributionChart.destroy();
-      window.sacramentDistributionChart = new Chart(ctxDistribution, {
-        type: "doughnut",
-        data: {
-          labels: Object.keys(sacramentTotals),
-          datasets: [{
-            data: Object.values(sacramentTotals),
-            backgroundColor: [
-              "#1cc88a", "#36b9cc", "#4e73df", "#f6c23e", "#e74a3b", "#858796"
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }
-      });
-    } catch (error) {
-      console.error("Error creating distribution chart:", error);
-    }
-
-    // --- Small Charts ---
-    
-    // Weekly Baptism Chart
-    try {
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentWeek = getWeekNumber(currentDate);
-      
-      const weeks = [];
-      const weekLabels = [];
-      
-      for (let i = 7; i >= 0; i--) {
-        const weekNum = currentWeek - i;
-        weeks.push(weekNum);
-        weekLabels.push(`W${weekNum}`);
-      }
-      
-      const weeklyBaptismData = Array(8).fill(0);
-      
-      allSacraments.forEach(item => {
-        if (item.sacrament === 'Baptism' && item.createdAt) {
-          try {
-            const createdDate = new Date(item.createdAt);
-            const itemWeek = getWeekNumber(createdDate);
-            const itemYear = createdDate.getFullYear();
-            
-            if (itemYear === currentYear) {
-              const weekIndex = weeks.indexOf(itemWeek);
-              if (weekIndex !== -1) {
-                weeklyBaptismData[weekIndex]++;
-              }
-            }
-          } catch (e) {
-            console.warn("Invalid date format:", item.createdAt);
-          }
-        }
-      });
-
-      const ctxWeeklyBaptism = document.getElementById("weekly-baptism-chart").getContext("2d");
-      if (window.weeklyBaptismChart) window.weeklyBaptismChart.destroy();
-      window.weeklyBaptismChart = new Chart(ctxWeeklyBaptism, {
-        type: "bar",
-        data: {
-          labels: weekLabels,
-          datasets: [{
-            label: "Baptisms",
-            data: weeklyBaptismData,
-            backgroundColor: "#1cc88a",
-            borderColor: "#1cc88a",
-            borderWidth: 1
-          }]
-        },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
-      });
-    } catch (error) {
-      console.error("Error creating weekly baptism chart:", error);
-    }
-
-    // Weekly Confirmation Chart
-    try {
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentWeek = getWeekNumber(currentDate);
-      
-      const weeks = [];
-      const weekLabels = [];
-      
-      for (let i = 7; i >= 0; i--) {
-        const weekNum = currentWeek - i;
-        weeks.push(weekNum);
-        weekLabels.push(`W${weekNum}`);
-      }
-      
-      const weeklyConfirmationData = Array(8).fill(0);
-      
-      allSacraments.forEach(item => {
-        if (item.sacrament === 'Confirmation' && item.createdAt) {
-          try {
-            const createdDate = new Date(item.createdAt);
-            const itemWeek = getWeekNumber(createdDate);
-            const itemYear = createdDate.getFullYear();
-            
-            if (itemYear === currentYear) {
-              const weekIndex = weeks.indexOf(itemWeek);
-              if (weekIndex !== -1) {
-                weeklyConfirmationData[weekIndex]++;
-              }
-            }
-          } catch (e) {
-            console.warn("Invalid date format:", item.createdAt);
-          }
-        }
-      });
-
-      const ctxWeeklyConfirmation = document.getElementById("weekly-confirmation-chart").getContext("2d");
-      if (window.weeklyConfirmationChart) window.weeklyConfirmationChart.destroy();
-      window.weeklyConfirmationChart = new Chart(ctxWeeklyConfirmation, {
-        type: "bar",
-        data: {
-          labels: weekLabels,
-          datasets: [{
-            label: "Confirmations",
-            data: weeklyConfirmationData,
-            backgroundColor: "#36b9cc",
-            borderColor: "#36b9cc",
-            borderWidth: 1
-          }]
-        },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
-      });
-    } catch (error) {
-      console.error("Error creating weekly confirmation chart:", error);
-    }
-
-    // Request Status Distribution Chart
-    try {
-      const statusCounts = {
-        'Pending': 0,
-        'Approved': 0,
-        'Rejected': 0
-      };
-      
-      allSacraments.forEach(item => {
-        const status = item.status ? item.status.toLowerCase() : 'pending';
-        if (status === 'pending') statusCounts['Pending']++;
-        else if (status === 'approved') statusCounts['Approved']++;
-        else if (status === 'rejected') statusCounts['Rejected']++;
-      });
-
-      const ctxStatus = document.getElementById("request-status-chart").getContext("2d");
-      if (window.requestStatusChart) window.requestStatusChart.destroy();
-      window.requestStatusChart = new Chart(ctxStatus, {
-        type: "pie",
-        data: {
-          labels: Object.keys(statusCounts),
-          datasets: [{
-            data: Object.values(statusCounts),
-            backgroundColor: [
-              "#f6c23e", "#1cc88a", "#e74a3b"
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }
-      });
-    } catch (error) {
-      console.error("Error creating status chart:", error);
     }
 
     // --- Upcoming Schedules Table - ACCURATE DATA ---

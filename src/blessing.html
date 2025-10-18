@@ -559,6 +559,27 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+.export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-medium);
+    box-shadow: var(--shadow-sm);
+}
+
+.export-btn:hover {
+    background: linear-gradient(135deg, #F57C00, #E65100);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
 .filter-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -1108,6 +1129,81 @@ body {
     color: var(--color-text-secondary);
 }
 
+/* Export Modal */
+.export-modal .modal-content {
+    max-width: 500px;
+}
+
+.export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.export-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-medium);
+}
+
+.export-option:hover {
+    background: var(--color-hover);
+    border-color: var(--color-primary);
+}
+
+.export-option.selected {
+    background: var(--color-hover);
+    border-color: var(--color-primary);
+}
+
+.export-option input {
+    margin: 0;
+}
+
+.export-option-label {
+    flex: 1;
+}
+
+.export-option-label h4 {
+    margin: 0 0 5px 0;
+    color: var(--color-text-primary);
+}
+
+.export-option-label p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Individual Export Button */
+.export-individual-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-medium);
+    box-shadow: var(--shadow-sm);
+    margin-top: 15px;
+}
+
+.export-individual-btn:hover {
+    background: linear-gradient(135deg, #7B1FA2, #6A1B9A);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
     .sidebar {
@@ -1423,6 +1519,9 @@ body {
                         <button class="add-request-btn" id="addRequestBtn">
                             <i class="fa-solid fa-plus"></i> Add Request
                         </button>
+                        <button class="export-btn" id="exportBtn">
+                            <i class="fa-solid fa-file-export"></i> Export Data
+                        </button>
                         <div class="filter-buttons">
                             <button class="active" data-status="all">All</button>
                             <button data-status="pending">Pending</button>
@@ -1445,6 +1544,7 @@ body {
                                 <th>Blessing Time</th>
                                 <th>Address</th>
                                 <th>Status</th>
+                                <th>Payment</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -1528,6 +1628,11 @@ body {
         <div class="modal-body" id="detailsContent">
             <!-- Details will be populated by JavaScript -->
         </div>
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--color-border);">
+            <button class="export-individual-btn" id="exportIndividualBtn">
+                <i class="fa-solid fa-file-export"></i> Export This Request
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1548,9 +1653,113 @@ body {
     </div>
 </div>
 
+<!-- Payment Confirmation Modal -->
+<div id="paymentModal" class="modal payment-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Confirm Payment</h2>
+            <span class="close-btn" id="closePayment">&times;</span>
+        </div>
+        <div class="payment-details">
+            <div class="payment-amount" id="paymentAmount">₱500.00</div>
+            <div class="payment-info">
+                <span>Request ID:</span>
+                <span id="paymentRequestId">-</span>
+            </div>
+            <div class="payment-info">
+                <span>Name:</span>
+                <span id="paymentName">-</span>
+            </div>
+            <div class="payment-info">
+                <span>Blessing Type:</span>
+                <span id="paymentType">-</span>
+            </div>
+        </div>
+        <form id="paymentForm">
+            <div class="form-group">
+                <label for="paymentDate">Payment Date:</label>
+                <input type="date" id="paymentDate" required>
+            </div>
+            <div class="form-group">
+                <label for="paymentMethod">Payment Method:</label>
+                <select id="paymentMethod" required>
+                    <option value="">Select Method</option>
+                    <option value="cash">Cash</option>
+                    <option value="gcash">GCash</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="paymentReference">Reference Number (if applicable):</label>
+                <input type="text" id="paymentReference">
+            </div>
+            <div class="form-group">
+                <label for="paymentNotes">Notes:</label>
+                <textarea id="paymentNotes"></textarea>
+            </div>
+            <button type="submit" class="submit-btn" id="submitPaymentBtn">Confirm Payment</button>
+        </form>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div id="exportModal" class="modal export-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Export Blessing Data</h2>
+            <span class="close-btn" id="closeExport">&times;</span>
+        </div>
+        <div class="export-options" id="exportOptions">
+            <div class="export-option" data-format="csv">
+                <input type="radio" name="exportFormat" id="csvFormat" value="csv" checked>
+                <div class="export-option-label">
+                    <h4>CSV Format</h4>
+                    <p>Export data as CSV file. Best for spreadsheet applications like Excel.</p>
+                </div>
+            </div>
+            <div class="export-option" data-format="excel">
+                <input type="radio" name="exportFormat" id="excelFormat" value="excel">
+                <div class="export-option-label">
+                    <h4>Excel Format</h4>
+                    <p>Export data as Excel file. Best for advanced data analysis.</p>
+                </div>
+            </div>
+            <div class="export-option" data-format="pdf">
+                <input type="radio" name="exportFormat" id="pdfFormat" value="pdf">
+                <div class="export-option-label">
+                    <h4>PDF Format</h4>
+                    <p>Export data as PDF file. Best for printing and sharing.</p>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="exportRange">Export Range:</label>
+            <select id="exportRange">
+                <option value="current">Current View (Filtered Data)</option>
+                <option value="all">All Data</option>
+                <option value="date">Date Range</option>
+            </select>
+        </div>
+        <div class="form-row double" id="dateRangeContainer" style="display: none;">
+            <div class="form-group">
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate">
+            </div>
+        </div>
+        <button type="button" class="submit-btn" id="submitExportBtn">Export Data</button>
+    </div>
+</div>
+
 <div id="alertContainer" class="custom-alert-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Sidebar toggle functionality
@@ -1574,8 +1783,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const baseURL = "http://localhost:5000/api/blessing";
     const addRequestBtn = document.getElementById('addRequestBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const exportIndividualBtn = document.getElementById('exportIndividualBtn');
     const modal = document.getElementById('addRequestModal');
+    const exportModal = document.getElementById('exportModal');
     const closeBtn = document.querySelector('.modal .close-btn');
+    const closeExport = document.getElementById('closeExport');
     const addRequestForm = document.getElementById('addRequestForm');
     const requestsTableBody = document.querySelector('#requestsTable tbody');
     const emptyState = document.getElementById('emptyState');
@@ -1603,10 +1816,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const actionTypeSpan = document.getElementById('actionType');
     const reasonModalTitle = document.getElementById('reasonModalTitle');
 
+    const paymentModal = document.getElementById('paymentModal');
+    const closePayment = document.getElementById('closePayment');
+    const paymentForm = document.getElementById('paymentForm');
+    const paymentAmount = document.getElementById('paymentAmount');
+    const paymentRequestId = document.getElementById('paymentRequestId');
+    const paymentName = document.getElementById('paymentName');
+    const paymentType = document.getElementById('paymentType');
+
+    const exportOptions = document.querySelectorAll('.export-option');
+    const exportRange = document.getElementById('exportRange');
+    const dateRangeContainer = document.getElementById('dateRangeContainer');
+    const startDate = document.getElementById('startDate');
+    const endDate = document.getElementById('endDate');
+    const submitExportBtn = document.getElementById('submitExportBtn');
+
     let requests = [];
     let currentAction = { id: null, type: null };
+    let currentPaymentRequest = null;
     let currentFilter = 'all';
     let currentSearchTerm = '';
+    let currentFilteredData = [];
+    let currentDetailsRequest = null;
 
     // Define status workflow
     const statusWorkflow = {
@@ -1661,6 +1892,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return timeString;
         } catch (e) {
             return timeString;
+        }
+    }
+
+    function getPaymentStatusClass(paymentStatus) {
+        switch(paymentStatus) {
+            case 'paid': return 'paid';
+            case 'pending': return 'pending';
+            case 'overdue': return 'overdue';
+            default: return 'pending';
         }
     }
 
@@ -1793,6 +2033,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    async function updatePaymentStatus(id, paymentData) {
+        try {
+            console.log("Updating payment for:", id, paymentData);
+            
+            const res = await fetch(`${baseURL}/${id}/payment`, {
+                method:'PUT', 
+                headers:{'Content-Type':'application/json'}, 
+                body: JSON.stringify(paymentData)
+            });
+            
+            const result = await res.json();
+            console.log("Payment update result:", result);
+            showNotification('Payment status updated successfully!');
+            fetchRequests();
+        } catch (err) {
+            console.error("Failed to update payment:", err);
+            showNotification('Failed to update payment.', 'error');
+        }
+    }
+
     function getAvailableActions(currentStatus) {
         return statusWorkflow[currentStatus] || [];
     }
@@ -1818,6 +2078,7 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
         
+        currentFilteredData = filteredData;
         renderTable(filteredData);
     }
 
@@ -1833,6 +2094,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const availableActions = getAvailableActions(request.status);
                 
                 const blessingType = request.blessingType || 'OTHER';
+                const paymentStatus = request.paymentStatus || 'pending';
                 
                 row.innerHTML = `
                     <td>${request.requesterName}</td>
@@ -1841,6 +2103,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${formatTime(request.time)}</td>
                     <td>${request.address.substring(0, 20)}${request.address.length > 20 ? '...' : ''}</td>
                     <td><span class="status-badge ${request.status}">${request.status}</span></td>
+                    <td><span class="payment-badge ${getPaymentStatusClass(paymentStatus)}">${paymentStatus}</span></td>
                     <td>
                         <div class="action-buttons">
                             ${availableActions.includes('in-process') ? 
@@ -1870,6 +2133,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             ${availableActions.includes('pending') ? 
                                 `<button class="reset-btn" title="Reset to Pending">
                                     <i class="fa-solid fa-rotate-left"></i> Reset
+                                </button>` : ''}
+                            ${(request.status === 'scheduled' || request.status === 'completed' || request.status === 'approved') && paymentStatus !== 'paid' ? 
+                                `<button class="payment-btn" title="Confirm Payment">
+                                    <i class="fa-solid fa-money-bill-wave"></i> Payment
                                 </button>` : ''}
                         </div>
                     </td>
@@ -1918,14 +2185,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Modal handling
     addRequestBtn.addEventListener('click', ()=>modal.classList.add('show'));
+    exportBtn.addEventListener('click', ()=>exportModal.classList.add('show'));
     closeBtn.addEventListener('click', ()=>{
         modal.classList.remove('show'); 
         addRequestForm.reset();
+    });
+    closeExport.addEventListener('click', ()=>{
+        exportModal.classList.remove('show');
     });
     window.addEventListener('click', (e)=>{
         if(e.target===modal){
             modal.classList.remove('show'); 
             addRequestForm.reset();
+        }
+        if(e.target===exportModal){
+            exportModal.classList.remove('show');
         }
     });
 
@@ -1951,6 +2225,8 @@ document.addEventListener('DOMContentLoaded', function() {
             displayTime: formatTime(document.getElementById('blessingTime').value),
             donationNote: document.getElementById('donationNote').value || 'Cash donation to be given during the blessing ceremony',
             status: 'pending',
+            paymentStatus: 'pending',
+            fee: blessingFees[document.getElementById('blessingType').value] || 500,
             requestNumber: requestNumber
         };
         
@@ -2002,6 +2278,381 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Payment modal handling
+    closePayment.addEventListener('click', ()=>{
+        paymentModal.classList.remove('show');
+        paymentForm.reset();
+    });
+    
+    window.addEventListener('click', (e)=>{
+        if(e.target===paymentModal){
+            paymentModal.classList.remove('show');
+            paymentForm.reset();
+        }
+    });
+    
+    paymentForm.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const paymentData = {
+            paymentStatus: 'paid',
+            paymentDate: document.getElementById('paymentDate').value,
+            paymentMethod: document.getElementById('paymentMethod').value,
+            paymentReference: document.getElementById('paymentReference').value || 'N/A',
+            paymentNotes: document.getElementById('paymentNotes').value || 'N/A'
+        };
+        
+        if (paymentData.paymentMethod === 'cash') {
+            paymentData.paymentReference = paymentData.paymentReference === 'N/A' ? 'CASH_PAYMENT' : paymentData.paymentReference;
+        }
+        
+        console.log("Submitting payment:", paymentData);
+        updatePaymentStatus(currentPaymentRequest._id, paymentData);
+        paymentModal.classList.remove('show');
+        paymentForm.reset();
+    });
+
+    // Export functionality
+    exportOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            exportOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            const radio = option.querySelector('input[type="radio"]');
+            radio.checked = true;
+        });
+    });
+
+    exportRange.addEventListener('change', function() {
+        if (this.value === 'date') {
+            dateRangeContainer.style.display = 'grid';
+        } else {
+            dateRangeContainer.style.display = 'none';
+        }
+    });
+
+    submitExportBtn.addEventListener('click', function() {
+        const exportFormat = document.querySelector('input[name="exportFormat"]:checked').value;
+        const exportRangeValue = exportRange.value;
+        
+        let dataToExport = [];
+        
+        if (exportRangeValue === 'current') {
+            dataToExport = currentFilteredData;
+        } else if (exportRangeValue === 'all') {
+            dataToExport = requests;
+        } else if (exportRangeValue === 'date') {
+            const start = startDate.value;
+            const end = endDate.value;
+            
+            if (!start || !end) {
+                showNotification('Please select both start and end dates.', 'error');
+                return;
+            }
+            
+            dataToExport = requests.filter(request => {
+                const requestDate = request.date || request.createdAt;
+                return requestDate >= start && requestDate <= end;
+            });
+        }
+        
+        if (dataToExport.length === 0) {
+            showNotification('No data to export for the selected criteria.', 'error');
+            return;
+        }
+        
+        exportData(dataToExport, exportFormat);
+        exportModal.classList.remove('show');
+    });
+
+    // Individual export functionality
+    exportIndividualBtn.addEventListener('click', function() {
+        if (currentDetailsRequest) {
+            exportIndividualRequest(currentDetailsRequest);
+        }
+    });
+
+    function exportData(data, format) {
+        // Prepare data for export
+        const exportData = data.map(request => ({
+            'Request Number': request.requestNumber,
+            'Sacrament Type': request.sacrament,
+            'Name': request.name,
+            'Blessing Type': request.blessingType,
+            'Request Details': request.requestForDetails,
+            'Address': request.address,
+            'Contact Number': request.contactNumber,
+            'Blessing Date': formatDate(request.date),
+            'Blessing Time': formatTime(request.time),
+            'Display Date': request.displayDate,
+            'Display Time': request.displayTime,
+            'Status': request.status,
+            'Payment Status': request.paymentStatus,
+            'Fee': `₱${request.fee}.00`,
+            'Payment Date': formatDate(request.paymentDate),
+            'Payment Method': request.paymentMethod,
+            'Payment Reference': request.paymentReference,
+            'Donation Note': request.donationNote,
+            'Created At': formatDate(request.createdAt)
+        }));
+
+        if (format === 'csv') {
+            exportToCSV(exportData);
+        } else if (format === 'excel') {
+            exportToExcel(exportData);
+        } else if (format === 'pdf') {
+            exportToPDF(exportData);
+        }
+    }
+
+    function exportIndividualRequest(request) {
+        // Show format selection for individual export
+        Swal.fire({
+            title: 'Export Individual Request',
+            text: 'Select export format for this blessing request',
+            input: 'select',
+            inputOptions: {
+                'pdf': 'PDF Format',
+                'csv': 'CSV Format',
+                'excel': 'Excel Format'
+            },
+            inputPlaceholder: 'Select format',
+            showCancelButton: true,
+            confirmButtonText: 'Export',
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to select a format!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const format = result.value;
+                const individualData = [{
+                    'Request Number': request.requestNumber,
+                    'Sacrament Type': request.sacrament,
+                    'Name': request.name,
+                    'Blessing Type': request.blessingType,
+                    'Request Details': request.requestForDetails,
+                    'Address': request.address,
+                    'Contact Number': request.contactNumber,
+                    'Blessing Date': formatDate(request.date),
+                    'Blessing Time': formatTime(request.time),
+                    'Display Date': request.displayDate,
+                    'Display Time': request.displayTime,
+                    'Status': request.status,
+                    'Payment Status': request.paymentStatus,
+                    'Fee': `₱${request.fee}.00`,
+                    'Payment Date': formatDate(request.paymentDate),
+                    'Payment Method': request.paymentMethod,
+                    'Payment Reference': request.paymentReference,
+                    'Donation Note': request.donationNote,
+                    'Created At': formatDate(request.createdAt)
+                }];
+
+                if (format === 'csv') {
+                    exportToCSV(individualData, `blessing_request_${request.name.replace(/\s+/g, '_')}`);
+                } else if (format === 'excel') {
+                    exportToExcel(individualData, `blessing_request_${request.name.replace(/\s+/g, '_')}`);
+                } else if (format === 'pdf') {
+                    exportIndividualToPDF(request);
+                }
+            }
+        });
+    }
+
+    function exportToCSV(data, customFilename = null) {
+        if (data.length === 0) return;
+        
+        const headers = Object.keys(data[0]);
+        const csvContent = [
+            headers.join(','),
+            ...data.map(row => headers.map(header => {
+                let cell = row[header] || '';
+                cell = cell.toString().replace(/"/g, '""');
+                if (cell.includes(',') || cell.includes('"') || cell.includes('\n')) {
+                    cell = `"${cell}"`;
+                }
+                return cell;
+            }).join(','))
+        ].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        const filename = customFilename || `blessing_requests_${new Date().toISOString().split('T')[0]}`;
+        link.setAttribute('download', `${filename}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showNotification('CSV file exported successfully!', 'success');
+    }
+
+    function exportToExcel(data, customFilename = null) {
+        if (data.length === 0) return;
+        
+        try {
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Blessing Requests');
+            const filename = customFilename || `blessing_requests_${new Date().toISOString().split('T')[0]}`;
+            XLSX.writeFile(wb, `${filename}.xlsx`);
+            showNotification('Excel file exported successfully!', 'success');
+        } catch (error) {
+            console.error('Error exporting to Excel:', error);
+            showNotification('Error exporting to Excel format.', 'error');
+        }
+    }
+
+  function exportToPDF(data) {
+    if (data.length === 0) return;
+    
+    try {
+        // Simple table structure
+        const tableBody = [
+            ['Name', 'Type', 'Date', 'Status', 'Payment', 'Fee']
+        ];
+
+        data.forEach(request => {
+            tableBody.push([
+                request.name || 'N/A',
+                request.blessingType || 'N/A',
+                formatDate(request.date) || 'N/A',
+                request.status || 'N/A',
+                request.paymentStatus || 'N/A',
+                `₱${request.fee || 0}.00`
+            ]);
+        });
+
+        const documentDefinition = {
+            content: [
+                { text: 'Blessing Requests Report', style: 'header' },
+                { text: `Total: ${data.length} requests`, style: 'subheader' },
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: ['*', '*', '*', '*', '*', '*'],
+                        body: tableBody
+                    }
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 18,
+                    bold: true,
+                    margin: [0, 0, 0, 10]
+                },
+                subheader: {
+                    fontSize: 12,
+                    margin: [0, 0, 0, 10]
+                }
+            }
+        };
+
+        pdfMake.createPdf(documentDefinition).download(`blessing_requests_${new Date().getTime()}.pdf`);
+        showNotification('PDF file exported successfully!', 'success');
+    } catch (error) {
+        console.error('PDF Export Error:', error);
+        showNotification('Failed to generate PDF. Please try CSV or Excel format.', 'error');
+    }
+}
+
+    function exportIndividualToPDF(request) {
+        try {
+            const documentDefinition = {
+                content: [
+                    { text: 'BLESSING REQUEST DETAILS', style: 'header', alignment: 'center' },
+                    { text: `Generated on: ${new Date().toLocaleDateString()}`, style: 'subheader', alignment: 'center', margin: [0, 0, 0, 20] },
+                    
+                    { text: 'Basic Information', style: 'sectionHeader' },
+                    {
+                        table: {
+                            widths: ['*', '*'],
+                            body: [
+                                ['Request Number:', request.requestNumber],
+                                ['Sacrament Type:', request.sacrament],
+                                ['Status:', request.status],
+                                ['Created At:', formatDate(request.createdAt)]
+                            ]
+                        },
+                        margin: [0, 0, 0, 15]
+                    },
+                    
+                    { text: 'Requester Information', style: 'sectionHeader' },
+                    {
+                        table: {
+                            widths: ['*', '*'],
+                            body: [
+                                ['Name:', request.name],
+                                ['Contact Number:', request.contactNumber],
+                                ['Address:', { text: request.address, colSpan: 2 }]
+                            ]
+                        },
+                        margin: [0, 0, 0, 15]
+                    },
+                    
+                    { text: 'Blessing Details', style: 'sectionHeader' },
+                    {
+                        table: {
+                            widths: ['*', '*'],
+                            body: [
+                                ['Blessing Type:', request.blessingType],
+                                ['Blessing Date:', `${formatDate(request.date)} (${request.displayDate})`],
+                                ['Blessing Time:', `${formatTime(request.time)} (${request.displayTime})`],
+                                ['Request Details:', { text: request.requestForDetails || 'N/A', colSpan: 2 }],
+                                ['Donation Note:', { text: request.donationNote || 'N/A', colSpan: 2 }]
+                            ]
+                        },
+                        margin: [0, 0, 0, 15]
+                    },
+                    
+                    { text: 'Payment Information', style: 'sectionHeader' },
+                    {
+                        table: {
+                            widths: ['*', '*'],
+                            body: [
+                                ['Payment Status:', request.paymentStatus],
+                                ['Fee:', `₱${request.fee}.00`],
+                                ['Payment Date:', formatDate(request.paymentDate)],
+                                ['Payment Method:', request.paymentMethod],
+                                ['Payment Reference:', request.paymentReference]
+                            ]
+                        },
+                        margin: [0, 0, 0, 15]
+                    }
+                ],
+                styles: {
+                    header: {
+                        fontSize: 20,
+                        bold: true,
+                        margin: [0, 0, 0, 10]
+                    },
+                    subheader: {
+                        fontSize: 12,
+                        margin: [0, 0, 0, 10]
+                    },
+                    sectionHeader: {
+                        fontSize: 14,
+                        bold: true,
+                        margin: [0, 10, 0, 5],
+                        color: '#1B5E20'
+                    }
+                },
+                defaultStyle: {
+                    fontSize: 10,
+                    lineHeight: 1.3
+                }
+            };
+            
+            pdfMake.createPdf(documentDefinition).download(`blessing_request_${request.name.replace(/\s+/g, '_')}.pdf`);
+            showNotification('PDF file exported successfully!', 'success');
+        } catch (error) {
+            console.error('Error exporting individual PDF:', error);
+            showNotification('Error exporting to PDF format.', 'error');
+        }
+    }
+
     requestsTableBody.addEventListener('click',(e)=>{
         const row = e.target.closest('tr'); 
         if(!row || !row.dataset.id) return;
@@ -2043,6 +2694,17 @@ document.addEventListener('DOMContentLoaded', function() {
             updateRequestStatus(id,'pending'); 
             return; 
         }
+        if(e.target.closest('.payment-btn')) { 
+            currentPaymentRequest = request;
+            paymentRequestId.textContent = request._id.substring(0, 8) + '...';
+            paymentName.textContent = request.name;
+            paymentType.textContent = request.blessingType || 'OTHER';
+            paymentAmount.textContent = `₱${request.fee || 500}.00`;
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('paymentDate').value = today;
+            paymentModal.classList.add('show');
+            return; 
+        }
         
         // Show details modal - DISPLAY ONLY WHAT'S IN DATABASE
         if(request){
@@ -2052,6 +2714,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Complete details display - SHOW ONLY DATABASE FIELDS
     function showRequestDetails(request) {
+        currentDetailsRequest = request;
+        
         let detailsHTML = `
             <div class="details-section">
                 <h3 class="details-section-header">Basic Information</h3>
@@ -2122,6 +2786,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     ` : ''}
                 </div>
             </div>
+
+            <div class="details-section">
+                <h3 class="details-section-header">Payment Information</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Payment Status:</span>
+                        <div class="detail-value"><span class="payment-badge ${getPaymentStatusClass(request.paymentStatus)}">${request.paymentStatus}</span></div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fee:</span>
+                        <div class="detail-value">₱${request.fee}.00</div>
+                    </div>
+                </div>
+            </div>
         `;
         
         // REASON SYSTEM DISPLAY - Only if data exists
@@ -2177,12 +2855,54 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
         
+        if (request.paymentStatus === 'paid') {
+            detailsHTML += `
+                <div class="details-section">
+                    <h3 class="details-section-header">Payment Details</h3>
+                    <div class="details-grid">
+                        ${request.paymentDate ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Payment Date:</span>
+                                <div class="detail-value">${formatDate(request.paymentDate)}</div>
+                            </div>
+                        ` : ''}
+                        ${request.paymentMethod ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Payment Method:</span>
+                                <div class="detail-value">${displayValue(request.paymentMethod)}</div>
+                            </div>
+                        ` : ''}
+                        ${request.paymentReference ? `
+                            <div class="detail-item">
+                                <span class="detail-label">Payment Reference:</span>
+                                <div class="detail-value">${displayValue(request.paymentReference)}</div>
+                            </div>
+                        ` : ''}
+                        ${request.paymentNotes ? `
+                            <div class="detail-item full-width">
+                                <span class="detail-label">Payment Notes:</span>
+                                <div class="detail-textarea">${displayValue(request.paymentNotes)}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
         detailsContent.innerHTML = detailsHTML;
         detailsModal.classList.add('show');
     }
 
-    closeDetails.addEventListener('click',()=>detailsModal.classList.remove('show'));
-    window.addEventListener('click',(e)=>{if(e.target===detailsModal) detailsModal.classList.remove('show');});
+    closeDetails.addEventListener('click',()=>{
+        detailsModal.classList.remove('show');
+        currentDetailsRequest = null;
+    });
+    window.addEventListener('click',(e)=>{
+        if(e.target===detailsModal) {
+            detailsModal.classList.remove('show');
+            currentDetailsRequest = null;
+        }
+    });
 
     fetchRequests();
 
