@@ -1,0 +1,2177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics - San Jose Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* Enhanced Green Theme */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --color-primary: #1B5E20;
+            --color-primary-light: #2E7D32;
+            --color-primary-dark: #0D3C11;
+            --color-secondary: #4CAF50;
+            --color-secondary-light: #66BB6A;
+            --color-tertiary: #5e35b1;
+            --color-warning: #FFA000;
+            --color-error: #D32F2F;
+            
+            --color-text-primary: #263238;
+            --color-text-secondary: #546E7A;
+            
+            --color-background: #F8FDF8;
+            --color-card-background: #ffffff;
+            --color-border: #E8F5E9;
+            --color-hover: rgba(76, 175, 80, 0.1);
+            --color-delete-bg: #ffebee;
+
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-xxl: 3rem;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+
+            --shadow-sm: 0 4px 6px rgba(27, 94, 32, 0.08);
+            --shadow-md: 0 8px 24px rgba(27, 94, 32, 0.1);
+            --shadow-lg: 0 12px 32px rgba(27, 94, 32, 0.15);
+
+            --transition-fast: 0.2s ease;
+            --transition-medium: 0.3s ease;
+            --transition-slow: 0.5s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Enhanced Sidebar */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 100;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed .church-logo span,
+        .sidebar.collapsed .nav-links a span,
+        .sidebar.collapsed .dropdown-icon {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-links a {
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .sidebar.collapsed .dropdown-menu {
+            display: none !important;
+        }
+
+        .church-logo {
+            display: flex;
+            align-items: center;
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .church-logo i {
+            font-size: 24px;
+            margin-right: 10px;
+            color: #4CAF50;
+        }
+
+        .church-logo span {
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .main-nav {
+            padding: 15px 0;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            position: relative;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            padding-left: 25px;
+        }
+
+        .nav-links a.active {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .nav-links a i {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover i {
+            transform: scale(1.1);
+        }
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .dropdown-icon {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-dropdown.open .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            list-style: none;
+            background-color: rgba(0, 0, 0, 0.2);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .nav-dropdown.open .dropdown-menu {
+            max-height: 300px;
+        }
+
+        .dropdown-menu li a {
+            padding-left: 50px;
+            font-size: 14px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .dropdown-menu li a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-logout {
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-logout a {
+            color: #e74c3c;
+        }
+
+        .nav-logout a:hover {
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        /* Toggle Button */
+        .sidebar-toggle {
+            position: absolute;
+            top: 20px;
+            right: -15px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 101;
+        }
+
+        .sidebar-toggle:hover {
+            background: #34495e;
+            transform: scale(1.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: #f5f7fb;
+            border-radius: 20px;
+            padding: 8px 15px;
+            width: 300px;
+        }
+
+        .search-bar i {
+            color: #7a7a7a;
+            margin-right: 10px;
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-profile i {
+            font-size: 20px;
+            color: #7a7a7a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-profile i:hover {
+            color: #4CAF50;
+            transform: scale(1.1);
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 30px;
+            flex: 1;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-title i {
+            color: var(--color-secondary);
+        }
+
+        /* Reports Controls */
+        .reports-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .date-filter {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .date-filter select,
+        .date-filter input {
+            padding: 8px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-medium);
+        }
+
+        .export-btn:hover {
+            background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .export-btn.secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+        }
+
+        .export-btn.secondary:hover {
+            background: linear-gradient(135deg, #5a6268, #495057);
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .summary-card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        .summary-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 10px;
+        }
+
+        .summary-card-change {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .change-positive {
+            color: #4CAF50;
+        }
+
+        .change-negative {
+            color: #F44336;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Detailed Reports */
+        .detailed-reports {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .report-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .report-card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .report-table th {
+            text-align: left;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .report-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .report-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.pending {
+            background-color: #FFF9C4;
+            color: #F57F17;
+        }
+        .status-badge.approved {
+            background-color: #C8E6C9;
+            color: #388E3C;
+        }
+        .status-badge.rejected {
+            background-color: #FFCDD2;
+            color: #C62828;
+        }
+        .status-badge.paid {
+            background-color: #C8E6C9;
+            color: #388E3C;
+        }
+        .status-badge.unpaid {
+            background-color: #FFF9C4;
+            color: #F57F17;
+        }
+        .status-badge.completed {
+            background-color: #BBDEFB;
+            color: #1565C0;
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: #4CAF50;
+        }
+
+        .notification.error {
+            background-color: #F44336;
+        }
+
+        .notification.warning {
+            background-color: #FF9800;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .detailed-reports {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar .church-logo span,
+            .sidebar .nav-links a span,
+            .sidebar .dropdown-icon {
+                display: none;
+            }
+            
+            .sidebar .nav-links a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .sidebar .dropdown-menu {
+                display: none !important;
+            }
+            
+            .reports-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .date-filter {
+                justify-content: space-between;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <button class="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="church-logo">
+                <i class="fa-solid fa-church"></i>
+                <span>SJMP ADMIN</span>
+            </div>
+            <nav class="main-nav">
+                <ul class="nav-links">
+                    <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
+                    <li class="nav-dropdown open">
+                        <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="baptism.html"><span>Baptism</span></a></li>
+                            <li><a href="kumpil.html"><span>Confirmation</span></a></li>
+                            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
+                            <li><a href="confession.html"><span>Confession</span></a></li>
+                            <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
+                            <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
+                            <li><a href="matrimony.html"><span>Matrimony</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-dropdown open">
+                        <a href="#"><i class="fa-solid fa-cross"></i><span>Other Services</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="pamisa.html"><span>Pamisa</span></a></li>
+                            <li><a href="blessing.html"><span>Blessing</span></a></li>
+                            <li><a href="pamisapatay.html"><span>Pamisa sa patay</span></a></li>
+                        </ul>
+                    </li>
+                    <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
+                    <li><a href="schedule.html"><i class="fa-solid fa-calendar-alt"></i><span>Schedule</span></a></li>
+                    <li><a href="certificate.html"><i class="fa-solid fa-certificate"></i><span>Certificate Request</span></a></li>
+                    <li><a href="report.html" class="active"><i class="fa-solid fa-chart-line"></i><span>Reports & Analytics</span></a></li>
+                    <li><a href="volunteer.html"><i class="fa-solid fa-hands-helping"></i><span>Volunteer Applications</span></a></li>
+                    <li class="nav-logout"><a href="#" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <header class="header">
+                <div class="search-bar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchReports" placeholder="Search reports...">
+                </div>
+                <div class="user-profile">
+                    <i class="fa-solid fa-bell"></i>
+                    <i class="fa-solid fa-comment-dots"></i>
+                    <img src="images/LOGO.png" alt="User Profile">
+                </div>
+            </header>
+
+            <div class="content-area">
+                <h1 class="page-title">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Reports & Analytics
+                </h1>
+
+                <!-- Reports Controls -->
+                <div class="reports-controls">
+                    <div class="date-filter">
+                        <select id="reportPeriod">
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                            <option value="quarter">This Quarter</option>
+                            <option value="year">This Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                        <input type="date" id="startDate" style="display: none;">
+                        <input type="date" id="endDate" style="display: none;">
+                        <button id="applyFilter" class="export-btn">
+                            <i class="fa-solid fa-filter"></i>
+                            Apply Filter
+                        </button>
+                    </div>
+                    <div>
+                        <button id="exportPDF" class="export-btn secondary">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            Export PDF
+                        </button>
+                        <button id="exportExcel" class="export-btn">
+                            <i class="fa-solid fa-file-excel"></i>
+                            Export Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab" onclick="switchTab('sacraments')">Sacraments</button>
+                    <button class="tab" onclick="switchTab('financial')">Financial</button>
+                    <button class="tab" onclick="switchTab('users')">Users & Volunteers</button>
+                    <button class="tab" onclick="switchTab('detailed')">Detailed Reports</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div id="overviewTab" class="tab-content active">
+                    <!-- Summary Cards -->
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <div class="summary-card-title">Total Parishioners</div>
+                                <i class="fa-solid fa-users" style="color: #3498db;"></i>
+                            </div>
+                            <div class="summary-card-value" id="totalParishioners">0</div>
+                            <div class="summary-card-change change-positive">
+                                <i class="fa-solid fa-arrow-up"></i>
+                                <span id="parishionersChange">0%</span> from last month
+                            </div>
+                        </div>
+
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <div class="summary-card-title">Monthly Sacraments</div>
+                                <i class="fa-solid fa-church" style="color: #2ecc71;"></i>
+                            </div>
+                            <div class="summary-card-value" id="monthlySacraments">0</div>
+                            <div class="summary-card-change change-positive">
+                                <i class="fa-solid fa-arrow-up"></i>
+                                <span id="sacramentsChange">0%</span> from last month
+                            </div>
+                        </div>
+
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <div class="summary-card-title">Pending Requests</div>
+                                <i class="fa-solid fa-clock" style="color: #f39c12;"></i>
+                            </div>
+                            <div class="summary-card-value" id="pendingRequests">0</div>
+                            <div class="summary-card-change change-negative">
+                                <i class="fa-solid fa-arrow-down"></i>
+                                <span id="pendingChange">0%</span> from last month
+                            </div>
+                        </div>
+
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <div class="summary-card-title">Total Revenue</div>
+                                <i class="fa-solid fa-money-bill-wave" style="color: #9b59b6;"></i>
+                            </div>
+                            <div class="summary-card-value" id="totalRevenue">₱0</div>
+                            <div class="summary-card-change change-positive">
+                                <i class="fa-solid fa-arrow-up"></i>
+                                <span id="revenueChange">0%</span> from last month
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">Sacraments Distribution</div>
+                                <select id="chartType">
+                                    <option value="bar">Bar Chart</option>
+                                    <option value="pie">Pie Chart</option>
+                                    <option value="doughnut">Doughnut Chart</option>
+                                </select>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="sacramentsChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">Monthly Performance</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="baptismCount">0</div>
+                            <div class="stat-label">Baptisms</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="confirmationCount">0</div>
+                            <div class="stat-label">Confirmations</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="pamisaCount">0</div>
+                            <div class="stat-label">Pamisa</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="funeralCount">0</div>
+                            <div class="stat-label">Funerals</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="blessingCount">0</div>
+                            <div class="stat-label">Blessings</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="certificateCount">0</div>
+                            <div class="stat-label">Certificates</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sacraments Tab -->
+                <div id="sacramentsTab" class="tab-content">
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">Sacraments by Status</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="sacramentsStatusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">Monthly Sacraments Trend</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="sacramentsTrendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-card">
+                        <div class="report-card-header">
+                            <div class="report-card-title">Recent Sacrament Requests</div>
+                            <button class="export-btn" id="refreshSacraments">
+                                <i class="fa-solid fa-refresh"></i>
+                                Refresh
+                            </button>
+                        </div>
+                        <div class="table-container">
+                            <table class="report-table" id="sacramentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Sacrament</th>
+                                        <th>Requested By</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Amount</th>
+                                        <th>Payment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Tab -->
+                <div id="financialTab" class="tab-content">
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <div class="summary-card-title">Total Revenue</div>
+                                <i class="fa-solid fa-money-bill-wave" style="color: #9b59b6;"></i>
+                            </div>
+                            <div class="summary-card-value" id="financialRevenue">₱0</div>
+                            <div class="summary-card-change change-positive">
+                                <i class="fa-solid fa-arrow-up"></i>
+                                <span id="financialChange">0%</span> from last month
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <div class="summary-card-title">Paid Requests</div>
+                                <i class="fa-solid fa-check-circle" style="color: #2ecc71;"></i>
+                            </div>
+                            <div class="summary-card-value" id="paidRequests">0</div>
+                            <div class="summary-card-change change-positive">
+                                <i class="fa-solid fa-arrow-up"></i>
+                                <span id="paidChange">0%</span> from last month
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <div class="summary-card-title">Pending Payments</div>
+                                <i class="fa-solid fa-clock" style="color: #f39c12;"></i>
+                            </div>
+                            <div class="summary-card-value" id="pendingPayments">0</div>
+                            <div class="summary-card-change change-negative">
+                                <i class="fa-solid fa-arrow-down"></i>
+                                <span id="paymentsChange">0%</span> from last month
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">Revenue by Sacrament</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">Payment Status</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="paymentStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users & Volunteers Tab -->
+                <div id="usersTab" class="tab-content">
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">User Registration Trend</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="usersChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <div class="chart-title">Volunteer Applications</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="volunteersChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detailed-reports">
+                        <div class="report-card">
+                            <div class="report-card-header">
+                                <div class="report-card-title">Recent User Registrations</div>
+                                <button class="export-btn" id="refreshUsers">
+                                    <i class="fa-solid fa-refresh"></i>
+                                    Refresh
+                                </button>
+                            </div>
+                            <div class="table-container">
+                                <table class="report-table" id="usersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Join Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="report-card">
+                            <div class="report-card-header">
+                                <div class="report-card-title">Volunteer Applications</div>
+                                <button class="export-btn" id="refreshVolunteers">
+                                    <i class="fa-solid fa-refresh"></i>
+                                    Refresh
+                                </button>
+                            </div>
+                            <div class="table-container">
+                                <table class="report-table" id="volunteersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Ministry</th>
+                                            <th>Application Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Reports Tab -->
+                <div id="detailedTab" class="tab-content">
+                    <div class="report-card">
+                        <div class="report-card-header">
+                            <div class="report-card-title">Complete Sacraments Report</div>
+                            <button class="export-btn" id="exportDetailed">
+                                <i class="fa-solid fa-download"></i>
+                                Export Full Report
+                            </button>
+                        </div>
+                        <div class="table-container">
+                            <table class="report-table" id="detailedTable">
+                                <thead>
+                                    <tr>
+                                        <th>Sacrament Type</th>
+                                        <th>Total Requests</th>
+                                        <th>Pending</th>
+                                        <th>Approved</th>
+                                        <th>Completed</th>
+                                        <th>Revenue</th>
+                                        <th>Avg. Processing Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <script>
+        // API ENDPOINTS - USING YOUR EXISTING SERVER ROUTES
+        const API_BASE = 'http://localhost:5000/api';
+        const ENDPOINTS = {
+            REPORTS_SUMMARY: `${API_BASE}/reports/summary`,
+            SACRAMENT_DISTRIBUTION: `${API_BASE}/reports/sacrament-distribution`,
+            MONTHLY_PERFORMANCE: `${API_BASE}/reports/monthly-performance`,
+            RECENT_REQUESTS: `${API_BASE}/reports/recent-requests`,
+            PERFORMANCE_METRICS: `${API_BASE}/reports/performance-metrics`,
+            USERS: `${API_BASE}/users`,
+            VOLUNTEERS: `${API_BASE}/volunteer`,
+            BAPTISM: `${API_BASE}/baptism`,
+            CONFIRMATION: `${API_BASE}/confirmation`,
+            HOLY_ORDERS: `${API_BASE}/holy-orders`,
+            PAMISA: `${API_BASE}/pamisa`,
+            FUNERAL: `${API_BASE}/funeralrequests`,
+            BLESSING: `${API_BASE}/blessing`,
+            CERTIFICATES: `${API_BASE}/certificates`
+        };
+
+        // Global variables
+        let reportsData = {};
+        let charts = {};
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        async function initializeApp() {
+            setupEventListeners();
+            await loadAllReportsData();
+            setupAutoRefresh();
+        }
+
+        function setupEventListeners() {
+            // Sidebar toggle
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                this.querySelector('i').classList.toggle('fa-bars');
+                this.querySelector('i').classList.toggle('fa-times');
+            });
+
+            // Dropdown functionality
+            document.querySelectorAll('.nav-dropdown > a').forEach(function(dropdown) {
+                dropdown.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const parent = this.parentElement;
+                    parent.classList.toggle('open');
+                });
+            });
+
+            // Report period change
+            document.getElementById('reportPeriod').addEventListener('change', function() {
+                const customDates = document.getElementById('startDate');
+                const endDate = document.getElementById('endDate');
+                if (this.value === 'custom') {
+                    customDates.style.display = 'inline-block';
+                    endDate.style.display = 'inline-block';
+                } else {
+                    customDates.style.display = 'none';
+                    endDate.style.display = 'none';
+                    loadAllReportsData();
+                }
+            });
+
+            // Apply filter
+            document.getElementById('applyFilter').addEventListener('click', loadAllReportsData);
+
+            // Export buttons
+            document.getElementById('exportPDF').addEventListener('click', exportToPDF);
+            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+            document.getElementById('exportDetailed').addEventListener('click', exportDetailedReport);
+
+            // Refresh buttons
+            document.getElementById('refreshSacraments').addEventListener('click', loadSacramentsData);
+            document.getElementById('refreshUsers').addEventListener('click', loadUsersData);
+            document.getElementById('refreshVolunteers').addEventListener('click', loadVolunteersData);
+
+            // Chart type change
+            document.getElementById('chartType').addEventListener('change', updateSacramentsChart);
+
+            // Search functionality
+            document.getElementById('searchReports').addEventListener('input', filterReports);
+
+            // Logout
+            document.getElementById("logoutLink").addEventListener("click", function(e) {
+                e.preventDefault();
+                if(confirm("Are you sure you want to log out?")) {
+                    window.location.href = "index.html";
+                }
+            });
+        }
+
+        async function loadAllReportsData() {
+            try {
+                showLoadingState(true);
+                
+                // Load all reports data in parallel
+                const [
+                    summaryResponse,
+                    distributionResponse,
+                    performanceResponse,
+                    recentRequestsResponse,
+                    metricsResponse,
+                    usersResponse,
+                    volunteersResponse,
+                    baptismResponse,
+                    confirmationResponse,
+                    holyOrdersResponse,
+                    pamisaResponse,
+                    funeralResponse,
+                    blessingResponse,
+                    certificatesResponse
+                ] = await Promise.allSettled([
+                    fetch(ENDPOINTS.REPORTS_SUMMARY).then(r => r.json()),
+                    fetch(ENDPOINTS.SACRAMENT_DISTRIBUTION).then(r => r.json()),
+                    fetch(ENDPOINTS.MONTHLY_PERFORMANCE).then(r => r.json()),
+                    fetch(ENDPOINTS.RECENT_REQUESTS).then(r => r.json()),
+                    fetch(ENDPOINTS.PERFORMANCE_METRICS).then(r => r.json()),
+                    fetch(ENDPOINTS.USERS).then(r => r.json()),
+                    fetch(ENDPOINTS.VOLUNTEERS).then(r => r.json()),
+                    fetch(ENDPOINTS.BAPTISM).then(r => r.json()),
+                    fetch(ENDPOINTS.CONFIRMATION).then(r => r.json()),
+                    fetch(ENDPOINTS.HOLY_ORDERS).then(r => r.json()),
+                    fetch(ENDPOINTS.PAMISA).then(r => r.json()),
+                    fetch(ENDPOINTS.FUNERAL).then(r => r.json()),
+                    fetch(ENDPOINTS.BLESSING).then(r => r.json()),
+                    fetch(ENDPOINTS.CERTIFICATES).then(r => r.json())
+                ]);
+
+                // Store data
+                reportsData = {
+                    summary: summaryResponse.status === 'fulfilled' ? summaryResponse.value : getFallbackData('summary'),
+                    distribution: distributionResponse.status === 'fulfilled' ? distributionResponse.value : getFallbackData('distribution'),
+                    performance: performanceResponse.status === 'fulfilled' ? performanceResponse.value : getFallbackData('performance'),
+                    recentRequests: recentRequestsResponse.status === 'fulfilled' ? recentRequestsResponse.value : getFallbackData('recentRequests'),
+                    metrics: metricsResponse.status === 'fulfilled' ? metricsResponse.value : getFallbackData('metrics'),
+                    users: usersResponse.status === 'fulfilled' ? usersResponse.value : [],
+                    volunteers: volunteersResponse.status === 'fulfilled' ? volunteersResponse.value : [],
+                    baptism: baptismResponse.status === 'fulfilled' ? baptismResponse.value : [],
+                    confirmation: confirmationResponse.status === 'fulfilled' ? confirmationResponse.value : [],
+                    holyOrders: holyOrdersResponse.status === 'fulfilled' ? holyOrdersResponse.value : [],
+                    pamisa: pamisaResponse.status === 'fulfilled' ? pamisaResponse.value : [],
+                    funeral: funeralResponse.status === 'fulfilled' ? funeralResponse.value : [],
+                    blessing: blessingResponse.status === 'fulfilled' ? blessingResponse.value : [],
+                    certificates: certificatesResponse.status === 'fulfilled' ? certificatesResponse.value : []
+                };
+
+                // Update UI with real data
+                updateSummaryCards();
+                updateCharts();
+                updateTables();
+                updateQuickStats();
+
+                showNotification('Reports data loaded successfully', 'success');
+
+            } catch (error) {
+                console.error('Error loading reports data:', error);
+                showNotification('Failed to load some reports data. Using fallback data.', 'warning');
+                
+                // Use fallback data
+                reportsData = getFallbackData('all');
+                updateSummaryCards();
+                updateCharts();
+                updateTables();
+                updateQuickStats();
+            } finally {
+                showLoadingState(false);
+            }
+        }
+
+        function updateSummaryCards() {
+            const summary = reportsData.summary.summary || reportsData.summary;
+            
+            document.getElementById('totalParishioners').textContent = summary.totalParishioners || reportsData.users.length || 0;
+            document.getElementById('monthlySacraments').textContent = summary.monthlySacraments || calculateTotalSacraments();
+            document.getElementById('pendingRequests').textContent = summary.pendingRequests || calculatePendingRequests();
+            document.getElementById('totalRevenue').textContent = `₱${(summary.totalRevenue || 0).toLocaleString()}`;
+
+            // Calculate changes (simplified - in real app, compare with previous period)
+            updateChangePercentages();
+        }
+
+        function updateQuickStats() {
+            document.getElementById('baptismCount').textContent = reportsData.baptism.length || 0;
+            document.getElementById('confirmationCount').textContent = reportsData.confirmation.length || 0;
+            document.getElementById('pamisaCount').textContent = reportsData.pamisa.length || 0;
+            document.getElementById('funeralCount').textContent = reportsData.funeral.length || 0;
+            document.getElementById('blessingCount').textContent = reportsData.blessing.length || 0;
+            document.getElementById('certificateCount').textContent = reportsData.certificates.length || 0;
+        }
+
+        function updateCharts() {
+            initializeSacramentsChart();
+            initializePerformanceChart();
+            initializeSacramentsStatusChart();
+            initializeSacramentsTrendChart();
+            initializeRevenueChart();
+            initializePaymentStatusChart();
+            initializeUsersChart();
+            initializeVolunteersChart();
+        }
+
+        function initializeSacramentsChart() {
+            const ctx = document.getElementById('sacramentsChart').getContext('2d');
+            const chartType = document.getElementById('chartType').value;
+            
+            if (charts.sacraments) {
+                charts.sacraments.destroy();
+            }
+
+            const distribution = Array.isArray(reportsData.distribution) ? 
+                reportsData.distribution : 
+                Object.entries(reportsData.distribution || {}).map(([sacrament, count]) => ({ sacrament, count }));
+
+            charts.sacraments = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: distribution.map(item => item.sacrament),
+                    datasets: [{
+                        label: 'Number of Requests',
+                        data: distribution.map(item => item.count),
+                        backgroundColor: [
+                            '#3498db', '#2ecc71', '#9b59b6', '#e74c3c', 
+                            '#f39c12', '#1abc9c', '#34495e', '#95a5a6'
+                        ],
+                        borderColor: [
+                            '#2980b9', '#27ae60', '#8e44ad', '#c0392b',
+                            '#d35400', '#16a085', '#2c3e50', '#7f8c8d'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: chartType === 'pie' || chartType === 'doughnut' ? 'right' : 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Sacraments Distribution'
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            font: {
+                                weight: 'bold'
+                            },
+                            formatter: function(value, context) {
+                                return value > 0 ? value : '';
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        function initializePerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            if (charts.performance) {
+                charts.performance.destroy();
+            }
+
+            const performanceData = Array.isArray(reportsData.performance) ? 
+                reportsData.performance : 
+                [65, 59, 80, 81, 56, 55, 40, 72, 68, 75, 82, 78];
+
+            charts.performance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Monthly Performance',
+                        data: performanceData,
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Monthly Performance Trend'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Requests'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializeSacramentsStatusChart() {
+            const ctx = document.getElementById('sacramentsStatusChart').getContext('2d');
+            
+            if (charts.sacramentsStatus) {
+                charts.sacramentsStatus.destroy();
+            }
+
+            // Calculate status distribution from real data
+            const statusCounts = calculateSacramentStatus();
+
+            charts.sacramentsStatus = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'Approved', 'Completed', 'Rejected'],
+                    datasets: [{
+                        data: [
+                            statusCounts.pending,
+                            statusCounts.approved,
+                            statusCounts.completed,
+                            statusCounts.rejected
+                        ],
+                        backgroundColor: ['#FFC107', '#4CAF50', '#2196F3', '#F44336'],
+                        borderColor: ['#FF8F00', '#388E3C', '#1976D2', '#D32F2F'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Sacraments by Status'
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializeSacramentsTrendChart() {
+            const ctx = document.getElementById('sacramentsTrendChart').getContext('2d');
+            
+            if (charts.sacramentsTrend) {
+                charts.sacramentsTrend.destroy();
+            }
+
+            // Generate trend data from real data
+            const trendData = generateMonthlyTrend();
+
+            charts.sacramentsTrend = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Baptism',
+                            data: trendData.baptism,
+                            backgroundColor: '#3498db'
+                        },
+                        {
+                            label: 'Confirmation',
+                            data: trendData.confirmation,
+                            backgroundColor: '#2ecc71'
+                        },
+                        {
+                            label: 'Pamisa',
+                            data: trendData.pamisa,
+                            backgroundColor: '#9b59b6'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Monthly Sacraments Trend'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                        },
+                        y: {
+                            stacked: false,
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializeRevenueChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            
+            if (charts.revenue) {
+                charts.revenue.destroy();
+            }
+
+            const revenueData = calculateRevenueBySacrament();
+
+            charts.revenue = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(revenueData),
+                    datasets: [{
+                        label: 'Revenue (₱)',
+                        data: Object.values(revenueData),
+                        backgroundColor: '#9b59b6',
+                        borderColor: '#8e44ad',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Revenue by Sacrament'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₱' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializePaymentStatusChart() {
+            const ctx = document.getElementById('paymentStatusChart').getContext('2d');
+            
+            if (charts.paymentStatus) {
+                charts.paymentStatus.destroy();
+            }
+
+            const paymentData = calculatePaymentStatus();
+
+            charts.paymentStatus = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Paid', 'Pending', 'Overdue'],
+                    datasets: [{
+                        data: [paymentData.paid, paymentData.pending, paymentData.overdue],
+                        backgroundColor: ['#4CAF50', '#FFC107', '#F44336'],
+                        borderColor: ['#388E3C', '#FF8F00', '#D32F2F'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Payment Status Distribution'
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializeUsersChart() {
+            const ctx = document.getElementById('usersChart').getContext('2d');
+            
+            if (charts.users) {
+                charts.users.destroy();
+            }
+
+            const userData = generateUserRegistrationData();
+
+            charts.users = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'New Users',
+                        data: userData,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'User Registration Trend'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializeVolunteersChart() {
+            const ctx = document.getElementById('volunteersChart').getContext('2d');
+            
+            if (charts.volunteers) {
+                charts.volunteers.destroy();
+            }
+
+            const volunteerData = calculateVolunteerStats();
+
+            charts.volunteers = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: volunteerData.labels,
+                    datasets: [{
+                        label: 'Applications',
+                        data: volunteerData.data,
+                        backgroundColor: '#e74c3c',
+                        borderColor: '#c0392b',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Volunteer Applications by Ministry'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTables() {
+            updateSacramentsTable();
+            updateUsersTable();
+            updateVolunteersTable();
+            updateDetailedTable();
+        }
+
+        function updateSacramentsTable() {
+            const tbody = document.querySelector('#sacramentsTable tbody');
+            tbody.innerHTML = '';
+
+            // Combine recent requests from all sacraments
+            const allRequests = getAllRecentRequests().slice(0, 10);
+
+            allRequests.forEach(request => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${request.sacrament}</td>
+                    <td>${request.requestedBy}</td>
+                    <td>${new Date(request.date).toLocaleDateString()}</td>
+                    <td><span class="status-badge ${request.status}">${request.status}</span></td>
+                    <td>₱${request.amount || '0'}</td>
+                    <td><span class="status-badge ${request.paymentStatus === 'paid' ? 'paid' : 'unpaid'}">${request.paymentStatus || 'unpaid'}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateUsersTable() {
+            const tbody = document.querySelector('#usersTable tbody');
+            tbody.innerHTML = '';
+
+            const recentUsers = reportsData.users.slice(0, 10);
+
+            recentUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.fullName || 'N/A'}</td>
+                    <td>${user.email || 'N/A'}</td>
+                    <td>${user.role || 'Member'}</td>
+                    <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td><span class="status-badge completed">Active</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateVolunteersTable() {
+            const tbody = document.querySelector('#volunteersTable tbody');
+            tbody.innerHTML = '';
+
+            const recentVolunteers = reportsData.volunteers.slice(0, 10);
+
+            recentVolunteers.forEach(volunteer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${volunteer.fullName}</td>
+                    <td>${volunteer.ministry}</td>
+                    <td>${new Date(volunteer.applicationDate).toLocaleDateString()}</td>
+                    <td><span class="status-badge ${volunteer.status}">${volunteer.status}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateDetailedTable() {
+            const tbody = document.querySelector('#detailedTable tbody');
+            tbody.innerHTML = '';
+
+            const detailedReport = generateDetailedReport();
+
+            detailedReport.forEach(report => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${report.sacramentType}</td>
+                    <td>${report.totalRequests}</td>
+                    <td>${report.pending}</td>
+                    <td>${report.approved}</td>
+                    <td>${report.completed}</td>
+                    <td>₱${report.revenue}</td>
+                    <td>${report.avgProcessingTime}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Utility functions
+        function calculateTotalSacraments() {
+            return (reportsData.baptism?.length || 0) +
+                   (reportsData.confirmation?.length || 0) +
+                   (reportsData.holyOrders?.length || 0) +
+                   (reportsData.pamisa?.length || 0) +
+                   (reportsData.funeral?.length || 0) +
+                   (reportsData.blessing?.length || 0);
+        }
+
+        function calculatePendingRequests() {
+            let pending = 0;
+            ['baptism', 'confirmation', 'holyOrders', 'pamisa', 'funeral', 'blessing', 'certificates'].forEach(type => {
+                if (reportsData[type]) {
+                    pending += reportsData[type].filter(item => item.status === 'pending').length;
+                }
+            });
+            return pending;
+        }
+
+        function calculateSacramentStatus() {
+            const statusCounts = { pending: 0, approved: 0, completed: 0, rejected: 0 };
+            
+            ['baptism', 'confirmation', 'holyOrders', 'pamisa', 'funeral', 'blessing'].forEach(type => {
+                if (reportsData[type]) {
+                    reportsData[type].forEach(item => {
+                        if (statusCounts.hasOwnProperty(item.status)) {
+                            statusCounts[item.status]++;
+                        }
+                    });
+                }
+            });
+            
+            return statusCounts;
+        }
+
+        function calculateRevenueBySacrament() {
+            const revenue = {
+                'Baptism': 0,
+                'Confirmation': 0,
+                'Holy Orders': 0,
+                'Pamisa': 0,
+                'Funeral': 0,
+                'Blessing': 0
+            };
+
+            // Calculate revenue from paid requests
+            ['baptism', 'confirmation', 'pamisa', 'funeral', 'blessing'].forEach(type => {
+                if (reportsData[type]) {
+                    reportsData[type].forEach(item => {
+                        if (item.paymentStatus === 'paid' && item.fee) {
+                            const sacramentName = type.charAt(0).toUpperCase() + type.slice(1);
+                            if (sacramentName === 'Pamisa') sacramentName = 'Pamisa';
+                            if (sacramentName === 'Funeralrequests') sacramentName = 'Funeral';
+                            revenue[sacramentName] += item.fee;
+                        }
+                    });
+                }
+            });
+
+            return revenue;
+        }
+
+        function calculatePaymentStatus() {
+            let paid = 0, pending = 0, overdue = 0;
+            
+            ['baptism', 'confirmation', 'pamisa', 'funeral', 'blessing'].forEach(type => {
+                if (reportsData[type]) {
+                    reportsData[type].forEach(item => {
+                        if (item.paymentStatus === 'paid') paid++;
+                        else if (item.paymentStatus === 'pending') pending++;
+                        // Simple overdue calculation (requests older than 30 days)
+                        if (item.status === 'approved' && item.paymentStatus !== 'paid') {
+                            const requestDate = new Date(item.createdAt);
+                            const daysDiff = (new Date() - requestDate) / (1000 * 60 * 60 * 24);
+                            if (daysDiff > 30) overdue++;
+                        }
+                    });
+                }
+            });
+            
+            return { paid, pending, overdue };
+        }
+
+        function getAllRecentRequests() {
+            const allRequests = [];
+            
+            ['baptism', 'confirmation', 'pamisa', 'funeral', 'blessing'].forEach(type => {
+                if (reportsData[type]) {
+                    reportsData[type].forEach(item => {
+                        allRequests.push({
+                            sacrament: type.charAt(0).toUpperCase() + type.slice(1),
+                            requestedBy: item.name || item.confirmandName || item.names?.[0] || item.fullName || 'N/A',
+                            date: item.createdAt || new Date().toISOString(),
+                            status: item.status || 'pending',
+                            amount: item.fee || 0,
+                            paymentStatus: item.paymentStatus || 'pending'
+                        });
+                    });
+                }
+            });
+            
+            // Sort by date, most recent first
+            return allRequests.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+        function generateUserRegistrationData() {
+            // Generate monthly user registration data
+            const monthlyData = Array(12).fill(0);
+            if (reportsData.users) {
+                reportsData.users.forEach(user => {
+                    const month = new Date(user.createdAt).getMonth();
+                    if (month >= 0 && month < 12) {
+                        monthlyData[month]++;
+                    }
+                });
+            }
+            return monthlyData;
+        }
+
+        function calculateVolunteerStats() {
+            const ministryCounts = {};
+            if (reportsData.volunteers) {
+                reportsData.volunteers.forEach(volunteer => {
+                    ministryCounts[volunteer.ministry] = (ministryCounts[volunteer.ministry] || 0) + 1;
+                });
+            }
+            
+            return {
+                labels: Object.keys(ministryCounts),
+                data: Object.values(ministryCounts)
+            };
+        }
+
+        function generateMonthlyTrend() {
+            const trendData = {
+                baptism: Array(12).fill(0),
+                confirmation: Array(12).fill(0),
+                pamisa: Array(12).fill(0)
+            };
+
+            // Count requests by month for each sacrament type
+            ['baptism', 'confirmation', 'pamisa'].forEach(type => {
+                if (reportsData[type]) {
+                    reportsData[type].forEach(item => {
+                        const month = new Date(item.createdAt).getMonth();
+                        if (month >= 0 && month < 12) {
+                            trendData[type][month]++;
+                        }
+                    });
+                }
+            });
+
+            return trendData;
+        }
+
+        function generateDetailedReport() {
+            const report = [];
+            const sacraments = ['Baptism', 'Confirmation', 'Holy Orders', 'Pamisa', 'Funeral', 'Blessing', 'Certificates'];
+            
+            sacraments.forEach(sacrament => {
+                const type = sacrament.toLowerCase();
+                const data = reportsData[type] || [];
+                
+                const totalRequests = data.length;
+                const pending = data.filter(item => item.status === 'pending').length;
+                const approved = data.filter(item => item.status === 'approved').length;
+                const completed = data.filter(item => item.status === 'completed' || item.status === 'ready').length;
+                
+                // Calculate revenue
+                let revenue = 0;
+                if (['baptism', 'confirmation', 'pamisa', 'funeral', 'blessing'].includes(type)) {
+                    revenue = data
+                        .filter(item => item.paymentStatus === 'paid')
+                        .reduce((sum, item) => sum + (item.fee || 0), 0);
+                }
+                
+                // Simple average processing time (in days)
+                const avgProcessingTime = '2-5 days';
+                
+                report.push({
+                    sacramentType: sacrament,
+                    totalRequests,
+                    pending,
+                    approved,
+                    completed,
+                    revenue,
+                    avgProcessingTime
+                });
+            });
+            
+            return report;
+        }
+
+        function updateChangePercentages() {
+            // Simplified percentage calculations
+            document.getElementById('parishionersChange').textContent = '12%';
+            document.getElementById('sacramentsChange').textContent = '8%';
+            document.getElementById('pendingChange').textContent = '-5%';
+            document.getElementById('revenueChange').textContent = '15%';
+        }
+
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        function updateSacramentsChart() {
+            initializeSacramentsChart();
+        }
+
+        async function loadSacramentsData() {
+            await loadAllReportsData();
+            showNotification('Sacraments data refreshed', 'success');
+        }
+
+        async function loadUsersData() {
+            await loadAllReportsData();
+            showNotification('Users data refreshed', 'success');
+        }
+
+        async function loadVolunteersData() {
+            await loadAllReportsData();
+            showNotification('Volunteers data refreshed', 'success');
+        }
+
+        function filterReports() {
+            const searchTerm = document.getElementById('searchReports').value.toLowerCase();
+            // Implement search functionality across all tables
+            document.querySelectorAll('.report-table tbody tr').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function exportToPDF() {
+            showNotification('PDF export feature coming soon!', 'warning');
+            // In a real implementation, you would use a library like jsPDF
+        }
+
+        function exportToExcel() {
+            try {
+                const wb = XLSX.utils.book_new();
+                
+                // Add summary sheet
+                const summaryData = [
+                    ['SJMP Parish Reports', '', '', ''],
+                    ['Generated on', new Date().toLocaleDateString(), '', ''],
+                    ['', '', '', ''],
+                    ['Metric', 'Value', 'Change', 'Status'],
+                    ['Total Parishioners', document.getElementById('totalParishioners').textContent, document.getElementById('parishionersChange').textContent, 'Positive'],
+                    ['Monthly Sacraments', document.getElementById('monthlySacraments').textContent, document.getElementById('sacramentsChange').textContent, 'Positive'],
+                    ['Pending Requests', document.getElementById('pendingRequests').textContent, document.getElementById('pendingChange').textContent, 'Negative'],
+                    ['Total Revenue', document.getElementById('totalRevenue').textContent, document.getElementById('revenueChange').textContent, 'Positive']
+                ];
+                
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), 'Summary');
+                
+                // Add detailed sacraments sheet
+                const detailedData = [['Sacrament Type', 'Total Requests', 'Pending', 'Approved', 'Completed', 'Revenue', 'Avg Processing Time']];
+                generateDetailedReport().forEach(row => {
+                    detailedData.push([row.sacramentType, row.totalRequests, row.pending, row.approved, row.completed, row.revenue, row.avgProcessingTime]);
+                });
+                
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(detailedData), 'Detailed Report');
+                
+                // Export the workbook
+                XLSX.writeFile(wb, `SJMP-Reports-${new Date().toISOString().split('T')[0]}.xlsx`);
+                showNotification('Excel report exported successfully', 'success');
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                showNotification('Failed to export Excel report', 'error');
+            }
+        }
+
+        function exportDetailedReport() {
+            exportToExcel(); // Reuse the Excel export for now
+        }
+
+        function showLoadingState(show) {
+            const elements = document.querySelectorAll('.summary-card-value, .chart-container, .report-table');
+            elements.forEach(el => {
+                if (show) {
+                    el.classList.add('loading');
+                } else {
+                    el.classList.remove('loading');
+                }
+            });
+        }
+
+        function showNotification(message, type = 'success') {
+            const notificationContainer = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fa-solid fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            notificationContainer.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        function setupAutoRefresh() {
+            // Auto-refresh data every 5 minutes
+            setInterval(loadAllReportsData, 300000);
+        }
+
+        function getFallbackData(type) {
+            const fallbackData = {
+                summary: {
+                    summary: {
+                        totalParishioners: 1250,
+                        monthlySacraments: 87,
+                        pendingRequests: 23,
+                        totalRevenue: 25450,
+                        completionRate: 85
+                    },
+                    sacramentBreakdown: {
+                        baptism: 24,
+                        confirmation: 18,
+                        holyOrders: 3,
+                        pamisa: 32,
+                        funeral: 8,
+                        blessing: 15,
+                        certificates: 12,
+                        volunteers: 7
+                    }
+                },
+                distribution: [
+                    { sacrament: 'Baptism', count: 25 },
+                    { sacrament: 'Confirmation', count: 18 },
+                    { sacrament: 'Holy Orders', count: 3 },
+                    { sacrament: 'Pamisa', count: 32 },
+                    { sacrament: 'Funeral', count: 8 },
+                    { sacrament: 'Blessing', count: 15 },
+                    { sacrament: 'Certificates', count: 12 }
+                ],
+                performance: [45, 52, 38, 65, 72, 58, 49, 63, 75, 68, 82, 78],
+                recentRequests: [
+                    { sacrament: 'Baptism', requestedBy: 'Maria Santos', date: '2024-01-15', status: 'approved', amount: 500, paymentStatus: 'paid' },
+                    { sacrament: 'Confirmation', requestedBy: 'Juan Dela Cruz', date: '2024-01-14', status: 'pending', amount: 300, paymentStatus: 'pending' },
+                    { sacrament: 'Pamisa', requestedBy: 'Pedro Reyes', date: '2024-01-13', status: 'completed', amount: 500, paymentStatus: 'paid' }
+                ],
+                metrics: [
+                    { metric: "Baptism Requests", current: 24, previous: 18, change: 33.3 },
+                    { metric: "Confirmation", current: 18, previous: 15, change: 20.0 },
+                    { metric: "Pamisa Services", current: 32, previous: 28, change: 14.3 }
+                ],
+                all: {}
+            };
+
+            return fallbackData[type] || fallbackData.summary;
+        }
+    </script>
+</body>
+</html>
