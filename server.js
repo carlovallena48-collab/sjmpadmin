@@ -1020,8 +1020,23 @@ app.delete("/api/funeralrequests/:id", async (req, res) => {
 });
 
 /* =========================================================
-  BLESSING ROUTES
+  BLESSING ROUTES - FIXED VERSION
   ========================================================= */
+
+// GET all Blessing Requests - FIXED
+app.get("/api/blessing", async (req, res) => {
+  try {
+    console.log("📤 Fetching all blessing requests...");
+    const requests = await BlessingRequest.find().sort({ createdAt: -1 }).lean();
+    console.log(`✅ Found ${requests.length} blessing requests`);
+    res.json(requests);
+  } catch (err) {
+    console.error("❌ Failed to fetch blessing requests:", err.message);
+    res.status(500).json({ message: "Failed to fetch blessing requests: " + err.message });
+  }
+});
+
+// CREATE Blessing Request - FIXED
 app.post("/api/blessing", async (req, res) => {
   try {
     console.log("📥 Received blessing request:", req.body);
@@ -1037,15 +1052,57 @@ app.post("/api/blessing", async (req, res) => {
       'OTHER': 600
     };
     
+    // Convert date format from YYYY-MM-DD to MM/DD/YYYY for database
+    const formatDateForDB = (dateString) => {
+      if (!dateString) return '';
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString;
+        return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+      } catch (e) {
+        return dateString;
+      }
+    };
+
+    // Convert time format from HH:MM to HH:MM AM/PM
+    const formatTimeForDB = (timeString) => {
+      if (!timeString) return '';
+      try {
+        if (timeString.includes(':')) {
+          const [hours, minutes] = timeString.split(':');
+          const hour = parseInt(hours);
+          const minute = parseInt(minutes);
+          const period = hour >= 12 ? 'PM' : 'AM';
+          const displayHour = hour % 12 || 12;
+          return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+        }
+        return timeString;
+      } catch (e) {
+        return timeString;
+      }
+    };
+
     const requestData = {
-      ...req.body,
-      requestNumber: requestNumber,
-      fee: blessingFees[req.body.blessingType] || 500,
-      paymentStatus: 'pending',
+      sacrament: "Blessing",
+      name: req.body.name,
+      blessingType: req.body.blessingType,
+      requestForDetails: req.body.requestForDetails || '',
+      address: req.body.address,
+      contactNumber: req.body.contactNumber,
+      date: formatDateForDB(req.body.date),
+      time: formatTimeForDB(req.body.time),
+      displayDate: req.body.displayDate || new Date(req.body.date).toLocaleDateString('en-US'),
+      displayTime: req.body.displayTime || formatTimeForDB(req.body.time),
+      donationNote: req.body.donationNote || 'Cash donation to be given during the blessing ceremony',
       status: 'pending',
+      paymentStatus: 'pending',
+      fee: blessingFees[req.body.blessingType] || 500,
+      requestNumber: requestNumber,
       createdAt: new Date(),
       lastUpdated: new Date()
     };
+    
+    console.log("📝 Processed request data:", requestData);
     
     const newRequest = await BlessingRequest.create(requestData);
     await logActivity("CREATE", "blessingrequests", newRequest.name, newRequest.contactNumber);
@@ -1057,18 +1114,7 @@ app.post("/api/blessing", async (req, res) => {
   }
 });
 
-app.get("/api/blessing", async (req, res) => {
-  try {
-    console.log("📤 Fetching all blessing requests...");
-    const requests = await BlessingRequest.find().sort({ createdAt: -1 }).lean();
-    console.log(`✅ Found ${requests.length} blessing requests`);
-    res.json(requests);
-  } catch (err) {
-    console.error("❌ Failed to fetch blessing requests:", err.message);
-    res.status(500).json({ message: "Failed to fetch blessing requests: " + err.message });
-  }
-});
-
+// UPDATE Blessing Request - FIXED
 app.put("/api/blessing/:id", async (req, res) => {
   try {
     console.log("🔄 Updating blessing request:", req.params.id, req.body);
@@ -1120,6 +1166,41 @@ app.put("/api/blessing/:id", async (req, res) => {
   }
 });
 
+// UPDATE Blessing Payment - FIXED
+app.put("/api/blessing/:id/payment", async (req, res) => {
+  try {
+    console.log("💰 Updating payment for blessing request:", req.params.id, req.body);
+    
+    const paymentData = {
+      paymentStatus: 'paid',
+      paymentDate: req.body.paymentDate,
+      paymentMethod: req.body.paymentMethod,
+      paymentReference: req.body.paymentReference,
+      paymentNotes: req.body.paymentNotes,
+      lastUpdated: new Date()
+    };
+    
+    const updatedRequest = await BlessingRequest.findByIdAndUpdate(
+      req.params.id,
+      paymentData,
+      { new: true }
+    );
+    
+    if (!updatedRequest) {
+      console.log("❌ Blessing request not found:", req.params.id);
+      return res.status(404).json({ message: "Request not found" });
+    }
+    
+    await logActivity("PAYMENT_UPDATE", "blessingrequests", updatedRequest.name, updatedRequest.contactNumber);
+    console.log("✅ Payment updated for blessing request:", updatedRequest);
+    res.json(updatedRequest);
+  } catch (err) {
+    console.error("❌ Failed to update payment for blessing:", err.message);
+    res.status(400).json({ message: "Failed to update payment: " + err.message });
+  }
+});
+
+// DELETE Blessing Request
 app.delete("/api/blessing/:id", async (req, res) => {
   try {
     const deletedRequest = await BlessingRequest.findByIdAndDelete(req.params.id);
@@ -2744,8 +2825,6 @@ app.get("/api/dashboard/monthly-users", async (req, res) => {
     ]);
   }
 });
-
-
 
 /* =========================================================
   START SERVER

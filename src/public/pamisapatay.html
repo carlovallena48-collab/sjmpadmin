@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pamisa sa Patay - San Jose Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel = "stylesheet" href = "css/pamisapatay.css">
+    <script src="js/pamisapatay.js"></script>
+</head>
+<body>
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <button class="sidebar-toggle">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="church-logo">
+      <i class="fa-solid fa-church"></i>
+      <span>SJMP ADMIN</span>
+    </div>
+    <nav class="main-nav">
+      <ul class="nav-links">
+        <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
+        <li class="nav-dropdown open">
+          <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
+          <ul class="dropdown-menu">
+            <li><a href="baptism.html"><span>Baptism</span></a></li>
+            <li><a href="kumpil.html"><span>Confirmation</span></a></li>
+            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
+            <li><a href="confession.html"><span>Confession</span></a></li>
+            <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
+            <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
+            <li><a href="matrimony.html"><span>Matrimony</span></a></li>
+          </ul>
+        </li>
+          <li class="nav-dropdown open">
+          <a href="#"><i class="fa-solid fa-cross"></i><span>Other Services</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
+          <ul class="dropdown-menu">
+            <li><a href="pamisa.html"><span>Pamisa</span></a></li>
+            <li><a href="blessing.html"><span>Blessing</span></a></li>
+            <li><a href="pamisapatay.html" class="active"><span>Pamisa sa patay</span></a></li>
+          </ul> 
+        </li>
+              <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
+              <li><a href="schedule.html"><i class="fa-solid fa-calendar-alt"></i><span>Schedule</span></a></li>
+              <li><a href="certificate.html"><i class="fa-solid fa-globe"></i><span>Certificate Request</span></a></li>
+              <li><a href="report.html"><i class="fa-solid fa-globe"></i><span>Reports And Analytics</span></a></li>
+              <li><a href="volunteer.html"><i class="fa-solid fa-hands-helping"></i><span>Volunteer Applications</span></a></li>
+              <li class="nav-logout"><a href="#" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a></li>
+      </ul>
+    </nav>
+  </aside>
+    <main class="main-content">
+        <header class="header">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="headerSearch" placeholder="Search for a request...">
+            </div>
+            <div class="user-profile">
+                <i class="fa-solid fa-bell"></i>
+                <i class="fa-solid fa-comment-dots"></i>
+                <img src="images/LOGO.png" alt="User Profile">
+            </div>
+        </header>
+
+        <div class="dashboard-widgets">
+            <div class="widget-card card-blue">
+                <i class="fa-solid fa-list-check"></i>
+                <div class="widget-content">
+                    <h4>Total Requests</h4>
+                    <p id="totalRequests">0</p>
+                </div>
+            </div>
+            <div class="widget-card status-widget">
+                <h4>Requests by Status</h4>
+                <div class="status-count pending">
+                    <i class="fa-solid fa-clock"></i>
+                    <span id="pendingCount">0</span>
+                    <span>Pending</span>
+                </div>
+                <div class="status-count in-process">
+                    <i class="fa-solid fa-gears"></i>
+                    <span id="inProcessCount">0</span>
+                    <span>In Process</span>
+                </div>
+                <div class="status-count scheduled">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span id="scheduledCount">0</span>
+                    <span>Scheduled</span>
+                </div>
+                <div class="status-count completed">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span id="completedCount">0</span>
+                    <span>Completed</span>
+                </div>
+                <div class="status-count approved">
+                    <i class="fa-solid fa-thumbs-up"></i>
+                    <span id="approvedCount">0</span>
+                    <span>Approved</span>
+                </div>
+                <div class="status-count rejected">
+                    <i class="fa-solid fa-ban"></i>
+                    <span id="rejectedCount">0</span>
+                    <span>Rejected</span>
+                </div>
+                <div class="status-count cancelled">
+                    <i class="fa-solid fa-xmark"></i>
+                    <span id="cancelledCount">0</span>
+                    <span>Cancelled</span>
+                </div>
+            </div>
+            <div class="widget-card card-green">
+                <i class="fa-solid fa-calendar-days"></i>
+                <div class="widget-content">
+                    <h4>Upcoming Pamisa</h4>
+                    <p id="upcomingCount">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Workflow Guide -->
+        <div class="status-workflow">
+            <h4>Pamisa sa Patay Request Workflow</h4>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-icon pending"><i class="fa-solid fa-clock"></i></div>
+                    <div class="step-label">Pending</div>
+                </div>
+                <div class="workflow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="workflow-step">
+                    <div class="step-icon in-process"><i class="fa-solid fa-gears"></i></div>
+                    <div class="step-label">In Process</div>
+                </div>
+                <div class="workflow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="workflow-step">
+                    <div class="step-icon scheduled"><i class="fa-solid fa-calendar-check"></i></div>
+                    <div class="step-label">Scheduled</div>
+                </div>
+                <div class="workflow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="workflow-step">
+                    <div class="step-icon completed"><i class="fa-solid fa-check-circle"></i></div>
+                    <div class="step-label">Completed</div>
+                </div>
+                <div class="workflow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="workflow-step">
+                    <div class="step-icon approved"><i class="fa-solid fa-thumbs-up"></i></div>
+                    <div class="step-label">Approved</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="requests-section">
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title">All Pamisa sa Patay Requests</h3>
+                    <div class="search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="tableSearch" placeholder="Search for a request...">
+                    </div>
+                </div>
+                <div class="table-header-controls">
+                    <div class="table-actions">
+                        <button class="add-request-btn" id="addRequestBtn">
+                            <i class="fa-solid fa-plus"></i> Add Request
+                        </button>
+                        <!-- EXPORT BUTTON -->
+                        <button class="export-btn" id="exportBtn">
+                            <i class="fa-solid fa-file-pdf"></i> Export to PDF
+                        </button>
+                        <div class="filter-buttons">
+                            <button class="active" data-status="all">All</button>
+                            <button data-status="pending">Pending</button>
+                            <button data-status="in-process">In Process</button>
+                            <button data-status="scheduled">Scheduled</button>
+                            <button data-status="completed">Completed</button>
+                            <button data-status="approved">Approved</button>
+                            <button data-status="rejected">Rejected</button>
+                            <button data-status="cancelled">Cancelled</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="pamisa-table" id="requestsTable">
+                        <thead>
+                            <tr>
+                                <th>Deceased Name</th>
+                                <th>Date of Death</th>
+                                <th>Schedule Date</th>
+                                <th>Schedule Time</th>
+                                <th>Contact Person</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="empty-state" id="emptyState">No pamisa sa patay requests found.</div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Add Request Modal -->
+<div id="addRequestModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add Pamisa sa Patay Request</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <form id="addRequestForm">
+            <h3 class="form-section-header">Impormasyon ng Namatay</h3>
+            <div class="form-row double">
+                <div class="form-group">
+                    <label for="nameOfDeceased">Pangalan ng Namatay:</label>
+                    <input type="text" id="nameOfDeceased" required>
+                </div>
+                <div class="form-group">
+                    <label for="dateDied">Petsa ng Kamatayan:</label>
+                    <input type="date" id="dateDied" required>
+                </div>
+            </div>
+            <div class="form-row double">
+                <div class="form-group">
+                    <label for="birthday">Petsa ng Kapanganakan:</label>
+                    <input type="date" id="birthday">
+                </div>
+                <div class="form-group">
+                    <label for="age">Edad:</label>
+                    <input type="number" id="age">
+                </div>
+            </div>
+            <div class="form-row double">
+                <div class="form-group">
+                    <label for="civilStatus">Katayuang Sibil:</label>
+                    <select id="civilStatus">
+                        <option value="">Pumili...</option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Widowed">Widowed</option>
+                        <option value="Separated">Separated</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nameOfHusbandOrWife">Pangalan ng Asawa (kung mayroon):</label>
+                    <input type="text" id="nameOfHusbandOrWife">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="causeOfDeath">Sanhi ng Kamatayan:</label>
+                <input type="text" id="causeOfDeath" required>
+            </div>
+            <div class="form-group">
+                <label for="receivedLastSacrament">Nakatanggap ng Huling Sakramento:</label>
+                <select id="receivedLastSacrament" required>
+                    <option value="">Pumili...</option>
+                    <option value="Yes">Opo</option>
+                    <option value="No">Hindi</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="placeOfBurialCemetery">Sementeryo o Libingan:</label>
+                <input type="text" id="placeOfBurialCemetery" required>
+            </div>
+            
+            <h3 class="form-section-header">Impormasyon ng Humihiling</h3>
+            <div class="form-row double">
+                <div class="form-group">
+                    <label for="informant">Pangalan ng Humihiling:</label>
+                    <input type="text" id="informant" required>
+                </div>
+                <div class="form-group">
+                    <label for="relationship">Relasyon sa Namatay:</label>
+                    <input type="text" id="relationship" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="residence">Address:</label>
+                <input type="text" id="residence" required>
+            </div>
+            <div class="form-group">
+                <label for="contactNumber">Contact Number:</label>
+                <input type="tel" id="contactNumber" required>
+            </div>
+            
+            <h3 class="form-section-header">Detalye ng Pamisa</h3>
+            <div class="form-row double">
+                <div class="form-group">
+                    <label for="scheduleDate">Petsa ng Pamisa:</label>
+                    <input type="date" id="scheduleDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="scheduleTime">Oras ng Pamisa:</label>
+                    <input type="time" id="scheduleTime" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitAddBtn">Add Request</button>
+        </form>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Pamisa sa Patay Request Details</h2>
+            <span class="close-btn" id="closeDetails">&times;</span>
+        </div>
+        <div class="modal-body" id="detailsContent">
+            <!-- Details will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- Reason Modal (for cancellation/rejection) -->
+<div id="reasonModal" class="modal reason-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="reasonModalTitle">Provide Reason</h2>
+            <span class="close-btn" id="closeReason">&times;</span>
+        </div>
+        <form id="reasonForm">
+            <div class="form-group">
+                <label for="reason">Reason for <span id="actionType">action</span>:</label>
+                <textarea id="reason" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn" id="submitReasonBtn">Submit</button>
+        </form>
+    </div>
+</div>
+
+<!-- Payment Confirmation Modal -->
+<div id="paymentModal" class="modal payment-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Confirm Payment</h2>
+            <span class="close-btn" id="closePayment">&times;</span>
+        </div>
+        <div class="payment-details">
+            <div class="payment-amount" id="paymentAmount">₱1000.00</div>
+            <div class="payment-info">
+                <span>Request ID:</span>
+                <span id="paymentRequestId">-</span>
+            </div>
+            <div class="payment-info">
+                <span>Deceased Name:</span>
+                <span id="paymentName">-</span>
+            </div>
+            <div class="payment-info">
+                <span>Contact Person:</span>
+                <span id="paymentContact">-</span>
+            </div>
+        </div>
+        <form id="paymentForm">
+            <div class="form-group">
+                <label for="paymentDate">Payment Date:</label>
+                <input type="date" id="paymentDate" required>
+            </div>
+            <div class="form-group">
+                <label for="paymentMethod">Payment Method:</label>
+                <select id="paymentMethod" required>
+                    <option value="">Select Method</option>
+                    <option value="cash">Cash</option>
+                    <option value="gcash">GCash</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="paymentReference">Reference Number (if applicable):</label>
+                <input type="text" id="paymentReference">
+            </div>
+            <div class="form-group">
+                <label for="paymentNotes">Notes:</label>
+                <textarea id="paymentNotes"></textarea>
+            </div>
+            <button type="submit" class="submit-btn" id="submitPaymentBtn">Confirm Payment</button>
+        </form>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div id="exportModal" class="modal export-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Export Funeral Requests to PDF</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="export-options">
+                <label class="export-option" for="exportAll">
+                    <input type="radio" id="exportAll" name="exportType" value="all" checked>
+                    <div class="export-option-content">
+                        <div class="export-option-title">Export All Requests</div>
+                        <div class="export-option-description">Export all funeral requests with complete details</div>
+                    </div>
+                </label>
+                
+                <label class="export-option" for="exportFiltered">
+                    <input type="radio" id="exportFiltered" name="exportType" value="filtered">
+                    <div class="export-option-content">
+                        <div class="export-option-title">Export Filtered Results</div>
+                        <div class="export-option-description">Export only the currently filtered and searched requests</div>
+                    </div>
+                </label>
+                
+                <label class="export-option" for="exportDateRange">
+                    <input type="radio" id="exportDateRange" name="exportType" value="dateRange">
+                    <div class="export-option-content">
+                        <div class="export-option-title">Export by Date Range</div>
+                        <div class="export-option-description">Export requests within a specific date range</div>
+                    </div>
+                </label>
+            </div>
+            
+            <div class="export-date-range" id="dateRangeSection">
+                <div class="date-range-inputs">
+                    <div class="form-group">
+                        <label for="startDate">From Date:</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">To Date:</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="export-stats" id="exportStats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalRecords">0</div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="dateRange">-</div>
+                    <div class="stat-label">Date Range</div>
+                </div>
+            </div>
+            
+            <div class="export-progress" id="exportProgress" style="display: none;">
+                <div>Generating PDF...</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div id="progressText">0%</div>
+            </div>
+            
+            <button class="submit-btn" id="startExportBtn">
+                <i class="fa-solid fa-file-pdf"></i> Generate PDF Report
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Individual Export Modal -->
+<div id="individualExportModal" class="modal individual-export-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Export Individual Funeral Request</h2>
+            <span class="close-btn">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="request-details-preview">
+                <h4>Request Details Preview</h4>
+                <div class="preview-content" id="previewContent">
+                    <!-- Preview content will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="export-options">
+                <div class="form-group">
+                    <label for="includePaymentInfo">
+                        <input type="checkbox" id="includePaymentInfo" checked>
+                        Include Payment Information
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="includeContactInfo">
+                        <input type="checkbox" id="includeContactInfo" checked>
+                        Include Contact Information
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="includeReasonInfo">
+                        <input type="checkbox" id="includeReasonInfo" checked>
+                        Include Cancellation/Rejection Reasons (if applicable)
+                    </label>
+                </div>
+            </div>
+            
+            <div class="export-progress" id="individualExportProgress" style="display: none;">
+                <div>Generating PDF...</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="individualProgressFill" style="width: 0%"></div>
+                </div>
+                <div id="individualProgressText">0%</div>
+            </div>
+            
+            <button class="submit-btn" id="generateIndividualPDFBtn">
+                <i class="fa-solid fa-file-pdf"></i> Generate Individual PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="alertContainer" class="custom-alert-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</body>
+</html>

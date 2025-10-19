@@ -31,7 +31,7 @@ async function createWindow() {
   }
 
   // Load the dashboard (inside src folder)
-  mainWindow.loadFile(path.join(__dirname, "src", "index.html"));
+  mainWindow.loadFile(path.join(__dirname, "src", "public/startup.html"));
 
   // Uncomment for debugging
   // mainWindow.webContents.openDevTools();

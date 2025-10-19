@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management - San Jose Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="css/usermanage.css">
+    <script src="js/usermanage.js"></script>
+</head>
+<body>
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <button class="sidebar-toggle">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="church-logo">
+      <i class="fa-solid fa-church"></i>
+      <span>SJMP ADMIN</span>
+    </div>
+    <nav class="main-nav">
+      <ul class="nav-links">
+        <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
+        <li class="nav-dropdown open">
+          <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
+          <ul class="dropdown-menu">
+            <li><a href="baptism.html"><span>Baptism</span></a></li>
+            <li><a href="kumpil.html"><span>Confirmation</span></a></li>
+            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
+            <li><a href="confession.html"><span>Confession</span></a></li>
+            <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
+            <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
+            <li><a href="matrimony.html"><span>Matrimony</span></a></li>
+          </ul>
+        </li>
+          <li class="nav-dropdown open">
+          <a href="#"><i class="fa-solid fa-cross"></i><span>Other Services</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
+          <ul class="dropdown-menu">
+            <li><a href="pamisa.html"><span>Pamisa</span></a></li>
+            <li><a href="blessing.html"><span>Blessing</span></a></li>
+            <li><a href="pamisapatay.html"><span>Pamisa sa patay</span></a></li>
+          </ul> 
+        </li>
+              <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
+              <li><a href="schedule.html"><i class="fa-solid fa-calendar-alt"></i><span>Schedule</span></a></li>
+              <li><a href="certificate.html"><i class="fa-solid fa-globe"></i><span>Certificate Request</span></a></li>
+              <li><a href="report.html"><i class="fa-solid fa-globe"></i><span>Reports And Analytics</span></a></li>
+              <li><a href="volunteer.html"><i class="fa-solid fa-hands-helping"></i><span>Volunteer Applications</span></a></li>
+              <li class="nav-logout"><a href="#" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a></li>
+      </ul>
+    </nav>
+  </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Search for members, events..."/>
+            </div>
+            <div class="user-profile">
+                <i class="fa-solid fa-bell"></i>
+                <i class="fa-solid fa-comment-dots"></i>
+                <img src="images/LOGO.png" alt="Admin Profile"/>
+            </div>
+        </header>
+
+        <section class="user-management-section">
+            <div class="box">
+                <div class="table-header-controls">
+                    <h3 class="box-title">User Information</h3>
+                    <div class="table-actions">
+                        <button class="add-user-btn" onclick="showUserForm()">
+                            <i class="fa-solid fa-plus"></i> Add User
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="user-table" id="userTable">
+                        <thead>
+                        <tr>
+                            <th>User Name</th>
+                            <th>Role</th>
+                            <th>Address</th>
+                            <th>Contact No.</th>
+                            <th>Schedule Count</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="empty-state" id="emptyState">No users found.</div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Add/Edit User Modal -->
+<div id="userModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeUserForm()">&times;</span>
+        <h3 id="modalTitle">Add New User</h3>
+        <form id="userForm">
+            <input type="hidden" id="userId"/>
+           
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter password"/>
+            </div>
+            <div class="form-group">
+                <label for="userEmail">Email</label>
+                <input type="email" id="userEmail" required placeholder="example@domain.com"/>
+            </div>
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" required placeholder="Full Name"/>
+            </div>
+            <div class="form-group">
+                <label for="userRole">Role</label>
+                <select id="userRole" required>
+                    <option value="Admin">Admin</option>
+                    <option value="Member">Member</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="userAddress">Address</label>
+                <input type="text" id="userAddress" required placeholder="123 Example St, City"/>
+            </div>
+            <div class="form-group">
+                <label for="userContact">Contact Number</label>
+                <input type="text" id="userContact" required placeholder="+63 9xx xxx xxxx"/>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="closeUserForm()">Cancel</button>
+                <button type="submit" class="save-btn">Save User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- View User Modal -->
+<div id="viewUserModal" class="modal modal-lg">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeViewUserModal()">&times;</span>
+        <div class="modal-profile-header">
+            <img id="viewUserImage" src="" alt="User Profile"/>
+            <div class="modal-profile-info">
+                <h4 id="viewUserName"></h4>
+                <p id="viewUserRole"></p>
+            </div>
+        </div>
+        <div class="tab-container">
+            <button class="tab-button active" onclick="switchTab('details')">User Details</button>
+            <button class="tab-button" onclick="switchTab('history')">Schedule History</button>
+        </div>
+        <div id="detailsTab" class="tab-content active">
+            <div class="user-info-grid">
+                <div>
+                    <span class="label">Fullname</span>
+                    <span class="value" id="viewfullName"></span>
+                </div>
+                <div>
+                    <span class="label">Email</span>
+                    <span class="value" id="viewUserEmail"></span>
+                </div>
+                <div>
+                    <span class="label">Contact No.</span>
+                    <span class="value" id="viewUserContact"></span>
+                </div>
+                <div>
+                    <span class="label">Address</span>
+                    <span class="value" id="viewUserAddress"></span>
+                </div>
+            </div>
+        </div>
+        <div id="historyTab" class="tab-content">
+            <!-- Schedule Statistics -->
+            <div class="history-stats" id="historyStats">
+                <div class="stat-card baptism">
+                    <h4>Baptism</h4>
+                    <p id="baptismCount">0</p>
+                </div>
+                <div class="stat-card confirmation">
+                    <h4>Confirmation</h4>
+                    <p id="confirmationCount">0</p>
+                </div>
+                <div class="stat-card eucharist">
+                    <h4>Eucharist</h4>
+                    <p id="eucharistCount">0</p>
+                </div>
+                <div class="stat-card matrimony">
+                    <h4>Matrimony</h4>
+                    <p id="matrimonyCount">0</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="history-filters">
+                <select id="sacramentFilter" onchange="filterHistory()">
+                    <option value="all">All Sacraments</option>
+                    <option value="Baptism">Baptism</option>
+                    <option value="Confirmation">Confirmation</option>
+                    <option value="Eucharist">Eucharist</option>
+                    <option value="Matrimony">Matrimony</option>
+                </select>
+                <select id="statusFilter" onchange="filterHistory()">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="in-process">In Process</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="completed">Completed</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+
+            <!-- History Table -->
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>Sacrament</th>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <tr>
+                        <td colspan="5" class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading schedule history...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="empty-state" id="historyEmptyState">No schedule history found.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation -->
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <p>Are you sure you want to delete?</p>
+    <div class="form-actions">
+        <button id="confirmDeleteBtn" class="yes-btn">Yes</button>
+        <button onclick="closeConfirmModal()" class="no-btn">No</button>
+    </div>
+  </div>
+</div>
+
+<div id="alertContainer" class="custom-alert-container"></div>
+
+
+</body>
+</html>
