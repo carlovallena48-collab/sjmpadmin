@@ -27,15 +27,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const requestsTableBody = document.querySelector('#requestsTable tbody');
     const emptyState = document.getElementById('emptyState');
     const filterButtons = document.querySelectorAll('.filter-buttons button');
+    
+    // UPDATED: Only keep the counts that are displayed in the new widget layout
     const totalRequestsCount = document.getElementById('totalRequests');
     const pendingCount = document.getElementById('pendingCount');
-    const inProcessCount = document.getElementById('inProcessCount');
-    const scheduledCount = document.getElementById('scheduledCount');
     const completedCount = document.getElementById('completedCount');
-    const approvedCount = document.getElementById('approvedCount');
-    const rejectedCount = document.getElementById('rejectedCount');
-    const cancelledCount = document.getElementById('cancelledCount');
     const upcomingCount = document.getElementById('upcomingCount');
+    
+    // REMOVED: Remove references to counts that are no longer displayed
+    // const inProcessCount = document.getElementById('inProcessCount');
+    // const scheduledCount = document.getElementById('scheduledCount');
+    // const approvedCount = document.getElementById('approvedCount');
+    // const rejectedCount = document.getElementById('rejectedCount');
+    // const cancelledCount = document.getElementById('cancelledCount');
+    
     const headerSearchInput = document.getElementById('headerSearch');
     const tableSearchInput = document.getElementById('tableSearch');
 
@@ -370,12 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCounts(data){
         totalRequestsCount.textContent = data.length;
         pendingCount.textContent = data.filter(r => r.status === 'pending').length;
-        inProcessCount.textContent = data.filter(r => r.status === 'in-process').length;
-        scheduledCount.textContent = data.filter(r => r.status === 'scheduled').length;
         completedCount.textContent = data.filter(r => r.status === 'completed').length;
-        approvedCount.textContent = data.filter(r => r.status === 'approved').length;
-        rejectedCount.textContent = data.filter(r => r.status === 'rejected').length;
-        cancelledCount.textContent = data.filter(r => r.status === 'cancelled').length;
         
         const today = new Date();
         today.setHours(0, 0, 0, 0); 
@@ -597,10 +597,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="detail-item">
                         <span class="detail-label">Request Number:</span>
                         <div class="detail-value">${displayValue(request.requestNumber)}</div>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Sacrament Type:</span>
-                        <div class="detail-value">${displayValue(request.sacrament)}</div>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Status:</span>
@@ -923,7 +919,6 @@ document.addEventListener('DOMContentLoaded', function() {
             doc.setTextColor(27, 94, 32);
             doc.text('BASIC INFORMATION', 0.5, yPosition);
             doc.setDrawColor(27, 94, 32);
-           
             
             yPosition += 0.3;
             doc.setFontSize(10);
@@ -941,7 +936,6 @@ document.addEventListener('DOMContentLoaded', function() {
             doc.setFontSize(12);
             doc.setTextColor(27, 94, 32);
             doc.text('DECEASED INFORMATION', 0.5, yPosition);
-         
             
             yPosition += 0.3;
             doc.setFontSize(10);
@@ -975,7 +969,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 doc.setFontSize(12);
                 doc.setTextColor(27, 94, 32);
                 doc.text('REQUESTER INFORMATION', 0.5, yPosition);
-               
                 
                 yPosition += 0.3;
                 doc.setFontSize(10);
@@ -998,7 +991,6 @@ document.addEventListener('DOMContentLoaded', function() {
             doc.setFontSize(12);
             doc.setTextColor(27, 94, 32);
             doc.text('SERVICE DETAILS', 0.5, yPosition);
-          
             
             yPosition += 0.3;
             doc.setFontSize(10);
@@ -1013,7 +1005,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 doc.setFontSize(12);
                 doc.setTextColor(27, 94, 32);
                 doc.text('PAYMENT INFORMATION', 0.5, yPosition);
-            
                 
                 yPosition += 0.3;
                 doc.setFontSize(10);
@@ -1047,7 +1038,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     doc.setFontSize(12);
                     doc.setTextColor(27, 94, 32);
                     doc.text('CANCELLATION DETAILS', 0.5, yPosition);
-                
                     
                     yPosition += 0.3;
                     doc.setFontSize(10);
@@ -1074,7 +1064,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     doc.setFontSize(12);
                     doc.setTextColor(27, 94, 32);
                     doc.text('REJECTION DETAILS', 0.5, yPosition);
-                  
                     
                     yPosition += 0.3;
                     doc.setFontSize(10);
@@ -1434,4 +1423,4 @@ document.addEventListener('DOMContentLoaded', function() {
             if(result.isConfirmed){window.location.href="index.html";}
         });
     });
-}); 
+});

@@ -703,6 +703,10 @@ body {
     background: linear-gradient(135deg, #FFA000, #FFB300);
     color: #fff;
 }
+.action-buttons .details-btn {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: #fff;
+}
 
 .action-buttons button:hover {
     transform: translateY(-2px);
@@ -1202,7 +1206,7 @@ body {
         </li>
               <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
               <li><a href="schedule.html"><i class="fa-solid fa-calendar-alt"></i><span>Schedule</span></a></li>
-              <li><a href="certificate.html"><i class="fa-solid fa-globe"></i><span>Certificate Request</span></a></li>
+              <li><a href="certificate.html" class="active"><i class="fa-solid fa-globe"></i><span>Certificate Request</span></a></li>
               <li><a href="report.html"><i class="fa-solid fa-globe"></i><span>Reports And Analytics</span></a></li>
               <li><a href="volunteer.html"><i class="fa-solid fa-hands-helping"></i><span>Volunteer Applications</span></a></li>
               <li class="nav-logout"><a href="#" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a></li>
@@ -1218,7 +1222,7 @@ body {
             <div class="user-profile">
                 <i class="fa-solid fa-bell"></i>
                 <i class="fa-solid fa-comment-dots"></i>
-                <img src="images/LOGO.png" alt="User Profile">
+                <img src="../images/LOGO.png" alt="User Profile">
             </div>
         </header>
 
@@ -1304,7 +1308,7 @@ body {
                         </button>
                         <div class="filter-buttons">
                             <button class="active" data-status="all">All</button>
-                            <button data-status="pending">Pending</button>
+                            <button data-status="Pending">Pending</button>
                             <button data-status="approved">Approved</button>
                             <button data-status="ready">Ready to Pick Up</button>
                             <button data-status="rejected">Rejected</button>
@@ -1497,13 +1501,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentFilter = 'all';
     let currentSearchTerm = '';
 
-    // Define status workflow - UPDATED WITH READY STATUS
+    // FIXED STATUS WORKFLOW - Consistent with database
     const statusWorkflow = {
-        'pending': ['approved', 'rejected', 'cancelled'],
-        'approved': ['ready', 'rejected', 'cancelled'],  // Ready added here
+        'Pending': ['approved', 'rejected', 'cancelled'],
+        'approved': ['ready', 'rejected', 'cancelled'],
         'ready': ['rejected', 'cancelled'],
-        'rejected': ['pending'],
-        'cancelled': ['pending']
+        'rejected': ['Pending'],
+        'cancelled': ['Pending']
     };
 
     // Date formatting functions
@@ -1544,7 +1548,23 @@ document.addEventListener('DOMContentLoaded', function() {
         return value;
     }
 
-    // Transform data to match frontend expectations
+    // FIXED: Normalize status function
+    function normalizeStatus(status) {
+        if (!status) return 'Pending';
+        
+        const statusMap = {
+            'pending': 'Pending',
+            'approved': 'approved', 
+            'ready': 'ready',
+            'rejected': 'rejected',
+            'cancelled': 'cancelled',
+            'Pending': 'Pending'
+        };
+        
+        return statusMap[status] || 'Pending';
+    }
+
+    // FIXED: Transform data to match frontend expectations
     function transformCertificateData(data) {
         return data.map(request => {
             console.log("🔄 Transforming request:", request);
@@ -1558,7 +1578,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 contactNumber: request.contactNumber || '',
                 address: request.address || '',
                 requestedCopies: request.requestedCopies || 1,
-                status: request.status || 'pending',
+                status: normalizeStatus(request.status), // FIXED: Use normalized status
                 certificateNumber: request.certificateNumber || '',
                 submittedByEmail: request.submittedByEmail || '',
                 requestDate: request.requestDate || '',
@@ -1566,7 +1586,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 createdAt: request.createdAt || '',
                 updatedAt: request.updatedAt || '',
                 
-                // REASON SYSTEM FIELDS
+                // REASON SYSTEM FIELDS - FIXED: Include all fields
                 cancellation_reason: request.cancellation_reason || '',
                 rejection_reason: request.rejection_reason || '',
                 cancelled_by: request.cancelled_by || '',
@@ -1592,6 +1612,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // FIXED: Get available actions with better debugging
+    function getAvailableActions(currentStatus) {
+        const normalizedStatus = normalizeStatus(currentStatus);
+        const actions = statusWorkflow[normalizedStatus] || [];
+        console.log(`🔍 Available actions for ${currentStatus} (normalized: ${normalizedStatus}):`, actions);
+        return actions;
+    }
+
+    // DEBUG FUNCTION
+    function debugRequests() {
+        console.log("🐛 DEBUG REQUESTS:");
+        requests.forEach((req, index) => {
+            console.log(`Request ${index + 1}:`, {
+                id: req._id,
+                name: req.fullName,
+                status: req.status,
+                normalizedStatus: normalizeStatus(req.status),
+                availableActions: getAvailableActions(req.status)
+            });
+        });
+    }
+
     async function fetchRequests() {
         try {
             console.log("🔄 Fetching certificate requests from:", baseURL);
@@ -1607,28 +1649,13 @@ document.addEventListener('DOMContentLoaded', function() {
             requests = transformCertificateData(data);
             console.log("🔄 Transformed requests:", requests);
             
+            // DEBUG
+            debugRequests();
+            
             applyFiltersAndSearch();
         } catch (err) { 
             console.error("❌ Failed to fetch requests:", err);
             showNotification('Failed to fetch requests from server: ' + err.message, 'error');
-            
-            // Fallback: Check if we can access the API directly
-            console.log("🔍 Testing API endpoint...");
-            testAPIEndpoint();
-        }
-    }
-
-    // Test API endpoint connectivity
-    async function testAPIEndpoint() {
-        try {
-            const testRes = await fetch(baseURL);
-            console.log("🔍 API Test Response:", {
-                status: testRes.status,
-                statusText: testRes.statusText,
-                ok: testRes.ok
-            });
-        } catch (testErr) {
-            console.error("🔍 API Test Failed:", testErr);
         }
     }
 
@@ -1697,16 +1724,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function getAvailableActions(currentStatus) {
-        return statusWorkflow[currentStatus] || [];
-    }
-
     function applyFiltersAndSearch() {
         let filteredData = [...requests];
         
         // Apply status filter
         if (currentFilter !== 'all') {
-            filteredData = filteredData.filter(r => r.status === currentFilter);
+            filteredData = filteredData.filter(r => normalizeStatus(r.status) === normalizeStatus(currentFilter));
         }
         
         // Apply search term
@@ -1725,6 +1748,7 @@ document.addEventListener('DOMContentLoaded', function() {
         renderTable(filteredData);
     }
 
+    // FIXED RENDER TABLE FUNCTION
     function renderTable(data) {
         requestsTableBody.innerHTML = '';
         console.log("🔄 Rendering table with data:", data);
@@ -1738,18 +1762,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.dataset.id = request._id;
                 const availableActions = getAvailableActions(request.status);
                 
-                console.log(`🔄 Rendering row for ${request.fullName}:`, {
+                console.log(`📝 Rendering row for ${request.fullName}:`, {
                     status: request.status,
-                    availableActions: availableActions
+                    normalizedStatus: normalizeStatus(request.status),
+                    availableActions: availableActions,
+                    requestId: request._id
                 });
                 
-                // FIXED: Add data-action attribute to buttons for proper event handling
+                // FIXED ACTION BUTTONS RENDERING
                 row.innerHTML = `
                     <td>${request.fullName || 'N/A'}</td>
                     <td>${request.certificateType || 'N/A'}</td>
                     <td>${formatDate(request.requestDate)}</td>
                     <td>${formatDate(request.scheduledDate)}</td>
-                    <td><span class="status-badge ${request.status}">${request.status}</span></td>
+                    <td><span class="status-badge ${normalizeStatus(request.status).toLowerCase()}">${request.status}</span></td>
                     <td>
                         <div class="action-buttons">
                             ${availableActions.includes('approved') ? 
@@ -1768,10 +1794,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 `<button class="cancel-btn" data-action="cancel" title="Cancel">
                                     <i class="fa-solid fa-xmark"></i> Cancel
                                 </button>` : ''}
-                            ${availableActions.includes('pending') ? 
+                            ${availableActions.includes('Pending') ? 
                                 `<button class="reset-btn" data-action="reset" title="Reset to Pending">
                                     <i class="fa-solid fa-rotate-left"></i> Reset
                                 </button>` : ''}
+                            <!-- Always show details button -->
+                            <button class="details-btn" data-action="details" title="View Details">
+                                <i class="fa-solid fa-eye"></i> Details
+                            </button>
                         </div>
                     </td>
                 `;
@@ -1783,11 +1813,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateCounts(data){
         totalRequestsCount.textContent = data.length;
-        pendingCount.textContent = data.filter(r => r.status === 'pending').length;
-        approvedCount.textContent = data.filter(r => r.status === 'approved').length;
-        readyCount.textContent = data.filter(r => r.status === 'ready').length;
-        rejectedCount.textContent = data.filter(r => r.status === 'rejected').length;
-        cancelledCount.textContent = data.filter(r => r.status === 'cancelled').length;
+        pendingCount.textContent = data.filter(r => normalizeStatus(r.status) === 'Pending').length;
+        approvedCount.textContent = data.filter(r => normalizeStatus(r.status) === 'approved').length;
+        readyCount.textContent = data.filter(r => normalizeStatus(r.status) === 'ready').length;
+        rejectedCount.textContent = data.filter(r => normalizeStatus(r.status) === 'rejected').length;
+        cancelledCount.textContent = data.filter(r => normalizeStatus(r.status) === 'cancelled').length;
         
         const today = new Date().toISOString().split('T')[0];
         todayCount.textContent = data.filter(r => r.requestDate === today).length;
@@ -1900,13 +1930,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const action = button.dataset.action;
-        console.log(`🔄 Action clicked: ${action} for request:`, id);
+        console.log(`🔄 Action clicked: ${action} for request:`, {
+            id: id,
+            name: request.fullName,
+            currentStatus: request.status,
+            availableActions: getAvailableActions(request.status)
+        });
         
         switch(action) {
             case 'approve':
+                console.log("✅ Approving request:", id);
                 updateRequestStatus(id, 'approved');
                 break;
             case 'ready':
+                console.log("📦 Marking as ready:", id);
                 updateRequestStatus(id, 'ready');
                 break;
             case 'reject':
@@ -1922,11 +1959,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 reasonModal.classList.add('show');
                 break;
             case 'reset':
-                updateRequestStatus(id, 'pending');
+                console.log("🔄 Resetting to pending:", id);
+                updateRequestStatus(id, 'Pending');
+                break;
+            case 'details':
+                console.log("ℹ️ Showing details for:", id);
+                showRequestDetails(request);
                 break;
             default:
-                // Show details modal kung hindi button ang na-click
-                showRequestDetails(request);
+                console.log("❓ Unknown action:", action);
         }
     });
 
@@ -1942,7 +1983,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Status:</span>
-                        <div class="detail-value"><span class="status-badge ${request.status}">${request.status}</span></div>
+                        <div class="detail-value"><span class="status-badge ${normalizeStatus(request.status).toLowerCase()}">${request.status}</span></div>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Certificate Type:</span>
@@ -1984,7 +2025,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="details-section">
                 <h3 class="details-section-header">Request Details</h3>
                 <div class="details-grid">
-                    <div class="detail-item">
+                    <div class="detail-item full-width">
                         <span class="detail-label">Purpose:</span>
                         <div class="detail-textarea">${displayValue(request.purpose)}</div>
                     </div>

@@ -66,7 +66,7 @@ body {
     min-height: 100vh;
 }
 
-/* Enhanced Sidebar with Animations - FROM DASHBOARD */
+/* Enhanced Sidebar */
 .sidebar {
     width: 260px;
     background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
@@ -361,70 +361,6 @@ body {
 
 .card-orange {
     background: linear-gradient(135deg, #e67e22, #d35400);
-}
-
-.status-widget {
-    grid-column: span 2;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    padding: 20px;
-}
-
-.status-count {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 15px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.2);
-    text-align: center;
-}
-
-.status-count i {
-    font-size: 1.5rem;
-    margin-bottom: 5px;
-}
-
-.status-count span:first-of-type {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 5px;
-}
-
-.status-count span:last-of-type {
-    font-size: 0.8rem;
-    opacity: 0.9;
-}
-
-.status-count.pending {
-    background: rgba(255, 193, 7, 0.2);
-    color: #FFC107;
-}
-.status-count.in-process {
-    background: rgba(3, 169, 244, 0.2);
-    color: #03A9F4;
-}
-.status-count.scheduled {
-    background: rgba(156, 39, 176, 0.2);
-    color: #9C27B0;
-}
-.status-count.completed {
-    background: rgba(76, 175, 80, 0.2);
-    color: #4CAF50;
-}
-.status-count.approved {
-    background: rgba(33, 150, 243, 0.2);
-    color: #2196F3;
-}
-.status-count.rejected {
-    background: rgba(244, 67, 54, 0.2);
-    color: #F44336;
-}
-.status-count.cancelled {
-    background: rgba(158, 158, 158, 0.2);
-    color: #9E9E9E;
 }
 
 /* Status Workflow Guide */
@@ -1221,11 +1157,6 @@ body {
         grid-template-columns: 1fr;
     }
     
-    .status-widget {
-        grid-column: span 1;
-        grid-template-columns: 1fr 1fr;
-    }
-    
     .header {
         flex-direction: column;
         gap: 15px;
@@ -1404,7 +1335,7 @@ body {
             <div class="user-profile">
                 <i class="fa-solid fa-bell"></i>
                 <i class="fa-solid fa-comment-dots"></i>
-                <img src="images/LOGO.png" alt="User Profile">
+                <img src="../images/LOGO.png" alt="User Profile">
             </div>
         </header>
 
@@ -1414,44 +1345,6 @@ body {
                 <div class="widget-content">
                     <h4>Total Requests</h4>
                     <p id="totalRequests">0</p>
-                </div>
-            </div>
-            <div class="widget-card status-widget">
-                <h4>Requests by Status</h4>
-                <div class="status-count pending">
-                    <i class="fa-solid fa-clock"></i>
-                    <span id="pendingCount">0</span>
-                    <span>Pending</span>
-                </div>
-                <div class="status-count in-process">
-                    <i class="fa-solid fa-gears"></i>
-                    <span id="inProcessCount">0</span>
-                    <span>In Process</span>
-                </div>
-                <div class="status-count scheduled">
-                    <i class="fa-solid fa-calendar-check"></i>
-                    <span id="scheduledCount">0</span>
-                    <span>Scheduled</span>
-                </div>
-                <div class="status-count completed">
-                    <i class="fa-solid fa-check-circle"></i>
-                    <span id="completedCount">0</span>
-                    <span>Completed</span>
-                </div>
-                <div class="status-count approved">
-                    <i class="fa-solid fa-thumbs-up"></i>
-                    <span id="approvedCount">0</span>
-                    <span>Approved</span>
-                </div>
-                <div class="status-count rejected">
-                    <i class="fa-solid fa-ban"></i>
-                    <span id="rejectedCount">0</span>
-                    <span>Rejected</span>
-                </div>
-                <div class="status-count cancelled">
-                    <i class="fa-solid fa-xmark"></i>
-                    <span id="cancelledCount">0</span>
-                    <span>Cancelled</span>
                 </div>
             </div>
             <div class="widget-card card-green">
@@ -1771,7 +1664,7 @@ body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Sidebar toggle functionality - FROM DASHBOARD
+    // Sidebar toggle functionality
     const sidebarToggle = document.querySelector('.sidebar-toggle');
     const sidebar = document.querySelector('.sidebar');
     
@@ -1781,7 +1674,7 @@ document.addEventListener('DOMContentLoaded', function() {
         this.querySelector('i').classList.toggle('fa-times');
     });
 
-    // Dropdown functionality - FROM DASHBOARD
+    // Dropdown functionality
     document.querySelectorAll('.nav-dropdown > a').forEach(function(dropdown) {
         dropdown.addEventListener('click', function(e) {
             e.preventDefault();
@@ -1803,13 +1696,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const emptyState = document.getElementById('emptyState');
     const filterButtons = document.querySelectorAll('.filter-buttons button');
     const totalRequestsCount = document.getElementById('totalRequests');
-    const pendingCount = document.getElementById('pendingCount');
-    const inProcessCount = document.getElementById('inProcessCount');
-    const scheduledCount = document.getElementById('scheduledCount');
-    const completedCount = document.getElementById('completedCount');
-    const approvedCount = document.getElementById('approvedCount');
-    const rejectedCount = document.getElementById('rejectedCount');
-    const cancelledCount = document.getElementById('cancelledCount');
     const upcomingCount = document.getElementById('upcomingCount');
     const headerSearchInput = document.getElementById('headerSearch');
     const tableSearchInput = document.getElementById('tableSearch');
@@ -2131,13 +2017,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateCounts(data){
         totalRequestsCount.textContent = data.length;
-        pendingCount.textContent = data.filter(r => r.status === 'pending').length;
-        inProcessCount.textContent = data.filter(r => r.status === 'in-process').length;
-        scheduledCount.textContent = data.filter(r => r.status === 'scheduled').length;
-        completedCount.textContent = data.filter(r => r.status === 'completed').length;
-        approvedCount.textContent = data.filter(r => r.status === 'approved').length;
-        rejectedCount.textContent = data.filter(r => r.status === 'rejected').length;
-        cancelledCount.textContent = data.filter(r => r.status === 'cancelled').length;
         
         const today = new Date();
         today.setHours(0, 0, 0, 0); 

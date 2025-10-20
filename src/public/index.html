@@ -1,531 +1,500 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Parish Admin Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parish Admin Login</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
-  <style>
-    :root {
-      --primary-color: #007bff;
-      --secondary-color: #0056b3;
-      --accent-color: #6c757d;
-      --bg-light: #f8f9fa;
-      --text-dark: #212529;
-      --text-light: #fff;
-      --border-color: #ced4da;
-      --radius: 12px;
-      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      --input-padding: 14px 18px;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #f1f2f3 0%, #f0eef3 100%);
-      color: var(--text-dark);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      line-height: 1.6;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* 3D ANIMATED BACKGROUND */
-    .bg-animation {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-    }
-
-    .floating-shapes {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-    }
-
-    .shape {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      animation: float 15s infinite linear;
-    }
-
-    .shape:nth-child(1) {
-      width: 80px;
-      height: 80px;
-      top: 10%;
-      left: 10%;
-      animation-delay: 0s;
-    }
-
-    .shape:nth-child(2) {
-      width: 120px;
-      height: 120px;
-      top: 70%;
-      left: 80%;
-      animation-delay: -2s;
-    }
-
-    .shape:nth-child(3) {
-      width: 60px;
-      height: 60px;
-      top: 20%;
-      left: 85%;
-      animation-delay: -4s;
-    }
-
-    .shape:nth-child(4) {
-      width: 100px;
-      height: 100px;
-      top: 80%;
-      left: 15%;
-      animation-delay: -6s;
-    }
-
-    .shape:nth-child(5) {
-      width: 90px;
-      height: 90px;
-      top: 60%;
-      left: 5%;
-      animation-delay: -8s;
-    }
-
-    .shape:nth-child(6) {
-      width: 70px;
-      height: 70px;
-      top: 30%;
-      left: 70%;
-      animation-delay: -10s;
-    }
-
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 0.7;
-      }
-      25% {
-        transform: translateY(-20px) rotate(90deg);
-        opacity: 0.9;
-      }
-      50% {
-        transform: translateY(0) rotate(180deg);
-        opacity: 0.7;
-      }
-      75% {
-        transform: translateY(20px) rotate(270deg);
-        opacity: 0.5;
-      }
-    }
-
-    /* GLOW EFFECT */
-    .glow {
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
-      border-radius: 50%;
-      animation: glowMove 20s infinite alternate;
-    }
-
-    .glow:nth-child(1) {
-      top: -100px;
-      left: -100px;
-    }
-
-    .glow:nth-child(2) {
-      bottom: -100px;
-      right: -100px;
-      animation-delay: -10s;
-    }
-
-    @keyframes glowMove {
-      0% {
-        transform: translate(0, 0) scale(1);
-      }
-      100% {
-        transform: translate(50px, 50px) scale(1.2);
-      }
-    }
-
-    .login-container {
-      display: flex;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: var(--radius);
-      box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.1),
-        0 0 0 1px rgba(255, 255, 255, 0.2);
-      width: 900px;
-      max-width: 95%;
-      overflow: hidden;
-      animation: fadeIn 0.6s ease-out;
-      position: relative;
-      z-index: 1;
-    }
-
-    .login-left {
-      flex: 1.2;
-      position: relative;
-      padding: 50px 40px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      background: 
-        /* SJ3 image as background */
-        url("./images/sj3.jpg") no-repeat center center/cover,
-        /* Gradient overlay */
-        linear-gradient(135deg, rgba(103, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-      color: var(--text-dark);
-      user-select: none;
-      overflow: hidden;
-    }
-
-    /* Overlay to improve text readability */
-    .login-left::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(255, 255, 255, 0.7);
-      z-index: 0;
-    }
-
-    .login-left > * { 
-      position: relative; 
-      z-index: 1; 
-    }
-
-    /* LOGO CONTAINER STYLES - MOVED TO RIGHT SIDE */
-    .logo-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 25px;
-      flex-wrap: wrap;
-    }
-
-    .logo {
-      width: 100px;
-      height: 100px;
-      transition: all 0.3s ease;
-      object-fit: contain;
-    }
-
-    .logo:hover { 
-      transform: scale(1.05) rotate(5deg);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .logo-divider {
-      width: 2px;
-      height: 60px;
-      background: linear-gradient(to bottom, transparent, rgba(0, 123, 255, 0.5), transparent);
-      margin: 0 10px;
-    }
-
-    /* For mobile - stack logos vertically */
-    @media (max-width: 768px) {
-      .logo-container {
-        flex-direction: column;
-        gap: 15px;
-      }
-      
-      .logo-divider {
-        width: 60px;
-        height: 2px;
-        margin: 5px 0;
-        background: linear-gradient(to right, transparent, rgba(0, 123, 255, 0.5), transparent);
-      }
-      
-      .logo {
-        width: 90px;
-        height: 90px;
-      }
-    }
-
-    .login-left h1 {
-      font-size: 2.2rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: var(--primary-color);
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .login-left p {
-      font-size: 0.95rem;
-      max-width: 300px;
-      opacity: 0.9;
-      color: #555;
-    }
-
-    .login-right {
-      flex: 1;
-      padding: 50px 40px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      background: rgba(255, 255, 255, 0.8);
-    }
-
-    .login-right h2 {
-      font-size: 2rem;
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 30px;
-      color: var(--primary-color);
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .form-group { margin-bottom: 25px; }
-
-    .form-group label {
-      display: block;
-      font-weight: 500;
-      margin-bottom: 8px;
-      color: #555;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    .input-wrapper { position: relative; }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-    .input-wrapper input {
-      width: 100%;
-      padding: var(--input-padding);
-      padding-left: 50px;
-      border: 1px solid rgba(0, 123, 255, 0.2);
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
+    <style>
+        /* DIVINE GREEN & GOLD COLOR PALETTE (Mas eleganteng Simbahan theme) */
+        :root {
+            --primary-color: #1b5e20; /* Deep Forest Green (Primary) */
+            --secondary-color: #388e3c; /* Medium Green */
+            --accent-color: #ffc107; /* Soft Gold/Amber (Accent) */
+            --bg-start: #e8f5e9; /* Very Light Green BG */
+            --bg-end: #f0f4f0; /* Soft Gray/White BG */
+            --text-dark: #212529;
+            --text-light: #fff;
+            --soft-ui-bg: #f5f5f5; /* Neumorphism Base, mas maputi */
+            --radius: 20px;
+            --input-padding: 18px 25px;
+        }
 
-    .input-wrapper input:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1), 0 4px 12px rgba(0, 123, 255, 0.15);
-      background: white;
-    }
-    
-    .input-wrapper .icon {
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--accent-color);
-      transition: all 0.3s ease;
-    }
-    
-    .input-wrapper input:focus + .icon { 
-      color: var(--primary-color);
-      transform: translateY(-50%) scale(1.1);
-    }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .login-btn {
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--text-light);
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      cursor: pointer;
-      transition: all 0.3s ease-in-out;
-      margin-top: 10px;
-      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .login-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
+        /* 3D ANIMATED BACKGROUND */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
 
-    .login-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-    }
+        .shape {
+            position: absolute;
+            background: rgba(27, 94, 32, 0.05); /* Deep Green shapes */
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+            filter: blur(2px); /* Added for a softer look */
+        }
+        
+        .shape:nth-child(1) { width: 80px; height: 80px; top: 10%; left: 10%; animation-delay: 0s; }
+        .shape:nth-child(2) { width: 120px; height: 120px; top: 70%; left: 80%; animation-delay: -2s; }
+        .shape:nth-child(3) { width: 60px; height: 60px; top: 20%; left: 85%; animation-delay: -4s; }
+        .shape:nth-child(4) { width: 100px; height: 100px; top: 80%; left: 15%; animation-delay: -6s; }
+        .shape:nth-child(5) { width: 90px; height: 90px; top: 60%; left: 5%; animation-delay: -8s; }
+        .shape:nth-child(6) { width: 70px; height: 70px; top: 30%; left: 70%; animation-delay: -10s; }
 
-    .login-btn:hover::before {
-      left: 100%;
-    }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+            25% { transform: translateY(-20px) rotate(90deg); opacity: 0.9; }
+            50% { transform: translateY(0) rotate(180deg); opacity: 0.7; }
+            75% { transform: translateY(20px) rotate(270deg); opacity: 0.5; }
+        }
 
-    .login-btn:active { 
-      transform: translateY(0);
-      box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
-    }
+        /* INAYOS: Idinagdag ang kulang na keyframes para gumana ang glow */
+        @keyframes glowMove {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(150px, 100px); }
+            100% { transform: translate(0, 0); }
+        }
 
-    .signup-link {
-      text-align: center;
-      margin-top: 20px;
-    }
+        .glow {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(255, 193, 7, 0.3) 0%, rgba(255, 193, 7, 0) 70%); 
+            border-radius: 50%;
+            filter: blur(30px); /* Para mas soft ang glow */
+            opacity: 0.7;
+            animation: glowMove 20s infinite alternate;
+        }
 
-    .signup-link a {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
+        .glow:nth-child(1) { top: 5%; left: 5%; animation-delay: 0s; }
+        .glow:nth-child(2) { bottom: 10%; right: 10%; animation-delay: -10s; animation-duration: 25s; }
 
-    .signup-link a:hover {
-      text-decoration: underline;
-      color: var(--secondary-color);
-    }
 
-    @keyframes fadeIn {
-      from { 
-        opacity: 0; 
-        transform: translateY(20px) scale(0.95); 
-      }
-      to { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
-      }
-    }
+        /* LOGIN CONTAINER: Ultra-Soft Neumorphic Style */
+        .login-container {
+            display: flex;
+            background: var(--soft-ui-bg);
+            border-radius: var(--radius);
+            /* Soft, subtle neumorphic shadow */
+            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.1), -10px -10px 30px #ffffff; 
+            width: 950px; 
+            max-width: 95%;
+            overflow: hidden;
+            animation: fadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            z-index: 1;
+        }
 
-    @media (max-width: 900px) {
-      .login-container { flex-direction: column; width: 85%; }
-      .login-left, .login-right { padding: 40px 30px; }
-    }
+        .login-left {
+            flex: 1.3; 
+            position: relative;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            
+            /* Enhanced gradient overlay */
+            background: 
+                linear-gradient(135deg, rgba(27, 94, 32, 0.9) 0%, rgba(56, 142, 60, 0.8) 100%), 
+                url("../images/sj3.jpg") no-repeat center center/cover;
+            color: var(--text-light); 
+            user-select: none;
+            overflow: hidden;
+            transition: background 0.8s ease;
+        }
+        
+        /* Added a subtle pattern overlay for more elegance */
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffc107' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zm1 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 2;
+        }
 
-    @media (max-width: 500px) {
-      .login-right h2 { font-size: 1.8rem; }
-      .login-left h1 { font-size: 1.6rem; }
-      .logo { width: 80px; height: 80px; }
-    }
-  </style>
+
+        .login-left:hover {
+            background: 
+                linear-gradient(135deg, rgba(27, 94, 32, 0.85) 0%, rgba(56, 142, 60, 0.75) 100%),
+                url("../images/sj3.jpg") no-repeat 50% 50%/110% 110%; 
+        }
+
+        .login-left h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: var(--accent-color); 
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            letter-spacing: 1px;
+            z-index: 3;
+        }
+
+        .login-left p {
+            font-size: 1.1rem;
+            max-width: 350px;
+            opacity: 0.95;
+            font-weight: 400;
+            color: #e0f2f1; 
+            margin-top: 15px;
+            z-index: 3;
+        }
+
+        .login-right {
+            flex: 1;
+            padding: 60px 50px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            background: var(--soft-ui-bg);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            width: 100px; 
+            height: 100px;
+            border-radius: 50%;
+            /* Elegant inset shadow */
+            box-shadow: inset 5px 5px 10px #e0e0e0, inset -5px -5px 10px #ffffff;
+            padding: 5px;
+            transition: all 0.3s ease;
+            object-fit: contain;
+        }
+
+        .logo-divider {
+            width: 4px; 
+            height: 70px;
+            background: linear-gradient(to bottom, transparent, var(--accent-color), transparent);
+            margin: 0 15px;
+        }
+
+        .login-right h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group { margin-bottom: 30px; } 
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            text-transform: uppercase; /* Added for a professional touch */
+            font-size: 0.9rem;
+        }
+        
+        .input-wrapper { position: relative; }
+
+        .input-wrapper input {
+            /* Input field styling */
+            width: 100%;
+            padding: var(--input-padding);
+            padding-left: 65px; 
+            border: 2px solid transparent; 
+            border-radius: 15px; 
+            /* Adjusted Neumorphism for depth */
+            background: #ededed;
+            box-shadow: inset 4px 4px 8px #d1d1d1, inset -4px -4px 8px #ffffff;
+            font-size: 1rem;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            /* Solid primary color border on focus */
+            border-color: var(--primary-color); 
+            background: var(--soft-ui-bg);
+            box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.15); /* Soft outer glow */
+        }
+        
+        .input-wrapper .icon {
+            position: absolute;
+            left: 25px; 
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color); /* Green icon */
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-wrapper input:focus + .icon { 
+            color: var(--accent-color); /* Gold icon on focus */
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* LOGIN BUTTON: Super Ganda Gradient with Gold Shine */
+        .login-btn {
+            width: 100%;
+            padding: 20px; 
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-light);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            margin-top: 20px;
+            /* Soft Green outward shadow */
+            box-shadow: 8px 8px 20px rgba(27, 94, 32, 0.4), -8px -8px 20px #ffffff;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 10px 10px 25px rgba(27, 94, 32, 0.5), -10px -10px 25px #ffffff;
+        }
+
+        .login-btn:active { 
+            transform: translateY(0);
+            /* Deep press effect */
+            background: var(--primary-color);
+            box-shadow: inset 3px 3px 7px #0f3e13, inset -3px -3px 7px #3fa043;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.95rem;
+        }
+
+        .signup-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+            color: var(--primary-color);
+        }
+
+        /* BACK TO HOME BUTTON STYLES */
+        .back-to-home {
+            position: absolute;
+            top: 20px; 
+            left: 20px;
+            z-index: 10;
+        }
+
+        .home-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 10px;
+            background: var(--soft-ui-bg);
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1), -3px -3px 6px #ffffff;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .home-btn i {
+            margin-right: 8px;
+            color: var(--accent-color); /* Gold icon */
+        }
+
+        .home-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15), -5px -5px 10px #ffffff;
+            color: var(--secondary-color);
+        }
+
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Responsive Fixes */
+        @media (max-width: 900px) {
+            .login-container { flex-direction: column; width: 90%; }
+            .login-left { height: 250px; padding: 30px 20px;} 
+            .login-left h1 { font-size: 2rem; }
+            .login-right { padding: 40px 30px; }
+            .logo-container { margin-bottom: 30px; }
+            .logo { width: 80px; height: 80px; }
+            .back-to-home { top: 15px; left: 50%; transform: translateX(-50%); } 
+        }
+        @media (max-width: 500px) {
+            .login-right h2 { font-size: 1.8rem; }
+            .logo { width: 60px; height: 60px; }
+            .logo-divider { height: 50px; }
+            .input-wrapper input { padding: 15px 20px; padding-left: 55px; }
+            .input-wrapper .icon { left: 15px; font-size: 1.1rem; }
+        }
+    </style>
 </head>
 <body>
-  <!-- 3D ANIMATED BACKGROUND -->
-  <div class="bg-animation">
-    <div class="floating-shapes">
-      <div class="shape"></div>
-      <div class="shape"></div>
-      <div class="shape"></div>
-      <div class="shape"></div>
-      <div class="shape"></div>
-      <div class="shape"></div>
+    <div class="bg-animation">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="glow"></div>
+        <div class="glow"></div>
     </div>
-    <div class="glow"></div>
-    <div class="glow"></div>
-  </div>
 
-  <div class="login-container">
-    <div class="login-left">
-      <!-- REMOVED LOGOS FROM LEFT SIDE -->
-      <h1>Welcome, Admin!</h1>
-      <p>Securely manage all parish records and activities from one central dashboard.</p>
+    <div class="back-to-home">
+        <a href="startup.html" class="home-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
     </div>
-    
-    <div class="login-right">
-      <!-- MOVED LOGOS TO THE TOP OF THE FORM SECTION -->
-      <div class="logo-container">
-        <img class="logo" src="../images/Diocese.png" alt="Diocese Logo">
-        <div class="logo-divider"></div>
-        <img class="logo" src="../images/LOGO.png" alt="Parish Logo">
-      </div>
-      
-      <h2>Admin Login</h2>
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <div class="input-wrapper">
-            <input type="text" id="username" placeholder="Enter your username" required>
-            <i class="fas fa-user icon"></i>
-          </div>
+
+    <div class="login-container">
+        <div class="login-left">
+            <h1>Holy Parish Admin Portal</h1>
+            <p>Dedicated access for church administration. Manage all sacred records and financial oversight in a secure environment.</p>
         </div>
         
-        <div class="form-group">
-          <label for="password">Password</label>
-          <div class="input-wrapper">
-            <input type="password" id="password" placeholder="Enter your password" required>
-            <i class="fas fa-lock icon"></i>
-          </div>
-        </div>
-        
-        <button type="submit" class="login-btn">Log In</button>
+        <div class="login-right">
+            <div class="logo-container">
+                <img class="logo" src="../images/Diocese.png" alt="Diocese Logo">
+                <div class="logo-divider"></div>
+                <img class="logo" src="../images/LOGO.png" alt="Parish Logo">
+            </div>
+            
+            <h2>Administrator Sign In</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="username" placeholder="Enter Admin Username" required>
+                        <i class="fas fa-user-shield icon"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" placeholder="Enter Your Secure Password" required>
+                        <i class="fas fa-key icon"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-lock-open"></i> Access Dashboard
+                </button>
 
-        <div class="signup-link">
-          <p>Don't have an account? <a href="register.html">Sign Up</a></p>
+                  
+            </form>
         </div>
-      </form>
     </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const loginForm = document.getElementById("loginForm");
-      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
-      
-      loginForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginForm = document.getElementById("loginForm");
+            // Kinuha ang primary color mula sa CSS Variable
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(); 
+            
+            loginForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const username = document.getElementById("username").value.trim();
+                const password = document.getElementById("password").value.trim();
 
-        try {
-          const res = await fetch("http://localhost:5000/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password })
-          });
+                try {
+                    // Tiyakin na naka-run ang backend server mo sa http://localhost:5000
+                    const res = await fetch("http://localhost:5000/login", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ username, password })
+                    });
 
-          const data = await res.json();
+                    const data = await res.json();
 
-          if (res.ok && data.success) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Login Successful!',
-              text: `Welcome ${data.user.name} (${data.user.role})`,
-              showConfirmButton: false,
-              timer: 2000
-            }).then(() => {
-              window.location.href = "dashboard.html";
+                    if (res.ok && data.success) {
+                        // SUCCESS
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Login Successful!',
+                            text: `Welcome ${data.user.name} (${data.user.role})`,
+                            showConfirmButton: false,
+                            timer: 2000,
+                            customClass: { popup: 'swal-popup-custom' }
+                        }).then(() => {
+                            window.location.href = "dashboard.html"; // Redirect to dashboard
+                        });
+                    } else {
+                        // FAILED LOGIN
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Access Denied',
+                            text: data.message || 'Invalid username or password. Please try again.',
+                            confirmButtonColor: primaryColor
+                        });
+                    }
+                } catch (err) {
+                    // SERVER/NETWORK ERROR
+                    console.error("Network Error:", err);
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Connection Issue!',
+                        text: 'Could not connect to the server. Please check the backend connection (http://localhost:5000).',
+                        confirmButtonColor: primaryColor
+                    });
+                }
             });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Login Failed!',
-              text: data.message || 'Invalid username or password.',
-              confirmButtonColor: primaryColor
-            });
-          }
-        } catch (err) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Server Error',
-            text: 'Could not connect to the server. Make sure backend is running.',
-            confirmButtonColor: primaryColor
-          });
-        }
-      });
-    });
-  </script>
+        });
+    </script>
 </body>
 </html>

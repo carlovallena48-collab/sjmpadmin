@@ -1,149 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Registration</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f8f9fa;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .register-container {
-      background: #fff;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      width: 400px;
-    }
-    h2 {
-      text-align: center;
-      color: #007bff;
-      margin-bottom: 30px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 500;
-    }
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 12px 15px;
-      border-radius: 8px;
-      border: 1px solid #ced4da;
-    }
-    .submit-btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      background-color: #007bff;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .submit-btn:hover {
-      background-color: #0056b3;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parish Admin Registration</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        /* DIVINE GREEN & GOLD COLOR PALETTE (Match sa Login) */
+        :root {
+            --primary-color: #1b5e20; /* Deep Forest Green (Primary) */
+            --secondary-color: #388e3c; /* Medium Green */
+            --accent-color: #ffc107; /* Soft Gold/Amber (Accent) */
+            --bg-start: #e8f5e9; /* Very Light Green BG */
+            --bg-end: #f0f4f0; /* Soft Gray/White BG */
+            --text-dark: #212529;
+            --soft-ui-bg: #f5f5f5;
+            --radius: 18px;
+            --input-padding: 14px 20px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* NEUMORPHIC CONTAINER */
+        .register-container {
+            background: var(--soft-ui-bg);
+            padding: 50px;
+            border-radius: var(--radius);
+            /* Soft, subtle neumorphic shadow */
+            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.1), -10px -10px 30px #ffffff; 
+            width: 450px; /* Mas malaki konti */
+            max-width: 90%;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 35px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.95rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input, .input-wrapper select {
+            width: 100%;
+            padding: var(--input-padding);
+            padding-left: 55px; /* Space for icon */
+            border: 2px solid transparent; 
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            /* Neumorphic inset */
+            background: #ededed;
+            box-shadow: inset 3px 3px 6px #d1d1d1, inset -3px -3px 6px #ffffff;
+            appearance: none; /* For select dropdown arrow */
+        }
+
+        .input-wrapper select {
+            padding-right: 20px; /* Space for custom arrow */
+        }
+
+        .input-wrapper input:focus, .input-wrapper select:focus {
+            outline: none;
+            border-color: var(--primary-color); 
+            background: var(--soft-ui-bg);
+            box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.15); /* Soft outer glow */
+        }
+        
+        /* Input Icons */
+        .input-wrapper .icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-color); /* Gold icon */
+            font-size: 1.1rem;
+            pointer-events: none; /* Para hindi mag-interfere sa input */
+        }
+        
+        .input-wrapper input:focus + .icon, .input-wrapper select:focus + .icon { 
+            color: var(--primary-color); /* Green icon on focus */
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Submit Button (Green Gradient with Neumorphic effect) */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--text-light);
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            margin-top: 15px;
+            /* Soft Green outward shadow */
+            box-shadow: 5px 5px 15px rgba(27, 94, 32, 0.4), -5px -5px 15px #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 8px 8px 20px rgba(27, 94, 32, 0.5), -8px -8px 20px #ffffff;
+        }
+
+        .submit-btn:active { 
+            transform: translateY(0);
+            /* Deep press effect */
+            background: var(--primary-color);
+            box-shadow: inset 3px 3px 7px #0f3e13, inset -3px -3px 7px #3fa043;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.95rem;
+        }
+
+        .login-link a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .login-link a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
 </head>
 <body>
 
 <div class="register-container">
-  <h2>Admin Registration</h2>
-  <form id="registerForm">
-    <div class="form-group">
-      <label for="name">Full Name</label>
-      <input type="text" id="name" placeholder="Enter full name" required>
-    </div>
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" id="username" placeholder="Enter username" required>
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Enter password" required>
-    </div>
-    <div class="form-group">
-      <label for="confirmPassword">Confirm Password</label>
-      <input type="password" id="confirmPassword" placeholder="Re-enter password" required>
-    </div>
-    <div class="form-group">
-      <label for="role">Role</label>
-      <select id="role" required>
-        <option value="admin">Admin</option>
-        <option value="staff">Staff</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="address">Address</label>
-      <input type="text" id="address" placeholder="Enter address">
-    </div>
-    <div class="form-group">
-      <label for="contact">Contact Number</label>
-      <input type="text" id="contact" placeholder="Enter contact number">
-    </div>
-    <button type="submit" class="submit-btn">Register</button>
-  </form>
+    <h2><i class="fas fa-church"></i> Parish Admin Registration</h2>
+    <form id="registerForm">
+        
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <div class="input-wrapper">
+                <input type="text" id="name" placeholder="Enter full name" required>
+                <i class="fas fa-user icon"></i>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="username">Username</label>
+            <div class="input-wrapper">
+                <input type="text" id="username" placeholder="Choose a unique username" required>
+                <i class="fas fa-at icon"></i>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-wrapper">
+                <input type="password" id="password" placeholder="Enter secure password" required>
+                <i class="fas fa-lock icon"></i>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="input-wrapper">
+                <input type="password" id="confirmPassword" placeholder="Re-enter password" required>
+                <i class="fas fa-key icon"></i>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="role">Access Role</label>
+            <div class="input-wrapper">
+                <select id="role" required>
+                    <option value="admin">Admin (Full Access)</option>
+                    <option value="staff">Staff (Limited Access)</option>
+                </select>
+                <i class="fas fa-users-cog icon"></i>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="address">Address</label>
+            <div class="input-wrapper">
+                <input type="text" id="address" placeholder="Enter physical address" required>
+                <i class="fas fa-map-marker-alt icon"></i>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="contact">Contact Number</label>
+            <div class="input-wrapper">
+                <input type="text" id="contact" placeholder="Enter contact number" required>
+                <i class="fas fa-phone icon"></i>
+            </div>
+        </div>
+        
+        <button type="submit" class="submit-btn">
+            <i class="fas fa-user-plus"></i> REGISTER ACCOUNT
+        </button>
+        
+        <div class="login-link">
+            <p>Already have an account? <a href="index.html">Go to Login</a></p>
+        </div>
+    </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  document.getElementById("registerForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+ document.getElementById("registerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const password = document.getElementById("password").value.trim();
-    const confirmPassword = document.getElementById("confirmPassword").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const confirmPassword = document.getElementById("confirmPassword").value.trim();
+  const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
 
-    if (password !== confirmPassword) {
-      Swal.fire({ icon: 'error', title: 'Passwords do not match!' });
-      return;
-    }
+  if (password !== confirmPassword) {
+    Swal.fire({ 
+      icon: 'error', 
+      title: 'Password Mismatch!',
+      text: 'The password and confirmation password do not match.',
+      confirmButtonColor: primaryColor 
+    });
+    return;
+  }
 
-    const data = {
-      name: document.getElementById("name").value.trim(),
-      username: document.getElementById("username").value.trim(),
-      password: password,
-      role: document.getElementById("role").value,
-      address: document.getElementById("address").value.trim(),
-      contact: document.getElementById("contact").value.trim()
-    };
+  const data = {
+    name: document.getElementById("name").value.trim(),
+    username: document.getElementById("username").value.trim(),
+    password: password,
+    role: document.getElementById("role").value,
+    address: document.getElementById("address").value.trim(),
+    contact: document.getElementById("contact").value.trim()
+  };
 
-    try {
-      const res = await fetch("http://localhost:5000/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
+  try {
+    const res = await fetch("http://localhost:5000/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
 
-      const result = await res.json();
+    const result = await res.json();
 
-      if (res.ok && result.success) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Registered!',
-          text: result.message,
-          timer: 2000,
-          showConfirmButton: false
-        }).then(() => window.location.href = "index.html"); // redirect to login
-      } else {
-        Swal.fire({ icon: 'error', title: 'Registration Failed', text: result.message });
+    if (res.ok && result.success) {
+      // Determine redirect based on user type
+      let redirectUrl = "startup.html"; // default to super admin login
+      
+      if (result.userType === 'staff') {
+        redirectUrl = "startup.html"; // redirect to staff login
       }
-    } catch (err) {
-      Swal.fire({ icon: 'error', title: 'Server Error', text: 'Cannot connect to backend' });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Account Registered!',
+        text: result.message,
+        timer: 2500,
+        showConfirmButton: false
+      }).then(() => {
+        window.location.href = redirectUrl;
+      });
+    } else {
+      Swal.fire({ 
+        icon: 'error', 
+        title: 'Registration Failed', 
+        text: result.message || 'An unexpected error occurred.',
+        confirmButtonColor: primaryColor
+      });
     }
-  });
+  } catch (err) {
+    Swal.fire({ 
+      icon: 'warning', 
+      title: 'Server Connection Error', 
+      text: 'Cannot connect to the backend server (http://localhost:5000).',
+      confirmButtonColor: primaryColor
+    });
+  }
+});
 </script>
 
 </body>

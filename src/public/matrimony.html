@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blessing Requests - San Jose Dashboard</title>
+<title>Marriage Requests - San Jose Dashboard</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -312,13 +312,13 @@ body {
 }
 
 /* Table Styles */
-.blessing-table {
+.marriage-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 1rem;
 }
 
-.blessing-table thead th {
+.marriage-table thead th {
     color: var(--color-text-secondary);
     font-weight: 600;
     text-align: left;
@@ -326,7 +326,7 @@ body {
     border-bottom: 2px solid var(--color-border);
 }
 
-.blessing-table tbody tr {
+.marriage-table tbody tr {
     background: var(--color-card-background);
     box-shadow: 0 4px 6px rgba(27, 94, 32, 0.08);
     border-radius: 8px;
@@ -334,17 +334,17 @@ body {
     cursor: pointer;
 }
 
-.blessing-table tbody tr:hover {
+.marriage-table tbody tr:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(27, 94, 32, 0.1);
     border-left: 5px solid var(--color-primary);
 }
 
-.blessing-table td { padding: 1rem; vertical-align: middle; }
+.marriage-table td { padding: 1rem; vertical-align: middle; }
 .empty-state { text-align: center; color: var(--color-text-secondary); padding: 2rem; font-size: 1.1rem; display: none; }
 
 /* Status Badges */
-.status-badge, .payment-badge, .type-badge {
+.status-badge, .payment-badge {
     display: inline-block;
     padding: 0.5rem 1rem;
     border-radius: 20px;
@@ -364,11 +364,6 @@ body {
 .payment-badge.paid { background-color: #C8E6C9; color: #2E7D32; border: 1px solid #2E7D32; }
 .payment-badge.pending { background-color: #FFF9C4; color: #F57F17; border: 1px solid #F57F17; }
 .payment-badge.overdue { background-color: #FFCDD2; color: #C62828; border: 1px solid #C62828; }
-
-.type-badge.business { background-color: #E3F2FD; color: #1565C0; border: 1px solid #1565C0; }
-.type-badge.house { background-color: #E8F5E8; color: #2E7D32; border: 1px solid #2E7D32; }
-.type-badge.vehicle { background-color: #FFF3E0; color: #EF6C00; border: 1px solid #EF6C00; }
-.type-badge.other { background-color: #F3E5F5; color: #7B1FA2; border: 1px solid #7B1FA2; }
 
 /* Action Buttons */
 .action-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
@@ -630,14 +625,14 @@ body {
             <li><a href="confession.html"><span>Confession</span></a></li>
             <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
             <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
-            <li><a href="matrimony.html"><span>Matrimony</span></a></li>
+            <li><a href="matrimony.html" class="active"><span>Matrimony</span></a></li>
           </ul>
         </li>
         <li class="nav-dropdown open">
           <a href="#"><i class="fa-solid fa-cross"></i><span>Other Services</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
           <ul class="dropdown-menu">
             <li><a href="pamisa.html"><span>Pamisa</span></a></li>
-            <li><a href="blessing.html" class="active"><span>Blessing</span></a></li>
+            <li><a href="blessing.html"><span>Blessing</span></a></li>
             <li><a href="pamisapatay.html"><span>Pamisa sa patay</span></a></li>
           </ul> 
         </li>
@@ -675,7 +670,7 @@ body {
       <div class="widget-card card-green">
         <i class="fa-solid fa-calendar-days"></i>
         <div class="widget-content">
-          <h4>Upcoming Blessings</h4>
+          <h4>Upcoming Weddings</h4>
           <p id="upcomingCount">0</p>
         </div>
       </div>
@@ -696,7 +691,7 @@ body {
     </div>
 
     <div class="status-workflow">
-      <h4>Blessing Request Workflow</h4>
+      <h4>Marriage Request Workflow</h4>
       <div class="workflow-steps">
         <div class="workflow-step">
           <div class="step-icon pending"><i class="fa-solid fa-clock"></i></div>
@@ -728,7 +723,7 @@ body {
     <section class="requests-section">
       <div class="box">
         <div class="box-header">
-          <h3 class="box-title">All Blessing Requests</h3>
+          <h3 class="box-title">All Marriage Requests</h3>
           <div class="search-bar">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" id="tableSearch" placeholder="Search for a request...">
@@ -755,14 +750,14 @@ body {
           </div>
         </div>
         <div class="table-container">
-          <table class="blessing-table" id="requestsTable">
+          <table class="marriage-table" id="requestsTable">
             <thead>
               <tr>
-                <th>Requested By</th>
-                <th>Blessing Type</th>
-                <th>Blessing Date</th>
-                <th>Blessing Time</th>
-                <th>Address</th>
+                <th>Couple</th>
+                <th>Wedding Date</th>
+                <th>Wedding Time</th>
+                <th>Groom Contact</th>
+                <th>Bride Contact</th>
                 <th>Status</th>
                 <th>Payment</th>
                 <th>Actions</th>
@@ -770,70 +765,179 @@ body {
             </thead>
             <tbody></tbody>
           </table>
-          <div class="empty-state" id="emptyState">No blessing requests found.</div>
+          <div class="empty-state" id="emptyState">No marriage requests found.</div>
         </div>
       </div>
     </section>
   </main>
 </div>
 
-<!-- Rest of your modals remain the same -->
 <!-- Add Request Modal -->
 <div id="addRequestModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>Add Blessing Request</h2>
+      <h2>Add Marriage Request</h2>
       <span class="close-btn">&times;</span>
     </div>
     <form id="addRequestForm">
-      <h3 class="form-section-header">Impormasyon ng Humihiling</h3>
+      <h3 class="form-section-header">Wedding Details</h3>
       <div class="form-row double">
         <div class="form-group">
-          <label for="requesterName">Pangalan ng Humihiling:</label>
-          <input type="text" id="requesterName" required>
+          <label for="dateOfWedding">Wedding Date:</label>
+          <input type="date" id="dateOfWedding" required>
         </div>
         <div class="form-group">
-          <label for="contactNumber">Contact Number:</label>
-          <input type="tel" id="contactNumber" required>
+          <label for="timeOfWedding">Wedding Time:</label>
+          <input type="time" id="timeOfWedding" required>
         </div>
       </div>
-      <div class="form-group">
-        <label for="address">Address:</label>
-        <input type="text" id="address" required>
-      </div>
-      
-      <h3 class="form-section-header">Detalye ng Blessing</h3>
+
+      <h3 class="form-section-header">Groom Information</h3>
       <div class="form-row triple">
         <div class="form-group">
-          <label for="blessingDate">Petsa ng Blessing:</label>
-          <input type="date" id="blessingDate" required>
+          <label for="groomName">First Name:</label>
+          <input type="text" id="groomName" required>
         </div>
         <div class="form-group">
-          <label for="blessingTime">Oras ng Blessing:</label>
-          <input type="time" id="blessingTime" required>
+          <label for="groomMiddleName">Middle Name:</label>
+          <input type="text" id="groomMiddleName" required>
         </div>
         <div class="form-group">
-          <label for="blessingType">Uri ng Blessing:</label>
-          <select id="blessingType" required>
-            <option value="">Pumili ng Uri</option>
-            <option value="BUSINESS">Business</option>
-            <option value="HOUSE">House</option>
-            <option value="VEHICLE">Vehicle</option>
-            <option value="OTHER">Other</option>
-          </select>
+          <label for="groomSurname">Surname:</label>
+          <input type="text" id="groomSurname" required>
         </div>
       </div>
-      
-      <div class="form-group">
-        <label for="requestForDetails">Detalye ng Pagpapala (kung mayroon):</label>
-        <textarea id="requestForDetails" placeholder="Mga detalye tungkol sa ipapapala..."></textarea>
+      <div class="form-row double">
+        <div class="form-group">
+          <label for="groomDOB">Date of Birth:</label>
+          <input type="date" id="groomDOB" required>
+        </div>
+        <div class="form-group">
+          <label for="groomAge">Age:</label>
+          <input type="number" id="groomAge" required>
+        </div>
       </div>
-      
       <div class="form-group">
-        <label for="donationNote">Paalala sa Donasyon:</label>
-        <textarea id="donationNote" placeholder="Mga paalala tungkol sa donasyon...">Cash donation to be given during the blessing ceremony</textarea>
+        <label for="groomPOB">Place of Birth:</label>
+        <input type="text" id="groomPOB" required>
       </div>
-      
+      <div class="form-group">
+        <label for="groomResidence">Residence:</label>
+        <input type="text" id="groomResidence" required>
+      </div>
+      <div class="form-row double">
+        <div class="form-group">
+          <label for="groomFatherName">Father's Name:</label>
+          <input type="text" id="groomFatherName" required>
+        </div>
+        <div class="form-group">
+          <label for="groomMotherMaidenName">Mother's Maiden Name:</label>
+          <input type="text" id="groomMotherMaidenName" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="groomCP">Contact Number:</label>
+        <input type="tel" id="groomCP" required>
+      </div>
+
+      <h3 class="form-section-header">Bride Information</h3>
+      <div class="form-row triple">
+        <div class="form-group">
+          <label for="brideName">First Name:</label>
+          <input type="text" id="brideName" required>
+        </div>
+        <div class="form-group">
+          <label for="brideMiddleName">Middle Name:</label>
+          <input type="text" id="brideMiddleName" required>
+        </div>
+        <div class="form-group">
+          <label for="brideSurname">Surname:</label>
+          <input type="text" id="brideSurname" required>
+        </div>
+      </div>
+      <div class="form-row double">
+        <div class="form-group">
+          <label for="brideDOB">Date of Birth:</label>
+          <input type="date" id="brideDOB" required>
+        </div>
+        <div class="form-group">
+          <label for="brideAge">Age:</label>
+          <input type="number" id="brideAge" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="bridePOB">Place of Birth:</label>
+        <input type="text" id="bridePOB" required>
+      </div>
+      <div class="form-group">
+        <label for="brideResidence">Residence:</label>
+        <input type="text" id="brideResidence" required>
+      </div>
+      <div class="form-row double">
+        <div class="form-group">
+          <label for="brideFatherName">Father's Name:</label>
+          <input type="text" id="brideFatherName" required>
+        </div>
+        <div class="form-group">
+          <label for="brideMotherMaidenName">Mother's Maiden Name:</label>
+          <input type="text" id="brideMotherMaidenName" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="brideCP">Contact Number:</label>
+        <input type="tel" id="brideCP" required>
+      </div>
+
+      <h3 class="form-section-header">Required Documents</h3>
+      <div class="form-row double">
+        <div class="form-group">
+          <label for="groomMarriageLicense">Groom's Marriage License:</label>
+          <input type="text" id="groomMarriageLicense">
+        </div>
+        <div class="form-group">
+          <label for="brideMarriageLicense">Bride's Marriage License:</label>
+          <input type="text" id="brideMarriageLicense">
+        </div>
+      </div>
+      <div class="form-row double">
+        <div class="form-group">
+          <label for="groomBaptismalCert">Groom's Baptismal Certificate:</label>
+          <input type="text" id="groomBaptismalCert">
+        </div>
+        <div class="form-group">
+          <label for="brideBaptismalCert">Bride's Baptismal Certificate:</label>
+          <input type="text" id="brideBaptismalCert">
+        </div>
+      </div>
+
+      <h3 class="form-section-header">Schedule</h3>
+      <div class="form-row double">
+        <div class="form-group">
+          <label for="interviewDate">Interview Date:</label>
+          <input type="date" id="interviewDate">
+        </div>
+        <div class="form-group">
+          <label for="interviewTime">Interview Time:</label>
+          <input type="time" id="interviewTime">
+        </div>
+      </div>
+      <div class="form-row double">
+        <div class="form-group">
+          <label for="seminarDate">Seminar Date:</label>
+          <input type="date" id="seminarDate">
+        </div>
+        <div class="form-group">
+          <label for="seminarTime">Seminar Time:</label>
+          <input type="time" id="seminarTime">
+        </div>
+      </div>
+
+      <h3 class="form-section-header">Sponsors (Optional)</h3>
+      <div class="form-group">
+        <label for="sponsors">Sponsors (comma separated):</label>
+        <textarea id="sponsors" placeholder="Enter sponsor names separated by commas"></textarea>
+      </div>
+
       <button type="submit" class="submit-btn" id="submitAddBtn">Add Request</button>
     </form>
   </div>
@@ -843,7 +947,7 @@ body {
 <div id="detailsModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>Blessing Request Details</h2>
+      <h2>Marriage Request Details</h2>
       <span class="close-btn" id="closeDetails">&times;</span>
     </div>
     <div class="modal-body" id="detailsContent"></div>
@@ -859,7 +963,7 @@ body {
 <div id="exportModal" class="modal export-modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>Export Blessing Data</h2>
+      <h2>Export Marriage Data</h2>
       <span class="close-btn" id="closeExport">&times;</span>
     </div>
     <div class="export-options" id="exportOptions">
@@ -904,7 +1008,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Rest of your JavaScript code remains the same...
     // Dropdown functionality
     document.querySelectorAll('.nav-dropdown > a').forEach(function(dropdown) {
         dropdown.addEventListener('click', function(e) {
@@ -914,7 +1017,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    const baseURL = "http://localhost:5000/api/blessing";
+    const baseURL = "http://localhost:5000/api/marriage";
     const addRequestBtn = document.getElementById('addRequestBtn');
     const exportBtn = document.getElementById('exportBtn');
     const exportIndividualBtn = document.getElementById('exportIndividualBtn');
@@ -952,14 +1055,6 @@ document.addEventListener('DOMContentLoaded', function() {
         'approved': [],
         'rejected': ['pending'],
         'cancelled': ['pending']
-    };
-
-    // Define blessing fees
-    const blessingFees = {
-        'BUSINESS': 1000,
-        'HOUSE': 800,
-        'VEHICLE': 500,
-        'OTHER': 600
     };
 
     // Date formatting functions
@@ -1000,16 +1095,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function getBlessingTypeClass(blessingType) {
-        switch(blessingType) {
-            case 'BUSINESS': return 'business';
-            case 'HOUSE': return 'house';
-            case 'VEHICLE': return 'vehicle';
-            case 'OTHER': return 'other';
-            default: return 'other';
-        }
-    }
-
     // Function to display value or N/A if empty
     function displayValue(value) {
         if (!value || value === '' || value === '0' || value === 0) {
@@ -1019,47 +1104,75 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Transform data to match what frontend expects
-    function transformBlessingData(data) {
+    function transformMarriageData(data) {
         return data.map(request => {
             return {
                 _id: request._id || '',
                 sacrament: request.sacrament || '',
-                name: request.name || '',
-                blessingType: request.blessingType || '',
-                requestForDetails: request.requestForDetails || '',
-                address: request.address || '',
-                contactNumber: request.contactNumber || '',
-                date: request.date || '',
-                time: request.time || '',
-                displayDate: request.displayDate || '',
-                displayTime: request.displayTime || '',
+                dateOfWedding: request.dateOfWedding || '',
+                timeOfWedding: request.timeOfWedding || '',
+                groomName: request.groomName || '',
+                groomMiddleName: request.groomMiddleName || '',
+                groomSurname: request.groomSurname || '',
+                groomDOB: request.groomDOB || '',
+                groomAge: request.groomAge || '',
+                groomPOB: request.groomPOB || '',
+                groomResidence: request.groomResidence || '',
+                groomFatherName: request.groomFatherName || '',
+                groomMotherMaidenName: request.groomMotherMaidenName || '',
+                groomCP: request.groomCP || '',
+                brideName: request.brideName || '',
+                brideMiddleName: request.brideMiddleName || '',
+                brideSurname: request.brideSurname || '',
+                brideDOB: request.brideDOB || '',
+                brideAge: request.brideAge || '',
+                bridePOB: request.bridePOB || '',
+                brideResidence: request.brideResidence || '',
+                brideFatherName: request.brideFatherName || '',
+                brideMotherMaidenName: request.brideMotherMaidenName || '',
+                brideCP: request.brideCP || '',
+                groomMarriageLicense: request.groomMarriageLicense || '',
+                groomBaptismalCert: request.groomBaptismalCert || '',
+                groomConfirmationCert: request.groomConfirmationCert || '',
+                groomMarriageBannsPermission: request.groomMarriageBannsPermission || '',
+                brideMarriageLicense: request.brideMarriageLicense || '',
+                brideBaptismalCert: request.brideBaptismalCert || '',
+                brideConfirmationCert: request.brideConfirmationCert || '',
+                brideMarriageBannsPermission: request.brideMarriageBannsPermission || '',
+                interviewDate: request.interviewDate || '',
+                interviewTime: request.interviewTime || '',
+                seminarDate: request.seminarDate || '',
+                seminarTime: request.seminarTime || '',
+                sponsors: request.sponsors || [],
+                groomSignature: request.groomSignature || '',
+                brideSignature: request.brideSignature || '',
                 status: request.status || 'pending',
-                createdAt: request.createdAt || '',
+                paymentStatus: request.paymentStatus || 'pending',
+                fee: request.fee || 5000,
+                submittedByEmail: request.submittedByEmail || '',
                 requestNumber: request.requestNumber || '',
+                createdAt: request.createdAt || '',
                 lastUpdated: request.lastUpdated || '',
-                donationNote: request.donationNote || '',
                 
                 // For frontend display
-                requesterName: request.name || 'Unknown',
-                requesterContact: displayValue(request.contactNumber),
-                requesterAddress: request.address || 'N/A',
-                blessingDate: request.date || '',
-                blessingTime: request.time || '',
+                coupleName: `${request.groomName || ''} ${request.groomSurname || ''} & ${request.brideName || ''} ${request.brideSurname || ''}`,
+                weddingDate: request.dateOfWedding || '',
+                weddingTime: request.timeOfWedding || '',
+                groomContact: request.groomCP || 'N/A',
+                brideContact: request.brideCP || 'N/A',
                 
                 // Payment fields
-                paymentStatus: request.paymentStatus || 'pending',
                 paymentDate: request.paymentDate || '',
                 paymentMethod: request.paymentMethod || '',
                 paymentReference: request.paymentReference || '',
-                paymentNotes: request.paymentNotes || '',
-                fee: request.fee || blessingFees[request.blessingType] || 500
+                paymentNotes: request.paymentNotes || ''
             };
         });
     }
 
     async function fetchRequests() {
         try {
-            console.log("🔄 Fetching blessing requests from:", baseURL);
+            console.log("🔄 Fetching marriage requests from:", baseURL);
             const res = await fetch(baseURL);
             
             if (!res.ok) {
@@ -1067,9 +1180,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const data = await res.json();
-            requests = transformBlessingData(data);
+            requests = transformMarriageData(data);
             
-            console.log("✅ Fetched blessing requests:", requests);
+            console.log("✅ Fetched marriage requests:", requests);
             applyFiltersAndSearch();
         } catch (err) { 
             console.error("❌ Failed to fetch requests:", err);
@@ -1091,7 +1204,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const result = await res.json();
             console.log("✅ Added request:", result);
-            showNotification('New blessing request added successfully!');
+            showNotification('New marriage request added successfully!');
             fetchRequests();
         } catch (err) {
             console.error("❌ Failed to add request:", err);
@@ -1138,10 +1251,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentSearchTerm) {
             const term = currentSearchTerm.toLowerCase();
             filteredData = filteredData.filter(r => 
-                r.requesterName.toLowerCase().includes(term) || 
-                (r.contactNumber && r.contactNumber.toLowerCase().includes(term)) ||
-                (r.blessingType && r.blessingType.toLowerCase().includes(term)) ||
-                (r.address && r.address.toLowerCase().includes(term)) ||
+                r.coupleName.toLowerCase().includes(term) || 
+                (r.groomContact && r.groomContact.toLowerCase().includes(term)) ||
+                (r.brideContact && r.brideContact.toLowerCase().includes(term)) ||
                 (r.status && r.status.toLowerCase().includes(term)) ||
                 (r.requestNumber && r.requestNumber.toLowerCase().includes(term))
             );
@@ -1162,15 +1274,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.dataset.id = request._id;
                 const availableActions = getAvailableActions(request.status);
                 
-                const blessingType = request.blessingType || 'OTHER';
                 const paymentStatus = request.paymentStatus || 'pending';
                 
                 row.innerHTML = `
-                    <td>${request.requesterName}</td>
-                    <td><span class="type-badge ${getBlessingTypeClass(blessingType)}">${blessingType}</span></td>
-                    <td>${formatDate(request.date)}</td>
-                    <td>${formatTime(request.time)}</td>
-                    <td>${request.address.substring(0, 20)}${request.address.length > 20 ? '...' : ''}</td>
+                    <td>${request.coupleName}</td>
+                    <td>${formatDate(request.weddingDate)}</td>
+                    <td>${formatTime(request.weddingTime)}</td>
+                    <td>${request.groomContact}</td>
+                    <td>${request.brideContact}</td>
                     <td><span class="status-badge ${request.status}">${request.status}</span></td>
                     <td><span class="payment-badge ${getPaymentStatusClass(paymentStatus)}">${paymentStatus}</span></td>
                     <td>
@@ -1203,6 +1314,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 `<button class="reset-btn" title="Reset to Pending">
                                     <i class="fa-solid fa-rotate-left"></i> Reset
                                 </button>` : ''}
+                            <button class="payment-btn" title="Update Payment">
+                                <i class="fa-solid fa-money-bill"></i> Payment
+                            </button>
                             <button class="export-individual-btn" title="Export Individual Request">
                                 <i class="fa-solid fa-file-export"></i> Export
                             </button>
@@ -1222,17 +1336,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const today = new Date();
         today.setHours(0, 0, 0, 0); 
         upcomingCount.textContent = data.filter(r => {
-            if (!r.date) return false;
+            if (!r.weddingDate) return false;
             try {
-                let blessingDate;
-                if (r.date.includes('/')) {
-                    const [month, day, year] = r.date.split('/');
-                    blessingDate = new Date(year, month - 1, day);
+                let weddingDate;
+                if (r.weddingDate.includes('/')) {
+                    const [month, day, year] = r.weddingDate.split('/');
+                    weddingDate = new Date(year, month - 1, day);
                 } else {
-                    blessingDate = new Date(r.date);
+                    weddingDate = new Date(r.weddingDate);
                 }
-                blessingDate.setHours(0, 0, 0, 0);
-                return blessingDate >= today && (r.status === 'scheduled' || r.status === 'in-process');
+                weddingDate.setHours(0, 0, 0, 0);
+                return weddingDate >= today && (r.status === 'scheduled' || r.status === 'in-process');
             } catch (e) {
                 return false;
             }
@@ -1279,22 +1393,53 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const timestamp = Date.now();
         const randomString = Math.random().toString(36).substring(2, 10);
-        const requestNumber = `BLESS-${timestamp}-${randomString}`;
+        const requestNumber = `MARRIAGE-${timestamp}-${randomString}`;
+        
+        // Process sponsors
+        const sponsorsInput = document.getElementById('sponsors').value;
+        const sponsors = sponsorsInput ? sponsorsInput.split(',').map(s => s.trim()).filter(s => s !== '') : [];
         
         const newRequest = {
-            name: document.getElementById('requesterName').value,
-            blessingType: document.getElementById('blessingType').value,
-            requestForDetails: document.getElementById('requestForDetails').value || '',
-            address: document.getElementById('address').value,
-            contactNumber: document.getElementById('contactNumber').value,
-            date: document.getElementById('blessingDate').value,
-            time: document.getElementById('blessingTime').value,
-            displayDate: new Date(document.getElementById('blessingDate').value).toLocaleDateString('en-US'),
-            displayTime: formatTime(document.getElementById('blessingTime').value),
-            donationNote: document.getElementById('donationNote').value || 'Cash donation to be given during the blessing ceremony',
+            dateOfWedding: document.getElementById('dateOfWedding').value,
+            timeOfWedding: document.getElementById('timeOfWedding').value,
+            // Groom Information
+            groomName: document.getElementById('groomName').value,
+            groomMiddleName: document.getElementById('groomMiddleName').value,
+            groomSurname: document.getElementById('groomSurname').value,
+            groomDOB: document.getElementById('groomDOB').value,
+            groomAge: document.getElementById('groomAge').value,
+            groomPOB: document.getElementById('groomPOB').value,
+            groomResidence: document.getElementById('groomResidence').value,
+            groomFatherName: document.getElementById('groomFatherName').value,
+            groomMotherMaidenName: document.getElementById('groomMotherMaidenName').value,
+            groomCP: document.getElementById('groomCP').value,
+            // Bride Information
+            brideName: document.getElementById('brideName').value,
+            brideMiddleName: document.getElementById('brideMiddleName').value,
+            brideSurname: document.getElementById('brideSurname').value,
+            brideDOB: document.getElementById('brideDOB').value,
+            brideAge: document.getElementById('brideAge').value,
+            bridePOB: document.getElementById('bridePOB').value,
+            brideResidence: document.getElementById('brideResidence').value,
+            brideFatherName: document.getElementById('brideFatherName').value,
+            brideMotherMaidenName: document.getElementById('brideMotherMaidenName').value,
+            brideCP: document.getElementById('brideCP').value,
+            // Documents
+            groomMarriageLicense: document.getElementById('groomMarriageLicense').value || '',
+            groomBaptismalCert: document.getElementById('groomBaptismalCert').value || '',
+            brideMarriageLicense: document.getElementById('brideMarriageLicense').value || '',
+            brideBaptismalCert: document.getElementById('brideBaptismalCert').value || '',
+            // Schedule
+            interviewDate: document.getElementById('interviewDate').value || '',
+            interviewTime: document.getElementById('interviewTime').value || '',
+            seminarDate: document.getElementById('seminarDate').value || '',
+            seminarTime: document.getElementById('seminarTime').value || '',
+            // Sponsors
+            sponsors: sponsors,
             status: 'pending',
             paymentStatus: 'pending',
-            fee: blessingFees[document.getElementById('blessingType').value] || 500,
+            fee: 5000,
+            submittedByEmail: 'admin@sjmp.com',
             requestNumber: requestNumber
         };
         
@@ -1358,6 +1503,10 @@ document.addEventListener('DOMContentLoaded', function() {
             updateRequestStatus(id,'pending'); 
             return; 
         }
+        if(e.target.closest('.payment-btn')) { 
+            updatePaymentStatus(request);
+            return; 
+        }
         if(e.target.closest('.export-individual-btn')) { 
             exportIndividualRequest(request);
             return; 
@@ -1368,6 +1517,71 @@ document.addEventListener('DOMContentLoaded', function() {
             showRequestDetails(request);
         }
     });
+
+    // Update payment status
+    function updatePaymentStatus(request) {
+        Swal.fire({
+            title: 'Update Payment Status',
+            html: `
+                <div class="form-group">
+                    <label for="paymentDate">Payment Date:</label>
+                    <input type="date" id="paymentDate" class="swal2-input" value="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="form-group">
+                    <label for="paymentMethod">Payment Method:</label>
+                    <select id="paymentMethod" class="swal2-input">
+                        <option value="cash">Cash</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="gcash">GCash</option>
+                        <option value="check">Check</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="paymentReference">Reference Number:</label>
+                    <input type="text" id="paymentReference" class="swal2-input" placeholder="Reference number">
+                </div>
+                <div class="form-group">
+                    <label for="paymentNotes">Notes:</label>
+                    <textarea id="paymentNotes" class="swal2-textarea" placeholder="Additional notes"></textarea>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Mark as Paid',
+            preConfirm: () => {
+                const paymentData = {
+                    paymentStatus: 'paid',
+                    paymentDate: document.getElementById('paymentDate').value,
+                    paymentMethod: document.getElementById('paymentMethod').value,
+                    paymentReference: document.getElementById('paymentReference').value,
+                    paymentNotes: document.getElementById('paymentNotes').value
+                };
+                
+                if (!paymentData.paymentDate) {
+                    Swal.showValidationMessage('Please enter payment date');
+                    return false;
+                }
+                
+                return paymentData;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`${baseURL}/${request._id}/payment`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(result.value)
+                })
+                .then(res => res.json())
+                .then(updatedRequest => {
+                    showNotification('Payment status updated successfully!');
+                    fetchRequests();
+                })
+                .catch(err => {
+                    console.error('Failed to update payment:', err);
+                    showNotification('Failed to update payment status', 'error');
+                });
+            }
+        });
+    }
 
     // Show request details
     function showRequestDetails(request) {
@@ -1397,53 +1611,188 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
 
             <div class="details-section">
-                <h3 class="details-section-header">Requester Information</h3>
+                <h3 class="details-section-header">Wedding Details</h3>
                 <div class="details-grid">
                     <div class="detail-item">
-                        <span class="detail-label">Name:</span>
-                        <div class="detail-value">${displayValue(request.name)}</div>
+                        <span class="detail-label">Wedding Date:</span>
+                        <div class="detail-value">${formatDate(request.dateOfWedding)}</div>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Contact Number:</span>
-                        <div class="detail-value">${displayValue(request.contactNumber)}</div>
+                        <span class="detail-label">Wedding Time:</span>
+                        <div class="detail-value">${formatTime(request.timeOfWedding)}</div>
                     </div>
-                    <div class="detail-item full-width">
-                        <span class="detail-label">Address:</span>
-                        <div class="detail-value">${displayValue(request.address)}</div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fee:</span>
+                        <div class="detail-value">₱${request.fee || 5000}.00</div>
                     </div>
                 </div>
             </div>
 
             <div class="details-section">
-                <h3 class="details-section-header">Blessing Details</h3>
+                <h3 class="details-section-header">Groom Information</h3>
                 <div class="details-grid">
                     <div class="detail-item">
-                        <span class="detail-label">Blessing Type:</span>
-                        <div class="detail-value"><span class="type-badge ${getBlessingTypeClass(request.blessingType)}">${displayValue(request.blessingType)}</span></div>
+                        <span class="detail-label">Full Name:</span>
+                        <div class="detail-value">${request.groomName} ${request.groomMiddleName} ${request.groomSurname}</div>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Blessing Date:</span>
-                        <div class="detail-value">${formatDate(request.date)} (${displayValue(request.displayDate)})</div>
+                        <span class="detail-label">Date of Birth:</span>
+                        <div class="detail-value">${formatDate(request.groomDOB)}</div>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Blessing Time:</span>
-                        <div class="detail-value">${formatTime(request.time)} (${displayValue(request.displayTime)})</div>
+                        <span class="detail-label">Age:</span>
+                        <div class="detail-value">${request.groomAge}</div>
                     </div>
-                    ${request.requestForDetails ? `
-                    <div class="detail-item full-width">
-                        <span class="detail-label">Details for Blessing:</span>
-                        <div class="detail-textarea">${displayValue(request.requestForDetails)}</div>
+                    <div class="detail-item">
+                        <span class="detail-label">Place of Birth:</span>
+                        <div class="detail-value">${request.groomPOB}</div>
                     </div>
-                    ` : ''}
-                    ${request.donationNote ? `
-                    <div class="detail-item full-width">
-                        <span class="detail-label">Donation Note:</span>
-                        <div class="detail-textarea">${displayValue(request.donationNote)}</div>
+                    <div class="detail-item">
+                        <span class="detail-label">Residence:</span>
+                        <div class="detail-value">${request.groomResidence}</div>
                     </div>
-                    ` : ''}
+                    <div class="detail-item">
+                        <span class="detail-label">Father's Name:</span>
+                        <div class="detail-value">${request.groomFatherName}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Mother's Maiden Name:</span>
+                        <div class="detail-value">${request.groomMotherMaidenName}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Contact Number:</span>
+                        <div class="detail-value">${request.groomCP}</div>
+                    </div>
                 </div>
             </div>
 
+            <div class="details-section">
+                <h3 class="details-section-header">Bride Information</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Full Name:</span>
+                        <div class="detail-value">${request.brideName} ${request.brideMiddleName} ${request.brideSurname}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date of Birth:</span>
+                        <div class="detail-value">${formatDate(request.brideDOB)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Age:</span>
+                        <div class="detail-value">${request.brideAge}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Place of Birth:</span>
+                        <div class="detail-value">${request.bridePOB}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Residence:</span>
+                        <div class="detail-value">${request.brideResidence}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Father's Name:</span>
+                        <div class="detail-value">${request.brideFatherName}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Mother's Maiden Name:</span>
+                        <div class="detail-value">${request.brideMotherMaidenName}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Contact Number:</span>
+                        <div class="detail-value">${request.brideCP}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add documents section if any documents exist
+        if (request.groomMarriageLicense || request.groomBaptismalCert || request.brideMarriageLicense || request.brideBaptismalCert) {
+            detailsHTML += `
+                <div class="details-section">
+                    <h3 class="details-section-header">Required Documents</h3>
+                    <div class="details-grid">
+                        ${request.groomMarriageLicense ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Groom's Marriage License:</span>
+                            <div class="detail-value">${request.groomMarriageLicense}</div>
+                        </div>
+                        ` : ''}
+                        ${request.groomBaptismalCert ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Groom's Baptismal Certificate:</span>
+                            <div class="detail-value">${request.groomBaptismalCert}</div>
+                        </div>
+                        ` : ''}
+                        ${request.brideMarriageLicense ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Bride's Marriage License:</span>
+                            <div class="detail-value">${request.brideMarriageLicense}</div>
+                        </div>
+                        ` : ''}
+                        ${request.brideBaptismalCert ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Bride's Baptismal Certificate:</span>
+                            <div class="detail-value">${request.brideBaptismalCert}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add schedule section if any schedule exists
+        if (request.interviewDate || request.seminarDate) {
+            detailsHTML += `
+                <div class="details-section">
+                    <h3 class="details-section-header">Schedule</h3>
+                    <div class="details-grid">
+                        ${request.interviewDate ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Interview Date:</span>
+                            <div class="detail-value">${formatDate(request.interviewDate)}</div>
+                        </div>
+                        ` : ''}
+                        ${request.interviewTime ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Interview Time:</span>
+                            <div class="detail-value">${formatTime(request.interviewTime)}</div>
+                        </div>
+                        ` : ''}
+                        ${request.seminarDate ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Seminar Date:</span>
+                            <div class="detail-value">${formatDate(request.seminarDate)}</div>
+                        </div>
+                        ` : ''}
+                        ${request.seminarTime ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Seminar Time:</span>
+                            <div class="detail-value">${formatTime(request.seminarTime)}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add sponsors section if any sponsors exist
+        if (request.sponsors && request.sponsors.length > 0 && request.sponsors.some(s => s !== '')) {
+            detailsHTML += `
+                <div class="details-section">
+                    <h3 class="details-section-header">Sponsors</h3>
+                    <div class="details-grid">
+                        <div class="detail-item full-width">
+                            <div class="detail-value">
+                                ${request.sponsors.filter(s => s !== '').map(sponsor => `<div>${sponsor}</div>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add payment information
+        detailsHTML += `
             <div class="details-section">
                 <h3 class="details-section-header">Payment Information</h3>
                 <div class="details-grid">
@@ -1453,8 +1802,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Fee:</span>
-                        <div class="detail-value">₱${request.fee}.00</div>
+                        <div class="detail-value">₱${request.fee || 5000}.00</div>
                     </div>
+                    ${request.paymentDate ? `
+                    <div class="detail-item">
+                        <span class="detail-label">Payment Date:</span>
+                        <div class="detail-value">${formatDate(request.paymentDate)}</div>
+                    </div>
+                    ` : ''}
+                    ${request.paymentMethod ? `
+                    <div class="detail-item">
+                        <span class="detail-label">Payment Method:</span>
+                        <div class="detail-value">${request.paymentMethod}</div>
+                    </div>
+                    ` : ''}
+                    ${request.paymentReference ? `
+                    <div class="detail-item">
+                        <span class="detail-label">Reference Number:</span>
+                        <div class="detail-value">${request.paymentReference}</div>
+                    </div>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -1485,10 +1852,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Set document properties
         doc.setProperties({
-            title: `Blessing Request - ${request.name}`,
-            subject: 'Blessing Request Details',
+            title: `Marriage Request - ${request.coupleName}`,
+            subject: 'Marriage Request Details',
             author: 'San Jose Parish',
-            keywords: 'blessing, request, parish',
+            keywords: 'marriage, request, parish',
             creator: 'San Jose Parish Management System'
         });
         
@@ -1500,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         doc.setFontSize(16);
         doc.setTextColor(0, 0, 0);
-        doc.text('BLESSING REQUEST DETAILS', 105, 30, { align: 'center' });
+        doc.text('MARRIAGE REQUEST DETAILS', 105, 30, { align: 'center' });
         
         // Add request details
         let yPosition = 50;
@@ -1518,43 +1885,64 @@ document.addEventListener('DOMContentLoaded', function() {
         doc.text(`Created: ${request.createdAt ? formatDate(request.createdAt) : 'N/A'}`, 20, yPosition);
         yPosition += 15;
         
-        // Requester Information
+        // Wedding Details
         doc.setFont('helvetica', 'bold');
-        doc.text('REQUESTER INFORMATION:', 20, yPosition);
+        doc.text('WEDDING DETAILS:', 20, yPosition);
         yPosition += 10;
         
         doc.setFont('helvetica', 'normal');
-        doc.text(`Name: ${request.name || 'N/A'}`, 20, yPosition);
+        doc.text(`Wedding Date: ${formatDate(request.dateOfWedding)}`, 20, yPosition);
         yPosition += 7;
-        doc.text(`Contact: ${request.contactNumber || 'N/A'}`, 20, yPosition);
+        doc.text(`Wedding Time: ${formatTime(request.timeOfWedding)}`, 20, yPosition);
         yPosition += 7;
+        doc.text(`Fee: ₱${request.fee || 5000}.00`, 20, yPosition);
+        yPosition += 15;
         
-        // Handle address with text wrapping
-        const addressLines = doc.splitTextToSize(`Address: ${request.address || 'N/A'}`, 170);
-        doc.text(addressLines, 20, yPosition);
-        yPosition += (addressLines.length * 7);
-        yPosition += 8;
-        
-        // Blessing Details
+        // Groom Information
         doc.setFont('helvetica', 'bold');
-        doc.text('BLESSING DETAILS:', 20, yPosition);
+        doc.text('GROOM INFORMATION:', 20, yPosition);
         yPosition += 10;
         
         doc.setFont('helvetica', 'normal');
-        doc.text(`Type: ${request.blessingType || 'N/A'}`, 20, yPosition);
+        doc.text(`Name: ${request.groomName} ${request.groomMiddleName} ${request.groomSurname}`, 20, yPosition);
         yPosition += 7;
-        doc.text(`Date: ${formatDate(request.date)}`, 20, yPosition);
+        doc.text(`Date of Birth: ${formatDate(request.groomDOB)}`, 20, yPosition);
         yPosition += 7;
-        doc.text(`Time: ${formatTime(request.time)}`, 20, yPosition);
+        doc.text(`Age: ${request.groomAge}`, 20, yPosition);
         yPosition += 7;
+        doc.text(`Place of Birth: ${request.groomPOB || 'N/A'}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Residence: ${request.groomResidence || 'N/A'}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Father: ${request.groomFatherName || 'N/A'}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Mother: ${request.groomMotherMaidenName || 'N/A'}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Contact: ${request.groomCP || 'N/A'}`, 20, yPosition);
+        yPosition += 15;
         
-        if (request.requestForDetails) {
-            const detailsLines = doc.splitTextToSize(`Details: ${request.requestForDetails}`, 170);
-            doc.text(detailsLines, 20, yPosition);
-            yPosition += (detailsLines.length * 7);
-        }
+        // Bride Information
+        doc.setFont('helvetica', 'bold');
+        doc.text('BRIDE INFORMATION:', 20, yPosition);
+        yPosition += 10;
         
-        yPosition += 8;
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Name: ${request.brideName} ${request.brideMiddleName} ${request.brideSurname}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Date of Birth: ${formatDate(request.brideDOB)}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Age: ${request.brideAge}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Place of Birth: ${request.bridePOB || 'N/A'}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Residence: ${request.brideResidence || 'N/A'}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Father: ${request.brideFatherName || 'N/A'}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Mother: ${request.brideMotherMaidenName || 'N/A'}`, 20, yPosition);
+        yPosition += 7;
+        doc.text(`Contact: ${request.brideCP || 'N/A'}`, 20, yPosition);
+        yPosition += 15;
         
         // Payment Information
         doc.setFont('helvetica', 'bold');
@@ -1563,8 +1951,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         doc.setFont('helvetica', 'normal');
         doc.text(`Status: ${request.paymentStatus.toUpperCase()}`, 20, yPosition);
-        yPosition += 7;
-        doc.text(`Fee: ₱${request.fee || 500}.00`, 20, yPosition);
         yPosition += 7;
         
         if (request.paymentDate) {
@@ -1586,7 +1972,7 @@ document.addEventListener('DOMContentLoaded', function() {
         doc.text(`Page 1 of 1`, 190, pageHeight - 20, { align: 'right' });
         
         // Save the PDF
-        const fileName = `Blessing_Request_${request.name.replace(/\s+/g, '_')}.pdf`;
+        const fileName = `Marriage_Request_${request.coupleName.replace(/\s+/g, '_')}.pdf`;
         doc.save(fileName);
         
         showNotification('Request exported as PDF successfully!', 'success');
@@ -1622,10 +2008,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Set document properties
         doc.setProperties({
-            title: 'Blessing Requests Report',
-            subject: 'Multiple Blessing Requests',
+            title: 'Marriage Requests Report',
+            subject: 'Multiple Marriage Requests',
             author: 'San Jose Parish',
-            keywords: 'blessing, requests, parish, report',
+            keywords: 'marriage, requests, parish, report',
             creator: 'San Jose Parish Management System'
         });
         
@@ -1641,7 +2027,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         doc.setFontSize(16);
         doc.setTextColor(0, 0, 0);
-        doc.text('BLESSING REQUESTS REPORT', 105, 30, { align: 'center' });
+        doc.text('MARRIAGE REQUESTS REPORT', 105, 30, { align: 'center' });
         
         doc.setFontSize(10);
         doc.setTextColor(128, 128, 128);
@@ -1656,12 +2042,12 @@ document.addEventListener('DOMContentLoaded', function() {
         doc.setTextColor(0, 0, 0);
         
         // Draw table headers
-        doc.text('Name', 20, yPosition);
-        doc.text('Type', 60, yPosition);
-        doc.text('Date', 90, yPosition);
-        doc.text('Time', 120, yPosition);
-        doc.text('Status', 140, yPosition);
-        doc.text('Payment', 170, yPosition);
+        doc.text('Couple', 20, yPosition);
+        doc.text('Wedding Date', 60, yPosition);
+        doc.text('Time', 90, yPosition);
+        doc.text('Status', 120, yPosition);
+        doc.text('Payment', 150, yPosition);
+        doc.text('Fee', 180, yPosition);
         
         // Draw line under headers
         yPosition += 3;
@@ -1691,12 +2077,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 doc.setFont('helvetica', 'bold');
                 doc.setTextColor(0, 0, 0);
                 
-                doc.text('Name', 20, yPosition);
-                doc.text('Type', 60, yPosition);
-                doc.text('Date', 90, yPosition);
-                doc.text('Time', 120, yPosition);
-                doc.text('Status', 140, yPosition);
-                doc.text('Payment', 170, yPosition);
+                doc.text('Couple', 20, yPosition);
+                doc.text('Wedding Date', 60, yPosition);
+                doc.text('Time', 90, yPosition);
+                doc.text('Status', 120, yPosition);
+                doc.text('Payment', 150, yPosition);
+                doc.text('Fee', 180, yPosition);
                 
                 yPosition += 3;
                 doc.line(20, yPosition, 190, yPosition);
@@ -1708,13 +2094,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Add request data
-            const name = request.name.length > 20 ? request.name.substring(0, 20) + '...' : request.name;
-            doc.text(name, 20, yPosition);
-            doc.text(request.blessingType || 'N/A', 60, yPosition);
-            doc.text(formatDate(request.date), 90, yPosition);
-            doc.text(formatTime(request.time), 120, yPosition);
-            doc.text(request.status, 140, yPosition);
-            doc.text(request.paymentStatus, 170, yPosition);
+            const coupleName = request.coupleName.length > 25 ? request.coupleName.substring(0, 25) + '...' : request.coupleName;
+            doc.text(coupleName, 20, yPosition);
+            doc.text(formatDate(request.weddingDate), 60, yPosition);
+            doc.text(formatTime(request.weddingTime), 90, yPosition);
+            doc.text(request.status, 120, yPosition);
+            doc.text(request.paymentStatus, 150, yPosition);
+            doc.text(`₱${request.fee || 5000}`, 180, yPosition);
             
             yPosition += 5;
             rowCount++;
@@ -1734,7 +2120,7 @@ document.addEventListener('DOMContentLoaded', function() {
         doc.text('San Jose Parish Management System', 105, pageHeight - 10, { align: 'center' });
         
         // Save the PDF
-        const fileName = `Blessing_Requests_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+        const fileName = `Marriage_Requests_Report_${new Date().toISOString().split('T')[0]}.pdf`;
         doc.save(fileName);
         
         showNotification(`${requests.length} requests exported as PDF successfully!`, 'success');

@@ -234,10 +234,12 @@
       width: 100%;
     }
 
+    /* USER PROFILE STYLES - UPDATED */
     .user-profile {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
+      position: relative;
     }
 
     .user-profile i {
@@ -252,11 +254,112 @@
       transform: scale(1.1);
     }
 
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      margin-right: 10px;
+    }
+
+    .user-info span {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 14px;
+    }
+
+    .user-info small {
+      color: #7a7a7a;
+      font-size: 12px;
+    }
+
     .user-profile img {
       width: 40px;
       height: 40px;
       border-radius: 50%;
       object-fit: cover;
+      border: 2px solid #4CAF50;
+    }
+
+    /* Profile Dropdown */
+    .profile-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      min-width: 200px;
+      z-index: 1000;
+      display: none;
+      margin-top: 10px;
+    }
+
+    .profile-dropdown.show {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    .profile-header {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      background: #f8f9fa;
+    }
+
+    .profile-header h4 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 14px;
+    }
+
+    .profile-header p {
+      margin: 5px 0 0 0;
+      color: #7a7a7a;
+      font-size: 12px;
+    }
+
+    .profile-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .profile-menu li {
+      border-bottom: 1px solid #f1f1f1;
+    }
+
+    .profile-menu li:last-child {
+      border-bottom: none;
+    }
+
+    .profile-menu a {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      color: #495057;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .profile-menu a:hover {
+      background: #f8f9fa;
+      color: #4CAF50;
+    }
+
+    .profile-menu i {
+      margin-right: 10px;
+      width: 16px;
+      text-align: center;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Dashboard Section */
@@ -572,6 +675,10 @@
       .search-bar {
         width: 100%;
       }
+      
+      .user-info {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -588,7 +695,7 @@
     </div>
     <nav class="main-nav">
       <ul class="nav-links">
-        <li><a href="dashboard.html" class="active"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
+        <li><a href="websitedashboard.html" class="active"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
         <li class="nav-dropdown open">
           <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
           <ul class="dropdown-menu">
@@ -607,8 +714,6 @@
             <li><a href="pamisa.html"><span>Pamisa</span></a></li>
             <li><a href="blessing.html"><span>Blessing</span></a></li>
             <li><a href="pamisapatay.html"><span>Pamisa sa patay</span></a></li>
-        
-          
           </ul> 
         </li>
               <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
@@ -630,7 +735,24 @@
       <div class="user-profile">
         <i class="fa-solid fa-bell"></i>  
         <i class="fa-solid fa-comment-dots"></i>
-        <img src="../images/LOGO.png" alt="Admin Profile">
+        <div class="user-info">
+          <span id="userName">Loading...</span>
+          <small id="userRole">Staff</small>
+        </div>
+        <img src="../images/LOGO.png" alt="Admin Profile" id="userAvatar">
+        
+        <!-- Profile Dropdown -->
+        <div class="profile-dropdown" id="profileDropdown">
+          <div class="profile-header">
+            <h4 id="dropdownUserName">Loading...</h4>
+            <p id="dropdownUserRole">Staff Member</p>
+          </div>
+          <ul class="profile-menu">
+            <li><a href="profile.html"><i class="fas fa-user"></i> My Profile</a></li>
+            <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+            <li><a href="#" id="profileLogoutLink"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+          </ul>
+        </div>
       </div>
     </header>
 
@@ -679,9 +801,6 @@
           </div>
         </article>
       </div>
-
-     
-     
 
       <div class="main-sections">
         <div class="section-left">
@@ -735,8 +854,113 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>  
+// ==================== SESSION MANAGEMENT ====================
+
+// Check user session and redirect if not logged in
+function checkUserSession() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const userData = localStorage.getItem('user');
+    const userType = localStorage.getItem('userType');
+    
+    console.log('Session check:', { isLoggedIn, userType, userData });
+    
+    if (!isLoggedIn || !userData || userType !== 'staff') {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Access Denied',
+            text: 'Please login as staff to access this page',
+            timer: 2000,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = 'adminlogin.html';
+        });
+        return null;
+    }
+    
+    return JSON.parse(userData);
+}
+
+// Display user profile information
+function displayUserProfile() {
+    const userData = checkUserSession();
+    if (!userData) return;
+    
+    console.log('Displaying user profile:', userData);
+    
+    // Display user info in header
+    document.getElementById('userName').textContent = userData.name || 'Staff User';
+    document.getElementById('userRole').textContent = userData.role || 'Website Staff';
+    
+    // Display user info in dropdown
+    document.getElementById('dropdownUserName').textContent = userData.name || 'Staff User';
+    document.getElementById('dropdownUserRole').textContent = userData.role || 'Website Staff';
+    
+    // You can also add user avatar if available
+    const userAvatar = document.getElementById('userAvatar');
+    if (userData.avatar) {
+        userAvatar.src = userData.avatar;
+    }
+}
+
+// Profile dropdown functionality
+document.getElementById('userAvatar').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('profileDropdown');
+    dropdown.classList.toggle('show');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('profileDropdown');
+    const avatar = document.getElementById('userAvatar');
+    
+    if (!dropdown.contains(e.target) && !avatar.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// Logout functionality
+function setupLogout() {
+    const logoutLinks = document.querySelectorAll('#logoutLink, #profileLogoutLink');
+    
+    logoutLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            Swal.fire({
+                title: 'Logout Confirmation',
+                text: 'Are you sure you want to logout?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, logout!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Clear all stored data
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('userType');
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('loginTime');
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Logged Out!',
+                        text: 'You have been successfully logged out.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = 'adminlogin.html';
+                    });
+                }
+            });
+        });
+    });
+}
+
+// ==================== DASHBOARD FUNCTIONALITY ====================
+
 // Date formatting functions
 function formatDate(dateString) {
   if (!dateString) return 'TBA';
@@ -795,6 +1019,7 @@ function getDateField(sacrament) {
     'Baptism': 'baptismDate',
     'Confirmation': 'kumpilDate',
     'Holy Orders': 'ordinationDate',
+    'Matrimony': 'dateOfWedding',
     'Pamisa': 'date',
     'Funeral Service': 'scheduleDate',
     'Blessing': 'date'
@@ -808,6 +1033,7 @@ function getTimeField(sacrament) {
     'Baptism': 'baptismTime',
     'Confirmation': 'kumpilTime',
     'Holy Orders': 'ordinationTime',
+    'Matrimony': 'timeOfWedding',
     'Pamisa': 'time',
     'Funeral Service': 'scheduleTime',
     'Blessing': 'time'
@@ -821,6 +1047,7 @@ function getNameField(sacrament) {
     'Baptism': 'name',
     'Confirmation': 'confirmandName',
     'Holy Orders': 'name',
+    'Matrimony': 'groomName',
     'Pamisa': 'names',
     'Funeral Service': 'nameOfDeceased',
     'Blessing': 'name'
@@ -834,6 +1061,9 @@ function extractName(item, sacrament) {
   if (sacrament === 'Pamisa' && Array.isArray(item[nameField]) && item[nameField].length > 0) {
     return item[nameField][0];
   }
+  if (sacrament === 'Matrimony') {
+    return `${item.groomName} & ${item.brideName}`;
+  }
   return item[nameField] || 'Unknown';
 }
 
@@ -844,21 +1074,6 @@ function getWeekNumber(date) {
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-}
-
-// Get week range from week number
-function getWeekRange(weekNum, year) {
-  const firstDayOfYear = new Date(year, 0, 1);
-  const daysToAdd = (weekNum - 1) * 7;
-  const startDate = new Date(firstDayOfYear);
-  startDate.setDate(firstDayOfYear.getDate() + daysToAdd);
-  const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + 6);
-  
-  return {
-    start: startDate,
-    end: endDate
-  };
 }
 
 // ACCURATE DATA FETCHING FUNCTIONS
@@ -877,6 +1092,7 @@ async function fetchDashboardData() {
       { url: "http://localhost:5000/api/baptism", type: 'Baptism' },
       { url: "http://localhost:5000/api/confirmation", type: 'Confirmation' },
       { url: "http://localhost:5000/api/holy-orders", type: 'Holy Orders' },
+      { url: "http://localhost:5000/api/marriage", type: 'Matrimony' },
       { url: "http://localhost:5000/api/pamisa", type: 'Pamisa' },
       { url: "http://localhost:5000/api/funeralrequests", type: 'Funeral Service' },
       { url: "http://localhost:5000/api/blessing", type: 'Blessing' }
@@ -890,7 +1106,7 @@ async function fetchDashboardData() {
         return data.map(item => ({ ...item, sacrament: endpoint.type }));
       } catch (error) {
         console.error(`Error fetching ${endpoint.type}:`, error);
-        return []; // Return empty array if fetch fails
+        return [];
       }
     });
 
@@ -1030,22 +1246,22 @@ async function fetchDashboardData() {
 
     // --- Monthly Sacraments Chart - ACCURATE DATA ---
     try {
-      // Initialize arrays for each sacrament type
       const sacramentCounts = {
         'Baptism': Array(12).fill(0),
         'Confirmation': Array(12).fill(0),
         'Holy Orders': Array(12).fill(0),
+        'Matrimony': Array(12).fill(0),
         'Pamisa': Array(12).fill(0),
         'Funeral Service': Array(12).fill(0),
         'Blessing': Array(12).fill(0)
       };
 
-      // Count sacraments by month using CREATED DATE (not schedule date)
+      // Count sacraments by month using CREATED DATE
       allSacraments.forEach(item => {
         if (item.createdAt) {
           try {
             const createdDate = new Date(item.createdAt);
-            const month = createdDate.getMonth(); // 0-11
+            const month = createdDate.getMonth();
             const sacramentType = item.sacrament;
             
             if (sacramentCounts[sacramentType] && month >= 0 && month < 12) {
@@ -1086,6 +1302,13 @@ async function fetchDashboardData() {
               borderWidth: 1
             },
             {
+              label: "Matrimony",
+              data: sacramentCounts['Matrimony'],
+              backgroundColor: "#e74a3b",
+              borderColor: "#e74a3b",
+              borderWidth: 1
+            },
+            {
               label: "Pamisa",
               data: sacramentCounts['Pamisa'],
               backgroundColor: "#f6c23e",
@@ -1095,8 +1318,8 @@ async function fetchDashboardData() {
             {
               label: "Funeral",
               data: sacramentCounts['Funeral Service'],
-              backgroundColor: "#e74a3b",
-              borderColor: "#e74a3b",
+              backgroundColor: "#5a5c69",
+              borderColor: "#5a5c69",
               borderWidth: 1
             },
             {
@@ -1112,10 +1335,31 @@ async function fetchDashboardData() {
           responsive: true, 
           maintainAspectRatio: false,
           plugins: {
-            title: { display: true, text: 'Sacraments Created This Year' }
+            title: { display: true, text: 'Sacraments Created This Year' },
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                font: {
+                  size: 11
+                }
+              }
+            }
           },
           scales: {
-            y: { beginAtZero: true }
+            y: { 
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Requests'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Months'
+              }
+            }
           }
         }
       });
@@ -1123,7 +1367,7 @@ async function fetchDashboardData() {
       console.error("Error creating sacrament chart:", error);
     }
 
-    // --- Upcoming Schedules Table - ACCURATE DATA ---
+    // --- Upcoming Schedules Table ---
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -1154,7 +1398,7 @@ async function fetchDashboardData() {
             return 0;
           }
         })
-        .slice(0, 10); // Show top 10 upcoming
+        .slice(0, 10);
 
       const upcomingBody = document.getElementById("upcoming-schedule-body");
       
@@ -1198,9 +1442,17 @@ async function fetchDashboardData() {
   }
 }
 
+// ==================== INITIALIZATION ====================
+
 // Initialize dashboard when page loads
 document.addEventListener("DOMContentLoaded", function() {
   console.log("🚀 Initializing dashboard...");
+  
+  // FIRST: Check user session and display profile
+  displayUserProfile();
+  setupLogout();
+  
+  // THEN: Load dashboard data
   fetchDashboardData();
 });
 

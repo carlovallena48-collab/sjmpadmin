@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Baptism Requests - San Jose Dashboard</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<!-- Add jsPDF library for export functionality -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -69,7 +68,7 @@ body {
     min-height: 100vh;
 }
 
-/* Enhanced Sidebar with Animations - FROM DASHBOARD */
+/* Enhanced Sidebar */
 .sidebar {
     width: 260px;
     background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
@@ -321,7 +320,7 @@ body {
     transform: scale(1.05);
 }
 
-/* Enhanced Dashboard Widgets */
+/* Updated Dashboard Widgets */
 .dashboard-widgets {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -370,52 +369,6 @@ body {
     margin: 0;
     color: var(--color-text-primary);
 }
-
-.status-widget {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
-    padding: var(--space-md);
-}
-
-.status-widget h4 {
-    margin-bottom: var(--space-md);
-    width: 100%;
-    text-align: center;
-    font-size: 1.1rem;
-    color: var(--color-primary);
-}
-
-.status-count {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    font-weight: 600;
-    color: var(--color-text-primary);
-    padding: 8px 0;
-    width: 100%;
-    transition: all var(--transition-fast);
-    border-radius: var(--radius-sm);
-}
-
-.status-count:hover {
-    background-color: var(--color-hover);
-    padding-left: 10px;
-}
-
-.status-count i {
-    font-size: 1.2rem;
-    width: 20px;
-    text-align: center;
-}
-
-.status-count.pending { color: #FFA000; }
-.status-count.in-process { color: #1976d2; }
-.status-count.scheduled { color: #388e3c; }
-.status-count.completed { color: #2e7d32; }
-.status-count.approved { color: #1b5e20; }
-.status-count.rejected { color: #c62828; }
-.status-count.cancelled { color: #757575; }
 
 .requests-section {
     margin-top: var(--space-xl);
@@ -594,21 +547,6 @@ body {
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 10px;
     margin-bottom: 15px;
-}
-
-.modal-header-with-export {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
-
-.modal-header-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
 }
 
 .modal .close-btn {
@@ -1181,7 +1119,6 @@ body {
             <li><a href="pamisa.html"><span>Pamisa</span></a></li>
             <li><a href="blessing.html"><span>Blessing</span></a></li>
             <li><a href="pamisapatay.html"><span>Pamisa sa patay</span></a></li>
-          
           </ul> 
         </li>
               <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
@@ -1203,64 +1140,26 @@ body {
             <div class="user-profile">
                 <i class="fa-solid fa-bell"></i>
                 <i class="fa-solid fa-comment-dots"></i>
-                <img src="images/LOGO.png" alt="User Profile">
+                <img src="../images/LOGO.png" alt="User Profile">
             </div>
         </header>
 
-        <div class="dashboard-widgets">
-            <div class="widget-card">
-                <i class="fa-solid fa-list-check"></i>
-                <div class="widget-content">
-                    <h4>Total Requests</h4>
-                    <p id="totalRequests">0</p>
-                </div>
-            </div>
-            <div class="widget-card status-widget">
-                <h4>Requests by Status</h4>
-                <div class="status-count pending">
-                    <i class="fa-solid fa-clock"></i>
-                    <span id="pendingCount">0</span>
-                    <span>Pending</span>
-                </div>
-                <div class="status-count in-process">
-                    <i class="fa-solid fa-gears"></i>
-                    <span id="inProcessCount">0</span>
-                    <span>In Process</span>
-                </div>
-                <div class="status-count scheduled">
-                    <i class="fa-solid fa-calendar-check"></i>
-                    <span id="scheduledCount">0</span>
-                    <span>Scheduled</span>
-                </div>
-                <div class="status-count completed">
-                    <i class="fa-solid fa-check-circle"></i>
-                    <span id="completedCount">0</span>
-                    <span>Completed</span>
-                </div>
-                <div class="status-count approved">
-                    <i class="fa-solid fa-thumbs-up"></i>
-                    <span id="approvedCount">0</span>
-                    <span>Approved</span>
-                </div>
-                <div class="status-count rejected">
-                    <i class="fa-solid fa-ban"></i>
-                    <span id="rejectedCount">0</span>
-                    <span>Rejected</span>
-                </div>
-                <div class="status-count cancelled">
-                    <i class="fa-solid fa-xmark"></i>
-                    <span id="cancelledCount">0</span>
-                    <span>Cancelled</span>
-                </div>
-            </div>
-            <div class="widget-card">
-                <i class="fa-solid fa-calendar-days"></i>
-                <div class="widget-content">
-                    <h4>Upcoming Baptisms</h4>
-                    <p id="upcomingCount">0</p>
-                </div>
-            </div>
+       <div class="dashboard-widgets">
+    <div class="widget-card">
+        <i class="fa-solid fa-list-check"></i>
+        <div class="widget-content">
+            <h4>Total Requests</h4>
+            <p id="totalRequests">0</p>
         </div>
+    </div>
+    <div class="widget-card">
+        <i class="fa-solid fa-calendar-days"></i>
+        <div class="widget-content">
+            <h4>Upcoming Baptisms</h4>
+            <p id="upcomingCount">0</p>
+        </div>
+    </div>
+</div>
 
         <!-- Status Workflow Guide -->
         <div class="status-workflow">
@@ -1542,7 +1441,7 @@ body {
 const { jsPDF } = window.jspdf;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Sidebar toggle functionality - FROM DASHBOARD
+    // Sidebar toggle functionality
     const sidebarToggle = document.querySelector('.sidebar-toggle');
     const sidebar = document.querySelector('.sidebar');
     
@@ -1552,7 +1451,7 @@ document.addEventListener('DOMContentLoaded', function() {
         this.querySelector('i').classList.toggle('fa-times');
     });
 
-    // Dropdown functionality - FROM DASHBOARD
+    // Dropdown functionality
     document.querySelectorAll('.nav-dropdown > a').forEach(function(dropdown) {
         dropdown.addEventListener('click', function(e) {
             e.preventDefault();
@@ -1571,13 +1470,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const emptyState = document.getElementById('emptyState');
     const filterButtons = document.querySelectorAll('.filter-buttons button');
     const totalRequestsCount = document.getElementById('totalRequests');
-    const pendingCount = document.getElementById('pendingCount');
-    const inProcessCount = document.getElementById('inProcessCount');
-    const scheduledCount = document.getElementById('scheduledCount');
-    const completedCount = document.getElementById('completedCount');
-    const approvedCount = document.getElementById('approvedCount');
-    const rejectedCount = document.getElementById('rejectedCount');
-    const cancelledCount = document.getElementById('cancelledCount');
     const upcomingCount = document.getElementById('upcomingCount');
     const headerSearchInput = document.getElementById('headerSearch');
     const tableSearchInput = document.getElementById('tableSearch');
@@ -2161,28 +2053,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateCounts(data){
-        totalRequestsCount.textContent = data.length;
-        pendingCount.textContent = data.filter(r => r.status === 'pending').length;
-        inProcessCount.textContent = data.filter(r => r.status === 'in-process').length;
-        scheduledCount.textContent = data.filter(r => r.status === 'scheduled').length;
-        completedCount.textContent = data.filter(r => r.status === 'completed').length;
-        approvedCount.textContent = data.filter(r => r.status === 'approved').length;
-        rejectedCount.textContent = data.filter(r => r.status === 'rejected').length;
-        cancelledCount.textContent = data.filter(r => r.status === 'cancelled').length;
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); 
-        upcomingCount.textContent = data.filter(r => {
-            if (!r.baptismDate) return false;
-            try {
-                const baptismDate = new Date(r.baptismDate);
-                baptismDate.setHours(0, 0, 0, 0);
-                return baptismDate >= today && (r.status === 'scheduled' || r.status === 'in-process');
-            } catch (e) {
-                return false;
-            }
-        }).length;
-    }
+    totalRequestsCount.textContent = data.length;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    upcomingCount.textContent = data.filter(r => {
+        if (!r.baptismDate) return false;
+        try {
+            const baptismDate = new Date(r.baptismDate);
+            baptismDate.setHours(0, 0, 0, 0);
+            return baptismDate >= today && (r.status === 'scheduled' || r.status === 'in-process');
+        } catch (e) {
+            return false;
+        }
+    }).length;
+}
 
     function showNotification(message, type='success'){
         const alert = document.createElement('div');

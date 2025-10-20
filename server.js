@@ -34,6 +34,19 @@ const adminSchema = new mongoose.Schema({
 
 const AdminAccount = mongoose.model("AdminAccount", adminSchema, "adminaccount");
 
+// Website Admin (Staff) Account
+const websiteAdminSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  username: { type: String, unique: true, required: true, trim: true, lowercase: true },
+  password: { type: String, required: true },
+  role: { type: String, default: "Website Manager" },
+  permissions: { type: [String], default: ["announcements", "events"] },
+  address: String,
+  contact: String,
+}, { suppressReservedKeysWarning: true });
+
+const WebsiteAdmin = mongoose.model("WebsiteAdmin", websiteAdminSchema, "websiteadmins");
+
 // User Account
 const userSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
@@ -318,6 +331,111 @@ const certificateSchema = new mongoose.Schema({
 const CertificateRequest = mongoose.model("CertificateRequest", certificateSchema, "certificaterequests");
 
 /* =========================================================
+  MARRIAGE REQUEST SCHEMA
+  ========================================================= */
+const marriageSchema = new mongoose.Schema({
+  sacrament: { type: String, default: "Marriage" },
+  // Wedding Details
+  dateOfWedding: { type: String, required: true },
+  timeOfWedding: { type: String, required: true },
+  // Groom Information
+  groomName: { type: String, required: true },
+  groomMiddleName: { type: String, required: true },
+  groomSurname: { type: String, required: true },
+  groomDOB: { type: String, required: true },
+  groomAge: { type: String, required: true },
+  groomPOB: { type: String, required: true },
+  groomResidence: { type: String, required: true },
+  groomFatherName: { type: String, required: true },
+  groomMotherMaidenName: { type: String, required: true },
+  groomCP: { type: String, required: true },
+  // Bride Information
+  brideName: { type: String, required: true },
+  brideMiddleName: { type: String, required: true },
+  brideSurname: { type: String, required: true },
+  brideDOB: { type: String, required: true },
+  brideAge: { type: String, required: true },
+  bridePOB: { type: String, required: true },
+  brideResidence: { type: String, required: true },
+  brideFatherName: { type: String, required: true },
+  brideMotherMaidenName: { type: String, required: true },
+  brideCP: { type: String, required: true },
+  // Documents
+  groomMarriageLicense: String,
+  groomBaptismalCert: String,
+  groomConfirmationCert: String,
+  groomMarriageBannsPermission: String,
+  brideMarriageLicense: String,
+  brideBaptismalCert: String,
+  brideConfirmationCert: String,
+  brideMarriageBannsPermission: String,
+  // Schedule
+  interviewDate: String,
+  interviewTime: String,
+  seminarDate: String,
+  seminarTime: String,
+  // Sponsors
+  sponsors: [String],
+  // Signatures
+  groomSignature: String,
+  brideSignature: String,
+  // Status and Payment
+  status: { type: String, default: "pending" },
+  paymentStatus: { type: String, default: "pending" },
+  fee: { type: Number, default: 5000 },
+  // System Fields
+  submittedByEmail: { type: String, required: true },
+  requestNumber: { type: String, required: true },
+  // REASON SYSTEM FIELDS
+  cancellation_reason: String,
+  rejection_reason: String,
+  cancelled_by: String,
+  rejected_by: String,
+  cancelled_at: Date,
+  rejected_at: Date,
+  // PAYMENT INFORMATION
+  paymentDate: String,
+  paymentMethod: String,
+  paymentReference: String,
+  paymentNotes: String,
+  // TIMESTAMPS
+  createdAt: { type: Date, default: Date.now },
+  lastUpdated: { type: Date, default: Date.now }
+}, { suppressReservedKeysWarning: true });
+
+const MarriageRequest = mongoose.model("MarriageRequest", marriageSchema, "marriagerequests");
+
+/* =========================================================
+  VOLUNTEER APPLICATIONS SCHEMA
+  ========================================================= */
+const volunteerSchema = new mongoose.Schema({
+    ministry: { type: String, required: true },
+    fullName: { type: String, required: true },
+    email: { type: String, required: true },
+    contactNumber: { type: String, required: true },
+    submittedByEmail: { type: String, required: true },
+    status: { type: String, default: "pending" },
+    applicationDate: { type: Date, required: true },
+    requestNumber: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+    lastUpdated: { type: Date, default: Date.now },
+    processedBy: { type: String, default: null },
+    processedDate: { type: Date, default: null },
+    notes: { type: String, default: "" },
+    requirements: {
+        orientation: { type: Boolean, default: false },
+        training: { type: Boolean, default: false },
+        documents: { type: Boolean, default: false }
+    },
+    // REASON SYSTEM FIELDS
+    rejection_reason: String,
+    rejected_by: String,
+    rejected_at: Date
+}, { suppressReservedKeysWarning: true });
+
+const VolunteerApplication = mongoose.model("VolunteerApplication", volunteerSchema, "volunteerapplications");
+
+/* =========================================================
   HELPER FUNCTIONS
   ========================================================= */
 async function logActivity(action, collectionName, fullName, email) {
@@ -346,40 +464,71 @@ function formatTimeForDisplay(timeString) {
 }
 
 /* =========================================================
-  ADMIN ROUTES
+  AUTHENTICATION ROUTES
   ========================================================= */
+
+// REGISTER - FIXED: Now properly handles both admin and staff registration
 app.post("/register", async (req, res) => {
   const { name, username, password, role, address, contact } = req.body;
   if (!name || !username || !password) return res.status(400).json({ success: false, message: "Name, username, and password are required" });
 
   try {
-    const existing = await AdminAccount.findOne({ username: username.trim().toLowerCase() });
-    if (existing) return res.status(409).json({ success: false, message: "Username taken" });
+    // Check if username exists in either collection
+    const existingAdmin = await AdminAccount.findOne({ username: username.trim().toLowerCase() });
+    const existingWebsiteAdmin = await WebsiteAdmin.findOne({ username: username.trim().toLowerCase() });
+    
+    if (existingAdmin || existingWebsiteAdmin) {
+      return res.status(409).json({ success: false, message: "Username taken" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newAdmin = await AdminAccount.create({
-      name: name.trim(),
-      username: username.trim().toLowerCase(),
-      password: hashedPassword,
-      role: role || "Admin",
-      address,
-      contact,
+    
+    // Determine which collection to use based on role
+    let newUser;
+    if (role === 'staff') {
+      // Save to WebsiteAdmin collection for staff
+      newUser = await WebsiteAdmin.create({
+        name: name.trim(),
+        username: username.trim().toLowerCase(),
+        password: hashedPassword,
+        role: "Website Manager",
+        permissions: ["announcements", "events"],
+        address,
+        contact,
+      });
+      await logActivity("CREATE", "websiteadmins", name, username);
+    } else {
+      // Save to AdminAccount collection for super admin
+      newUser = await AdminAccount.create({
+        name: name.trim(),
+        username: username.trim().toLowerCase(),
+        password: hashedPassword,
+        role: role || "Admin",
+        address,
+        contact,
+      });
+      await logActivity("CREATE", "adminaccount", name, username);
+    }
+
+    res.json({ 
+      success: true, 
+      message: "Account registered successfully", 
+      user: newUser,
+      userType: role === 'staff' ? 'staff' : 'admin'
     });
-
-    await logActivity("CREATE", "adminaccount", name, username);
-
-    res.json({ success: true, message: "Admin registered", user: newAdmin });
   } catch (err) {
     console.error("❌ Error in /register:", err.message);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
+// SUPER ADMIN LOGIN - FIXED: Only allows AdminAccount users
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).json({ success: false, message: "Username and password required" });
 
   try {
+    // Only check AdminAccount collection for super admin login
     const admin = await AdminAccount.findOne({ username: username.trim().toLowerCase() });
     if (!admin) return res.status(401).json({ success: false, message: "Invalid credentials" });
 
@@ -389,16 +538,49 @@ app.post("/login", async (req, res) => {
 
     if (!match) return res.status(401).json({ success: false, message: "Invalid credentials" });
 
-    res.json({ success: true, user: admin });
+    res.json({ 
+      success: true, 
+      user: admin,
+      userType: 'admin' // Always return admin type for this route
+    });
   } catch (err) {
     console.error("❌ Error in /login:", err.message);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
+// WEBSITE STAFF LOGIN - FIXED: Only allows WebsiteAdmin users
+app.post("/website/login", async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ success: false, message: "Username and password required" });
+
+  try {
+    // Only check WebsiteAdmin collection for staff login
+    const admin = await WebsiteAdmin.findOne({ username: username.trim().toLowerCase() });
+    if (!admin) return res.status(401).json({ success: false, message: "Invalid credentials" });
+
+    const match = admin.password.startsWith("$2")
+      ? await bcrypt.compare(password, admin.password)
+      : password === admin.password;
+
+    if (!match) return res.status(401).json({ success: false, message: "Invalid credentials" });
+
+    res.json({ 
+      success: true, 
+      user: admin,
+      userType: 'staff' // Always return staff type for this route
+    });
+  } catch (err) {
+    console.error("❌ Error in /website/login:", err.message);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 /* =========================================================
-  BAPTISM ROUTES
+  SACRAMENT REQUEST ROUTES
   ========================================================= */
+
+// BAPTISM ROUTES
 app.post("/api/baptism", async (req, res) => {
   try {
     const baptismFees = { 'solo': 500, 'common': 300 };
@@ -469,9 +651,7 @@ app.delete("/api/baptism/:id", async (req, res) => {
   }
 });
 
-/* =========================================================
-  CONFIRMATION ROUTES
-  ========================================================= */
+// CONFIRMATION ROUTES
 app.post("/api/confirmation", async (req, res) => {
   try {
     console.log("📥 Received confirmation request:", req.body);
@@ -599,9 +779,7 @@ app.delete("/api/confirmation/:id", async (req, res) => {
   }
 });
 
-/* =========================================================
-  HOLY ORDERS ROUTES
-  ========================================================= */
+// HOLY ORDERS ROUTES
 app.post("/api/holy-orders", async (req, res) => {
   try {
     console.log("📥 Received holy orders request:", req.body);
@@ -706,11 +884,7 @@ app.delete("/api/holy-orders/:id", async (req, res) => {
   }
 });
 
-/* =========================================================
-  PAMISA ROUTES - REGULAR MASS
-  ========================================================= */
-
-// CREATE Pamisa Request - REGULAR MASS
+// PAMISA ROUTES - REGULAR MASS
 app.post("/api/pamisa", async (req, res) => {
   try {
     console.log("📥 Received pamisa request:", req.body);
@@ -747,7 +921,6 @@ app.post("/api/pamisa", async (req, res) => {
   }
 });
 
-// GET all Pamisa Requests
 app.get("/api/pamisa", async (req, res) => {
   try {
     console.log("📤 Fetching all pamisa requests...");
@@ -760,7 +933,6 @@ app.get("/api/pamisa", async (req, res) => {
   }
 });
 
-// UPDATE Pamisa Status
 app.put("/api/pamisa/:id", async (req, res) => {
   try {
     console.log("🔄 Updating pamisa request:", req.params.id, req.body);
@@ -813,7 +985,6 @@ app.put("/api/pamisa/:id", async (req, res) => {
   }
 });
 
-// UPDATE Pamisa Payment
 app.put("/api/pamisa/:id/payment", async (req, res) => {
   try {
     console.log("💰 Updating payment for pamisa request:", req.params.id, req.body);
@@ -844,7 +1015,6 @@ app.put("/api/pamisa/:id/payment", async (req, res) => {
   }
 });
 
-// DELETE Pamisa Request
 app.delete("/api/pamisa/:id", async (req, res) => {
   try {
     const deletedRequest = await PamisaRequest.findByIdAndDelete(req.params.id);
@@ -857,11 +1027,7 @@ app.delete("/api/pamisa/:id", async (req, res) => {
   }
 });
 
-/* =========================================================
-  FUNERAL REQUEST ROUTES (PAMISA SA PATAY)
-  ========================================================= */
-
-// CREATE Funeral Request
+// FUNERAL REQUEST ROUTES (PAMISA SA PATAY)
 app.post("/api/funeralrequests", async (req, res) => {
   try {
     console.log("📥 Received funeral request:", req.body);
@@ -907,7 +1073,6 @@ app.post("/api/funeralrequests", async (req, res) => {
   }
 });
 
-// GET all Funeral Requests
 app.get("/api/funeralrequests", async (req, res) => {
   try {
     console.log("📤 Fetching all funeral requests...");
@@ -920,7 +1085,6 @@ app.get("/api/funeralrequests", async (req, res) => {
   }
 });
 
-// UPDATE Funeral Status
 app.put("/api/funeralrequests/:id", async (req, res) => {
   try {
     console.log("🔄 Updating funeral request:", req.params.id, req.body);
@@ -975,7 +1139,6 @@ app.put("/api/funeralrequests/:id", async (req, res) => {
   }
 });
 
-// UPDATE Funeral Payment
 app.put("/api/funeralrequests/:id/payment", async (req, res) => {
   try {
     console.log("💰 Updating payment for funeral request:", req.params.id, req.body);
@@ -1006,7 +1169,6 @@ app.put("/api/funeralrequests/:id/payment", async (req, res) => {
   }
 });
 
-// DELETE Funeral Request
 app.delete("/api/funeralrequests/:id", async (req, res) => {
   try {
     const deletedRequest = await FuneralRequest.findByIdAndDelete(req.params.id);
@@ -1019,11 +1181,7 @@ app.delete("/api/funeralrequests/:id", async (req, res) => {
   }
 });
 
-/* =========================================================
-  BLESSING ROUTES - FIXED VERSION
-  ========================================================= */
-
-// GET all Blessing Requests - FIXED
+// BLESSING ROUTES - FIXED VERSION
 app.get("/api/blessing", async (req, res) => {
   try {
     console.log("📤 Fetching all blessing requests...");
@@ -1036,7 +1194,6 @@ app.get("/api/blessing", async (req, res) => {
   }
 });
 
-// CREATE Blessing Request - FIXED
 app.post("/api/blessing", async (req, res) => {
   try {
     console.log("📥 Received blessing request:", req.body);
@@ -1114,7 +1271,6 @@ app.post("/api/blessing", async (req, res) => {
   }
 });
 
-// UPDATE Blessing Request - FIXED
 app.put("/api/blessing/:id", async (req, res) => {
   try {
     console.log("🔄 Updating blessing request:", req.params.id, req.body);
@@ -1166,7 +1322,6 @@ app.put("/api/blessing/:id", async (req, res) => {
   }
 });
 
-// UPDATE Blessing Payment - FIXED
 app.put("/api/blessing/:id/payment", async (req, res) => {
   try {
     console.log("💰 Updating payment for blessing request:", req.params.id, req.body);
@@ -1200,7 +1355,6 @@ app.put("/api/blessing/:id/payment", async (req, res) => {
   }
 });
 
-// DELETE Blessing Request
 app.delete("/api/blessing/:id", async (req, res) => {
   try {
     const deletedRequest = await BlessingRequest.findByIdAndDelete(req.params.id);
@@ -1213,11 +1367,147 @@ app.delete("/api/blessing/:id", async (req, res) => {
   }
 });
 
-/* =========================================================
-  CERTIFICATE REQUEST ROUTES - FIXED READY STATUS
-  ========================================================= */
+// MARRIAGE ROUTES
+app.post("/api/marriage", async (req, res) => {
+  try {
+    console.log("📥 Received marriage request:", req.body);
+    
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 10);
+    const requestNumber = `MARRIAGE-${timestamp}-${randomString}`;
+    
+    const requestData = {
+      ...req.body,
+      requestNumber: requestNumber,
+      status: 'pending',
+      paymentStatus: 'pending',
+      fee: 5000,
+      submittedByEmail: req.body.submittedByEmail || 'admin@sjmp.com',
+      createdAt: new Date(),
+      lastUpdated: new Date()
+    };
+    
+    console.log("📝 Processed marriage request data:", requestData);
+    
+    const newRequest = await MarriageRequest.create(requestData);
+    await logActivity("CREATE", "marriagerequests", `${newRequest.groomName} & ${newRequest.brideName}`, newRequest.submittedByEmail);
+    console.log("✅ Marriage request created:", newRequest);
+    res.status(201).json(newRequest);
+  } catch (err) {
+    console.error("❌ Failed to create marriage request:", err.message);
+    res.status(400).json({ message: "Failed to create marriage request: " + err.message });
+  }
+});
 
-// CREATE Certificate Request
+app.get("/api/marriage", async (req, res) => {
+  try {
+    console.log("📤 Fetching all marriage requests...");
+    const requests = await MarriageRequest.find().sort({ createdAt: -1 }).lean();
+    console.log(`✅ Found ${requests.length} marriage requests`);
+    res.json(requests);
+  } catch (err) {
+    console.error("❌ Failed to fetch marriage requests:", err.message);
+    res.status(500).json({ message: "Failed to fetch marriage requests: " + err.message });
+  }
+});
+
+app.put("/api/marriage/:id", async (req, res) => {
+  try {
+    console.log("🔄 Updating marriage request:", req.params.id, req.body);
+    
+    const updateData = { 
+      ...req.body,
+      lastUpdated: new Date()
+    };
+    const actionBy = 'admin';
+    
+    if (updateData.status === 'cancelled' && updateData.cancellation_reason) {
+      updateData.cancelled_by = actionBy;
+      updateData.cancelled_at = new Date();
+      updateData.rejection_reason = '';
+      updateData.rejected_by = '';
+      updateData.rejected_at = null;
+    } else if (updateData.status === 'rejected' && updateData.rejection_reason) {
+      updateData.rejected_by = actionBy;
+      updateData.rejected_at = new Date();
+      updateData.cancellation_reason = '';
+      updateData.cancelled_by = '';
+      updateData.cancelled_at = null;
+    } else if (updateData.status === 'pending') {
+      updateData.cancellation_reason = '';
+      updateData.rejection_reason = '';
+      updateData.cancelled_by = '';
+      updateData.rejected_by = '';
+      updateData.cancelled_at = null;
+      updateData.rejected_at = null;
+    }
+    
+    const updatedRequest = await MarriageRequest.findByIdAndUpdate(
+      req.params.id, 
+      updateData, 
+      { new: true }
+    );
+    
+    if (!updatedRequest) {
+      console.log("❌ Marriage request not found:", req.params.id);
+      return res.status(404).json({ message: "Request not found" });
+    }
+    
+    await logActivity("UPDATE", "marriagerequests", `${updatedRequest.groomName} & ${updatedRequest.brideName}`, updatedRequest.submittedByEmail);
+    console.log("✅ Marriage request updated:", updatedRequest);
+    res.json(updatedRequest);
+  } catch (err) {
+    console.error("❌ Failed to update marriage request:", err.message);
+    res.status(400).json({ message: "Failed to update request: " + err.message });
+  }
+});
+
+app.put("/api/marriage/:id/payment", async (req, res) => {
+  try {
+    console.log("💰 Updating payment for marriage request:", req.params.id, req.body);
+    
+    const paymentData = {
+      paymentStatus: 'paid',
+      paymentDate: req.body.paymentDate,
+      paymentMethod: req.body.paymentMethod,
+      paymentReference: req.body.paymentReference,
+      paymentNotes: req.body.paymentNotes,
+      lastUpdated: new Date()
+    };
+    
+    const updatedRequest = await MarriageRequest.findByIdAndUpdate(
+      req.params.id,
+      paymentData,
+      { new: true }
+    );
+    
+    if (!updatedRequest) {
+      console.log("❌ Marriage request not found:", req.params.id);
+      return res.status(404).json({ message: "Request not found" });
+    }
+    
+    await logActivity("PAYMENT_UPDATE", "marriagerequests", `${updatedRequest.groomName} & ${updatedRequest.brideName}`, updatedRequest.submittedByEmail);
+    console.log("✅ Payment updated for marriage request:", updatedRequest);
+    res.json(updatedRequest);
+  } catch (err) {
+    console.error("❌ Failed to update payment for marriage:", err.message);
+    res.status(400).json({ message: "Failed to update payment: " + err.message });
+  }
+});
+
+app.delete("/api/marriage/:id", async (req, res) => {
+  try {
+    const deletedRequest = await MarriageRequest.findByIdAndDelete(req.params.id);
+    if (!deletedRequest) return res.status(404).json({ message: "Request not found" });
+    await logActivity("DELETE", "marriagerequests", `${deletedRequest.groomName} & ${deletedRequest.brideName}`, deletedRequest.submittedByEmail);
+    res.json({ message: "Request deleted" });
+  } catch (err) {
+    console.error("❌ Failed to delete marriage request:", err.message);
+    res.status(400).json({ message: "Failed to delete request" });
+  }
+});
+
+// CERTIFICATE REQUEST ROUTES - FIXED READY STATUS
 app.post("/api/certificates", async (req, res) => {
   try {
     console.log("📥 Received certificate request:", req.body);
@@ -1263,7 +1553,6 @@ app.post("/api/certificates", async (req, res) => {
   }
 });
 
-// GET all Certificate Requests
 app.get("/api/certificates", async (req, res) => {
   try {
     console.log("📤 Fetching all certificate requests...");
@@ -1276,7 +1565,6 @@ app.get("/api/certificates", async (req, res) => {
   }
 });
 
-// GET single Certificate Request
 app.get("/api/certificates/:id", async (req, res) => {
   try {
     console.log("📤 Fetching certificate request:", req.params.id);
@@ -1293,7 +1581,6 @@ app.get("/api/certificates/:id", async (req, res) => {
   }
 });
 
-// UPDATE Certificate Status - FIXED READY STATUS
 app.put("/api/certificates/:id", async (req, res) => {
   try {
     console.log("🔄 Updating certificate request:", req.params.id, req.body);
@@ -1384,7 +1671,6 @@ app.put("/api/certificates/:id", async (req, res) => {
   }
 });
 
-// DELETE Certificate Request
 app.delete("/api/certificates/:id", async (req, res) => {
   try {
     console.log("🗑️ Deleting certificate request:", req.params.id);
@@ -1400,6 +1686,81 @@ app.delete("/api/certificates/:id", async (req, res) => {
     console.error("❌ Failed to delete certificate request:", err.message);
     res.status(400).json({ message: "Failed to delete certificate request" });
   }
+});
+
+// VOLUNTEER APPLICATIONS ROUTES
+app.get("/api/volunteer", async (req, res) => {
+    try {
+        console.log("📤 Fetching all volunteer applications...");
+        const applications = await VolunteerApplication.find().sort({ createdAt: -1 }).lean();
+        console.log(`✅ Found ${applications.length} volunteer applications`);
+        res.json(applications);
+    } catch (err) {
+        console.error("❌ Failed to fetch volunteer applications:", err.message);
+        res.status(500).json({ message: "Failed to fetch volunteer applications: " + err.message });
+    }
+});
+
+app.put("/api/volunteer/:id", async (req, res) => {
+    try {
+        console.log("🔄 Updating volunteer application:", req.params.id, req.body);
+        
+        const updateData = { 
+            ...req.body,
+            lastUpdated: new Date()
+        };
+        const actionBy = 'admin';
+        
+        // REASON SYSTEM HANDLING
+        if (updateData.status === 'rejected' && updateData.rejection_reason) {
+            updateData.rejected_by = actionBy;
+            updateData.rejected_at = new Date();
+            updateData.processedBy = null;
+            updateData.processedDate = null;
+        } else if (updateData.status === 'approved') {
+            updateData.processedBy = actionBy;
+            updateData.processedDate = new Date();
+            updateData.rejection_reason = '';
+            updateData.rejected_by = '';
+            updateData.rejected_at = null;
+        } else if (updateData.status === 'pending') {
+            updateData.rejection_reason = '';
+            updateData.rejected_by = '';
+            updateData.rejected_at = null;
+            updateData.processedBy = null;
+            updateData.processedDate = null;
+        }
+        
+        const updatedApplication = await VolunteerApplication.findByIdAndUpdate(
+            req.params.id, 
+            updateData, 
+            { new: true }
+        );
+        
+        if (!updatedApplication) {
+            console.log("❌ Volunteer application not found:", req.params.id);
+            return res.status(404).json({ message: "Application not found" });
+        }
+        
+        await logActivity("UPDATE", "volunteerapplications", updatedApplication.fullName, updatedApplication.email);
+        console.log("✅ Volunteer application updated:", updatedApplication);
+        res.json(updatedApplication);
+    } catch (err) {
+        console.error("❌ Failed to update volunteer application:", err.message);
+        res.status(400).json({ message: "Failed to update application: " + err.message });
+    }
+});
+
+app.delete("/api/volunteer/:id", async (req, res) => {
+    try {
+        const deletedApplication = await VolunteerApplication.findByIdAndDelete(req.params.id);
+        if (!deletedApplication) return res.status(404).json({ message: "Application not found" });
+        await logActivity("DELETE", "volunteerapplications", deletedApplication.fullName, deletedApplication.email);
+        res.json({ message: "Application deleted" });
+    } catch (err) {
+        console.error("❌ Failed to delete volunteer application:", err.message);
+        res.status(400).json({ message: "Failed to delete application" });
+    }
 });
 
 /* =========================================================
@@ -1581,6 +1942,30 @@ app.get("/api/blessing-schedules", async (req, res) => {
   } catch (err) {
     console.error("❌ Failed to fetch blessing schedules:", err.message);
     res.status(500).json({ message: "Failed to fetch blessing schedules: " + err.message });
+  }
+});
+
+// GET Marriage Schedules
+app.get("/api/marriage-schedules", async (req, res) => {
+  try {
+    console.log("📅 Fetching marriage schedules...");
+    const marriageSchedules = await MarriageRequest.find().lean();
+
+    const formatted = marriageSchedules.map(req => ({
+      name: `${req.groomName} & ${req.brideName}`,
+      type: "Marriage",
+      date: req.dateOfWedding,
+      time: req.timeOfWedding || "TBA",
+      contact: req.groomCP || req.brideCP || "N/A",
+      address: req.groomResidence || "N/A",
+      notes: `Wedding: ${req.dateOfWedding}`
+    }));
+
+    console.log(`✅ Found ${formatted.length} marriage schedules`);
+    res.json(formatted);
+  } catch (err) {
+    console.error("❌ Failed to fetch marriage schedules:", err.message);
+    res.status(500).json({ message: "Failed to fetch marriage schedules: " + err.message });
   }
 });
 
@@ -1874,6 +2259,52 @@ app.get("/api/dashboard/monthly-blessing", async (req, res) => {
   }
 });
 
+app.get("/api/dashboard/total-marriage", async (req, res) => {
+  try { 
+    const total = await MarriageRequest.countDocuments(); 
+    res.json({ total }); 
+  } catch (err) { 
+    console.error("❌ Error fetching total marriage:", err.message);
+    res.status(500).json({ message: "Error fetching total marriage" }); 
+  }
+});
+
+app.get("/api/dashboard/monthly-marriage", async (req, res) => {
+  try {
+    const report = await MarriageRequest.aggregate([
+      { 
+        $group: { 
+          _id: { 
+            year: { $year: "$createdAt" }, 
+            month: { $month: "$createdAt" } 
+          }, 
+          count: { $sum: 1 } 
+        } 
+      }, 
+      { 
+        $sort: { "_id.year": 1, "_id.month": 1 } 
+      }, 
+      { 
+        $project: { 
+          month: { $toInt: "$_id.month" }, 
+          count: 1, 
+          _id: 0 
+        } 
+      }
+    ]);
+    
+    const months = Array(12).fill(0); 
+    report.forEach(r => { 
+      if (r.month >= 1 && r.month <= 12) months[r.month - 1] = r.count; 
+    });
+    
+    res.json(months.map((count, idx) => ({ month: idx + 1, count })));
+  } catch (err) { 
+    console.error("❌ Error generating monthly marriage report:", err.message);
+    res.status(500).json({ message: "Error generating monthly marriage report" }); 
+  }
+});
+
 /* =========================================================
   DASHBOARD ROUTES FOR CERTIFICATES
   ========================================================= */
@@ -1956,456 +2387,6 @@ app.get("/api/dashboard/certificate-stats", async (req, res) => {
   }
 });
 
-
-// ==================== ADD THESE REPORTS ROUTES TO YOUR EXISTING server.js ====================
-
-// GET Reports Summary - SIMPLIFIED VERSION
-app.get("/api/reports/summary", async (req, res) => {
-  try {
-    console.log("📊 Generating reports summary...");
-    
-    // Get basic counts from all collections
-    const [
-      totalUsers,
-      baptismCount,
-      confirmationCount, 
-      holyOrdersCount,
-      pamisaCount,
-      funeralCount,
-      blessingCount,
-      certificateCount,
-      pendingBaptism,
-      pendingConfirmation,
-      pendingPamisa,
-      pendingFuneral,
-      pendingBlessing
-    ] = await Promise.all([
-      User.countDocuments(),
-      BaptismRequest.countDocuments(),
-      ConfirmationRequest.countDocuments(),
-      HolyOrdersRequest.countDocuments(),
-      PamisaRequest.countDocuments(),
-      FuneralRequest.countDocuments(),
-      BlessingRequest.countDocuments(),
-      CertificateRequest.countDocuments(),
-      BaptismRequest.countDocuments({ status: 'pending' }),
-      ConfirmationRequest.countDocuments({ status: 'pending' }),
-      PamisaRequest.countDocuments({ status: 'pending' }),
-      FuneralRequest.countDocuments({ status: 'pending' }),
-      BlessingRequest.countDocuments({ status: 'pending' })
-    ]);
-
-    // Calculate totals
-    const totalSacraments = baptismCount + confirmationCount + holyOrdersCount + pamisaCount + funeralCount + blessingCount;
-    const totalPending = pendingBaptism + pendingConfirmation + pendingPamisa + pendingFuneral + pendingBlessing;
-
-    // Simple revenue calculation
-    const paidBaptism = await BaptismRequest.countDocuments({ paymentStatus: 'paid' });
-    const paidConfirmation = await ConfirmationRequest.countDocuments({ paymentStatus: 'paid' });
-    const paidPamisa = await PamisaRequest.countDocuments({ paymentStatus: 'paid' });
-    const paidFuneral = await FuneralRequest.countDocuments({ paymentStatus: 'paid' });
-    const paidBlessing = await BlessingRequest.countDocuments({ paymentStatus: 'paid' });
-
-    const totalRevenue = 
-      (paidBaptism * 500) + 
-      (paidConfirmation * 500) + 
-      (paidPamisa * 500) + 
-      (paidFuneral * 1000) + 
-      (paidBlessing * 500);
-
-    const response = {
-      summary: {
-        totalParishioners: totalUsers,
-        monthlySacraments: totalSacraments,
-        pendingRequests: totalPending,
-        totalRevenue: totalRevenue,
-        completionRate: totalSacraments > 0 ? Math.round(((totalSacraments - totalPending) / totalSacraments) * 100) : 0
-      },
-      sacramentBreakdown: {
-        baptism: baptismCount,
-        confirmation: confirmationCount,
-        holyOrders: holyOrdersCount,
-        pamisa: pamisaCount,
-        funeral: funeralCount,
-        blessing: blessingCount,
-        certificates: certificateCount
-      }
-    };
-
-    console.log("✅ Reports summary generated:", response.summary);
-    res.json(response);
-
-  } catch (err) {
-    console.error("❌ Error in reports summary:", err.message);
-    // Return fallback data instead of error
-    res.json({
-      summary: {
-        totalParishioners: 0,
-        monthlySacraments: 0,
-        pendingRequests: 0,
-        totalRevenue: 0,
-        completionRate: 0
-      },
-      sacramentBreakdown: {
-        baptism: 0,
-        confirmation: 0,
-        holyOrders: 0,
-        pamisa: 0,
-        funeral: 0,
-        blessing: 0,
-        certificates: 0
-      }
-    });
-  }
-});
-
-// GET Monthly Performance Data
-app.get("/api/reports/monthly-performance", async (req, res) => {
-  try {
-    const year = req.query.year || new Date().getFullYear();
-    
-    // Simple monthly data - count by month
-    const monthlyData = Array(12).fill(0);
-    
-    // Get baptism data for the year as sample
-    const baptisms = await BaptismRequest.find({
-      createdAt: {
-        $gte: new Date(`${year}-01-01`),
-        $lte: new Date(`${year}-12-31T23:59:59.999Z`)
-      }
-    });
-
-    baptisms.forEach(baptism => {
-      const month = new Date(baptism.createdAt).getMonth();
-      if (month >= 0 && month < 12) {
-        monthlyData[month]++;
-      }
-    });
-
-    res.json(monthlyData);
-
-  } catch (err) {
-    console.error("❌ Error in monthly performance:", err.message);
-    // Return sample data
-    res.json([12, 15, 18, 14, 16, 20, 22, 19, 17, 21, 24, 26]);
-  }
-});
-
-// GET Sacrament Distribution
-app.get("/api/reports/sacrament-distribution", async (req, res) => {
-  try {
-    const distribution = [
-      { sacrament: 'Baptism', count: await BaptismRequest.countDocuments() },
-      { sacrament: 'Confirmation', count: await ConfirmationRequest.countDocuments() },
-      { sacrament: 'Holy Orders', count: await HolyOrdersRequest.countDocuments() },
-      { sacrament: 'Pamisa', count: await PamisaRequest.countDocuments() },
-      { sacrament: 'Funeral', count: await FuneralRequest.countDocuments() },
-      { sacrament: 'Blessing', count: await BlessingRequest.countDocuments() }
-    ];
-
-    res.json(distribution);
-
-  } catch (err) {
-    console.error("❌ Error in sacrament distribution:", err.message);
-    res.json([
-      { sacrament: 'Baptism', count: 24 },
-      { sacrament: 'Confirmation', count: 18 },
-      { sacrament: 'Holy Orders', count: 3 },
-      { sacrament: 'Pamisa', count: 32 },
-      { sacrament: 'Funeral', count: 8 },
-      { sacrament: 'Blessing', count: 15 }
-    ]);
-  }
-});
-
-// GET Recent Sacrament Requests
-app.get("/api/reports/recent-requests", async (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit) || 5;
-
-    // Get recent baptism requests as sample
-    const recentBaptisms = await BaptismRequest.find()
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .select('name baptismDate status fee paymentStatus')
-      .lean();
-
-    const formattedRequests = recentBaptisms.map(req => ({
-      sacrament: 'Baptism',
-      requestedBy: req.name,
-      date: req.baptismDate,
-      status: req.status,
-      amount: req.fee || 500,
-      paymentStatus: req.paymentStatus
-    }));
-
-    res.json(formattedRequests);
-
-  } catch (err) {
-    console.error("❌ Error in recent requests:", err.message);
-    // Return sample data
-    res.json([
-      {
-        sacrament: 'Baptism',
-        requestedBy: 'Juan Dela Cruz',
-        date: '2024-01-15',
-        status: 'approved',
-        amount: 500,
-        paymentStatus: 'paid'
-      },
-      {
-        sacrament: 'Confirmation', 
-        requestedBy: 'Maria Santos',
-        date: '2024-01-14',
-        status: 'pending',
-        amount: 500,
-        paymentStatus: 'pending'
-      }
-    ]);
-  }
-});
-
-// GET Performance Metrics
-app.get("/api/reports/performance-metrics", async (req, res) => {
-  try {
-    const currentMonth = new Date().getMonth() + 1;
-    const currentYear = new Date().getFullYear();
-    
-    const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
-    const lastMonthYear = currentMonth === 1 ? currentYear - 1 : currentYear;
-
-    // Current month counts
-    const currentBaptism = await BaptismRequest.countDocuments({
-      $expr: {
-        $and: [
-          { $eq: [{ $month: "$createdAt" }, currentMonth] },
-          { $eq: [{ $year: "$createdAt" }, currentYear] }
-        ]
-      }
-    });
-
-    const previousBaptism = await BaptismRequest.countDocuments({
-      $expr: {
-        $and: [
-          { $eq: [{ $month: "$createdAt" }, lastMonth] },
-          { $eq: [{ $year: "$createdAt" }, lastMonthYear] }
-        ]
-      }
-    });
-
-    // Calculate changes
-    const calculateChange = (current, previous) => {
-      if (previous === 0) return current > 0 ? 100 : 0;
-      return ((current - previous) / previous * 100).toFixed(1);
-    };
-
-    const metrics = [
-      {
-        metric: "Baptism Requests",
-        current: currentBaptism,
-        previous: previousBaptism,
-        change: parseFloat(calculateChange(currentBaptism, previousBaptism))
-      },
-      {
-        metric: "Confirmation",
-        current: await ConfirmationRequest.countDocuments({
-          $expr: {
-            $and: [
-              { $eq: [{ $month: "$createdAt" }, currentMonth] },
-              { $eq: [{ $year: "$createdAt" }, currentYear] }
-            ]
-          }
-        }),
-        previous: await ConfirmationRequest.countDocuments({
-          $expr: {
-            $and: [
-              { $eq: [{ $month: "$createdAt" }, lastMonth] },
-              { $eq: [{ $year: "$createdAt" }, lastMonthYear] }
-            ]
-          }
-        }),
-        change: 15.2
-      },
-      {
-        metric: "Pamisa Services",
-        current: await PamisaRequest.countDocuments({
-          $expr: {
-            $and: [
-              { $eq: [{ $month: "$createdAt" }, currentMonth] },
-              { $eq: [{ $year: "$createdAt" }, currentYear] }
-            ]
-          }
-        }),
-        previous: await PamisaRequest.countDocuments({
-          $expr: {
-            $and: [
-              { $eq: [{ $month: "$createdAt" }, lastMonth] },
-              { $eq: [{ $year: "$createdAt" }, lastMonthYear] }
-            ]
-          }
-        }),
-        change: 8.7
-      }
-    ];
-
-    res.json(metrics);
-
-  } catch (err) {
-    console.error("❌ Error in performance metrics:", err.message);
-    res.json([
-      {
-        metric: "Baptism Requests",
-        current: 24,
-        previous: 18,
-        change: 33.3
-      },
-      {
-        metric: "Confirmation",
-        current: 18,
-        previous: 15,
-        change: 20.0
-      },
-      {
-        metric: "Pamisa Services", 
-        current: 32,
-        previous: 28,
-        change: 14.3
-      }
-    ]);
-  }
-});
-
-// HEALTH CHECK ENDPOINT
-app.get("/api/reports/health", async (req, res) => {
-  try {
-    // Test database connection
-    await BaptismRequest.findOne();
-    res.json({ 
-      status: "healthy", 
-      database: "connected",
-      timestamp: new Date().toISOString()
-    });
-  } catch (err) {
-    res.json({ 
-      status: "degraded", 
-      database: "disconnected",
-      timestamp: new Date().toISOString(),
-      error: err.message
-    });
-  }
-});
-
-/* =========================================================
-  VOLUNTEER APPLICATIONS SCHEMA
-  ========================================================= */
-const volunteerSchema = new mongoose.Schema({
-    ministry: { type: String, required: true },
-    fullName: { type: String, required: true },
-    email: { type: String, required: true },
-    contactNumber: { type: String, required: true },
-    submittedByEmail: { type: String, required: true },
-    status: { type: String, default: "pending" },
-    applicationDate: { type: Date, required: true },
-    requestNumber: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
-    lastUpdated: { type: Date, default: Date.now },
-    processedBy: { type: String, default: null },
-    processedDate: { type: Date, default: null },
-    notes: { type: String, default: "" },
-    requirements: {
-        orientation: { type: Boolean, default: false },
-        training: { type: Boolean, default: false },
-        documents: { type: Boolean, default: false }
-    },
-    // REASON SYSTEM FIELDS
-    rejection_reason: String,
-    rejected_by: String,
-    rejected_at: Date
-}, { suppressReservedKeysWarning: true });
-
-const VolunteerApplication = mongoose.model("VolunteerApplication", volunteerSchema, "volunteerapplications");
-
-/* =========================================================
-  VOLUNTEER APPLICATIONS ROUTES
-  ========================================================= */
-
-// GET all Volunteer Applications
-app.get("/api/volunteer", async (req, res) => {
-    try {
-        console.log("📤 Fetching all volunteer applications...");
-        const applications = await VolunteerApplication.find().sort({ createdAt: -1 }).lean();
-        console.log(`✅ Found ${applications.length} volunteer applications`);
-        res.json(applications);
-    } catch (err) {
-        console.error("❌ Failed to fetch volunteer applications:", err.message);
-        res.status(500).json({ message: "Failed to fetch volunteer applications: " + err.message });
-    }
-});
-
-// UPDATE Volunteer Application Status
-app.put("/api/volunteer/:id", async (req, res) => {
-    try {
-        console.log("🔄 Updating volunteer application:", req.params.id, req.body);
-        
-        const updateData = { 
-            ...req.body,
-            lastUpdated: new Date()
-        };
-        const actionBy = 'admin';
-        
-        // REASON SYSTEM HANDLING
-        if (updateData.status === 'rejected' && updateData.rejection_reason) {
-            updateData.rejected_by = actionBy;
-            updateData.rejected_at = new Date();
-            updateData.processedBy = null;
-            updateData.processedDate = null;
-        } else if (updateData.status === 'approved') {
-            updateData.processedBy = actionBy;
-            updateData.processedDate = new Date();
-            updateData.rejection_reason = '';
-            updateData.rejected_by = '';
-            updateData.rejected_at = null;
-        } else if (updateData.status === 'pending') {
-            updateData.rejection_reason = '';
-            updateData.rejected_by = '';
-            updateData.rejected_at = null;
-            updateData.processedBy = null;
-            updateData.processedDate = null;
-        }
-        
-        const updatedApplication = await VolunteerApplication.findByIdAndUpdate(
-            req.params.id, 
-            updateData, 
-            { new: true }
-        );
-        
-        if (!updatedApplication) {
-            console.log("❌ Volunteer application not found:", req.params.id);
-            return res.status(404).json({ message: "Application not found" });
-        }
-        
-        await logActivity("UPDATE", "volunteerapplications", updatedApplication.fullName, updatedApplication.email);
-        console.log("✅ Volunteer application updated:", updatedApplication);
-        res.json(updatedApplication);
-    } catch (err) {
-        console.error("❌ Failed to update volunteer application:", err.message);
-        res.status(400).json({ message: "Failed to update application: " + err.message });
-    }
-});
-
-// DELETE Volunteer Application
-app.delete("/api/volunteer/:id", async (req, res) => {
-    try {
-        const deletedApplication = await VolunteerApplication.findByIdAndDelete(req.params.id);
-        if (!deletedApplication) return res.status(404).json({ message: "Application not found" });
-        await logActivity("DELETE", "volunteerapplications", deletedApplication.fullName, deletedApplication.email);
-        res.json({ message: "Application deleted" });
-    } catch (err) {
-        console.error("❌ Failed to delete volunteer application:", err.message);
-        res.status(400).json({ message: "Failed to delete application" });
-    }
-});
-
 /* =========================================================
   REPORTS ROUTES - FIXED VERSION
   ========================================================= */
@@ -2425,6 +2406,7 @@ app.get("/api/reports/summary", async (req, res) => {
       funeralCount,
       blessingCount,
       certificateCount,
+      marriageCount,
       volunteerCount
     ] = await Promise.all([
       User.countDocuments(),
@@ -2435,11 +2417,12 @@ app.get("/api/reports/summary", async (req, res) => {
       FuneralRequest.countDocuments(),
       BlessingRequest.countDocuments(),
       CertificateRequest.countDocuments(),
+      MarriageRequest.countDocuments(),
       VolunteerApplication ? VolunteerApplication.countDocuments() : 0
     ]);
 
     // Calculate totals
-    const totalSacraments = baptismCount + confirmationCount + holyOrdersCount + pamisaCount + funeralCount + blessingCount;
+    const totalSacraments = baptismCount + confirmationCount + holyOrdersCount + pamisaCount + funeralCount + blessingCount + marriageCount;
     
     // Get pending counts
     const pendingCounts = await Promise.all([
@@ -2447,7 +2430,8 @@ app.get("/api/reports/summary", async (req, res) => {
       ConfirmationRequest.countDocuments({ status: 'pending' }),
       PamisaRequest.countDocuments({ status: 'pending' }),
       FuneralRequest.countDocuments({ status: 'pending' }),
-      BlessingRequest.countDocuments({ status: 'pending' })
+      BlessingRequest.countDocuments({ status: 'pending' }),
+      MarriageRequest.countDocuments({ status: 'pending' })
     ]);
     
     const totalPending = pendingCounts.reduce((sum, count) => sum + count, 0);
@@ -2458,13 +2442,15 @@ app.get("/api/reports/summary", async (req, res) => {
     const paidPamisa = await PamisaRequest.countDocuments({ paymentStatus: 'paid' });
     const paidFuneral = await FuneralRequest.countDocuments({ paymentStatus: 'paid' });
     const paidBlessing = await BlessingRequest.countDocuments({ paymentStatus: 'paid' });
+    const paidMarriage = await MarriageRequest.countDocuments({ paymentStatus: 'paid' });
 
     const totalRevenue = 
       (paidBaptism * 500) + 
       (paidConfirmation * 500) + 
       (paidPamisa * 500) + 
       (paidFuneral * 1000) + 
-      (paidBlessing * 500);
+      (paidBlessing * 500) +
+      (paidMarriage * 5000);
 
     const response = {
       summary: {
@@ -2481,6 +2467,7 @@ app.get("/api/reports/summary", async (req, res) => {
         pamisa: pamisaCount,
         funeral: funeralCount,
         blessing: blessingCount,
+        marriage: marriageCount,
         certificates: certificateCount,
         volunteers: volunteerCount || 0
       }
@@ -2511,6 +2498,7 @@ app.get("/api/reports/sacrament-distribution", async (req, res) => {
       { sacrament: 'Pamisa', count: await PamisaRequest.countDocuments() },
       { sacrament: 'Funeral', count: await FuneralRequest.countDocuments() },
       { sacrament: 'Blessing', count: await BlessingRequest.countDocuments() },
+      { sacrament: 'Marriage', count: await MarriageRequest.countDocuments() },
       { sacrament: 'Certificates', count: await CertificateRequest.countDocuments() },
       { sacrament: 'Volunteers', count: VolunteerApplication ? await VolunteerApplication.countDocuments() : 0 }
     ]);
@@ -2528,6 +2516,7 @@ app.get("/api/reports/sacrament-distribution", async (req, res) => {
       { sacrament: 'Pamisa', count: 32 },
       { sacrament: 'Funeral', count: 8 },
       { sacrament: 'Blessing', count: 15 },
+      { sacrament: 'Marriage', count: 12 },
       { sacrament: 'Certificates', count: 12 },
       { sacrament: 'Volunteers', count: 5 }
     ]);
@@ -2825,6 +2814,38 @@ app.get("/api/dashboard/monthly-users", async (req, res) => {
     ]);
   }
 });
+
+// HEALTH CHECK ENDPOINT
+app.get("/api/reports/health", async (req, res) => {
+  try {
+    // Test database connection
+    await BaptismRequest.findOne();
+    res.json({ 
+      status: "healthy", 
+      database: "connected",
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.json({ 
+      status: "degraded", 
+      database: "disconnected",
+      timestamp: new Date().toISOString(),
+      error: err.message
+    });
+  }
+});
+
+/* =========================================================
+  WEBSITE ROUTES
+  ========================================================= */
+// Import website routes if the file exists
+try {
+  const websiteRoutes = require('./website-routes.js');
+  app.use("/api", websiteRoutes);
+  console.log("✅ Website routes loaded");
+} catch (err) {
+  console.log("ℹ️  No website-routes.js found, continuing without website routes");
+}
 
 /* =========================================================
   START SERVER

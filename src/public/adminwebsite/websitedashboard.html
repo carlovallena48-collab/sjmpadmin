@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - San Jose Manggagawa Parish</title>
+    <title>Website Dashboard - San Jose Manggagawa Parish</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
+    <script src = "./js/websitedashboard.js"> </script>
+      <style>
         :root {
             --primary: #1a5276;
             --primary-dark: #154360;
@@ -34,7 +35,7 @@
         }
 
         .dashboard-container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -409,6 +410,53 @@
             background: rgba(26, 82, 118, 0.1);
         }
 
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+        }
+
+        .stat-icon.announcements { background: var(--primary); }
+        .stat-icon.events { background: var(--accent); }
+        .stat-icon.views { background: var(--success); }
+        .stat-icon.users { background: var(--gray); }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .stat-info p {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin: 0;
+        }
+
         /* Center Popup Alerts */
         .alert-overlay {
             position: fixed;
@@ -512,6 +560,10 @@
                 width: 95%;
                 padding: 20px;
             }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -524,11 +576,15 @@
                 <div class="logo-icon">
                     <i class="fas fa-church"></i>
                 </div>
-                <div class="logo-text">SAN JOSE PARISH</div>
+                <div class="logo-text">SAN JOSE PARISH - WEBSITE</div>
             </div>
             
             <div class="top-menu">
-                <button class="menu-item active" data-target="announcements">
+                <button class="menu-item active" data-target="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </button>
+                <button class="menu-item" data-target="announcements">
                     <i class="fas fa-bullhorn"></i>
                     Announcements
                 </button>
@@ -544,8 +600,8 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <div>
-                        <div style="font-weight: 600; font-size: 0.9rem;">Admin User</div>
-                        <div style="font-size: 0.75rem; color: var(--gray);">Administrator</div>
+                        <div style="font-weight: 600; font-size: 0.9rem;">Website Admin</div>
+                        <div style="font-size: 0.75rem; color: var(--gray);">Content Manager</div>
                     </div>
                     <i class="fas fa-chevron-down" style="font-size: 0.75rem;"></i>
                 </button>
@@ -567,92 +623,167 @@
             </div>
         </div>
 
-        <div class="content-area">
-            <div class="content-box active" id="announcements">
-                <h2>
-                    Announcements
-                    <button class="btn" id="addAnnouncementBtn">
-                        <i class="fas fa-plus"></i> New
-                    </button>
-                </h2>
-                
-                <div id="announcementForm" class="form-container">
-                    <div class="form-group">
-                        <label for="announcementTitle">Title</label>
-                        <input type="text" id="announcementTitle" class="form-control" placeholder="Enter announcement title">
+        <!-- Dashboard Overview -->
+        <div class="content-box active" id="dashboard">
+            <h2>Website Dashboard Overview</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon announcements">
+                        <i class="fas fa-bullhorn"></i>
                     </div>
-                    <div class="form-group">
-                        <label for="announcementContent">Content</label>
-                        <textarea id="announcementContent" class="form-control" placeholder="Enter announcement content"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Add Image (Optional)</label>
-                        <div class="image-upload" id="announcementImageUpload">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Click to upload an image</p>
-                            <input type="file" id="announcementImage" accept="image/*">
-                        </div>
-                        <div class="image-preview" id="announcementImagePreview"></div>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn" id="saveAnnouncementBtn">
-                            <i class="fas fa-save"></i> Publish
-                        </button>
-                        <button class="btn" style="background: var(--gray);" id="cancelAnnouncementBtn">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
+                    <div class="stat-info">
+                        <h3 id="totalAnnouncements">0</h3>
+                        <p>Total Announcements</p>
                     </div>
                 </div>
                 
-                <div class="posts-list" id="announcementsList"></div>
+                <div class="stat-card">
+                    <div class="stat-icon events">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalEvents">0</h3>
+                        <p>Total Events</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon views">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalViews">1,247</h3>
+                        <p>Website Views</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon users">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="activeUsers">156</h3>
+                        <p>Active Users</p>
+                    </div>
+                </div>
             </div>
-
-            <div class="content-box" id="events">
-                <h2>
-                    Events & Programs
-                    <button class="btn btn-accent" id="addEventBtn">
-                        <i class="fas fa-plus"></i> New
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                <h3 style="margin-bottom: 10px;">Quick Actions</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn" onclick="showContent('announcements')">
+                        <i class="fas fa-plus"></i> New Announcement
                     </button>
-                </h2>
-                
-                <div id="eventForm" class="form-container">
-                    <div class="form-group">
-                        <label for="eventTitle">Event Title</label>
-                        <input type="text" id="eventTitle" class="form-control" placeholder="Enter event title">
-                    </div>
-                    <div class="form-group">
-                        <label for="eventDate">Date & Time</label>
-                        <input type="datetime-local" id="eventDate" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="eventDescription">Description</label>
-                        <textarea id="eventDescription" class="form-control" placeholder="Enter event description"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Add Image (Optional)</label>
-                        <div class="image-upload" id="eventImageUpload">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Click to upload an image</p>
-                            <input type="file" id="eventImage" accept="image/*">
-                        </div>
-                        <div class="image-preview" id="eventImagePreview"></div>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn btn-accent" id="saveEventBtn">
-                            <i class="fas fa-save"></i> Publish
-                        </button>
-                        <button class="btn" style="background: var(--gray);" id="cancelEventBtn">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
-                    </div>
+                    <button class="btn btn-accent" onclick="showContent('events')">
+                        <i class="fas fa-plus"></i> New Event
+                    </button>
+                    <button class="btn" style="background: var(--success);">
+                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    </button>
                 </div>
-                
-                <div class="posts-list" id="eventsList"></div>
+            </div>
+        </div>
+
+        <!-- Announcements Section -->
+        <div class="content-box" id="announcements">
+            <h2>
+                Website Announcements
+                <button class="btn" id="addAnnouncementBtn">
+                    <i class="fas fa-plus"></i> New Announcement
+                </button>
+            </h2>
+            
+            <div id="announcementForm" class="form-container">
+                <div class="form-group">
+                    <label for="announcementTitle">Title *</label>
+                    <input type="text" id="announcementTitle" class="form-control" placeholder="Enter announcement title">
+                </div>
+                <div class="form-group">
+                    <label for="announcementContent">Content *</label>
+                    <textarea id="announcementContent" class="form-control" placeholder="Enter announcement content"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Add Image (Optional)</label>
+                    <div class="image-upload" id="announcementImageUpload">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click to upload an image</p>
+                        <input type="file" id="announcementImage" accept="image/*">
+                    </div>
+                    <div class="image-preview" id="announcementImagePreview"></div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn" id="saveAnnouncementBtn">
+                        <i class="fas fa-save"></i> Publish Announcement
+                    </button>
+                    <button class="btn" style="background: var(--gray);" id="cancelAnnouncementBtn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+            
+            <div class="posts-list" id="announcementsList">
+                <div style="text-align: center; padding: 40px; color: var(--gray);">
+                    <i class="fas fa-bullhorn" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <p>No announcements yet. Create your first announcement!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events Section -->
+        <div class="content-box" id="events">
+            <h2>
+                Parish Events & Programs
+                <button class="btn btn-accent" id="addEventBtn">
+                    <i class="fas fa-plus"></i> New Event
+                </button>
+            </h2>
+            
+            <div id="eventForm" class="form-container">
+                <div class="form-group">
+                    <label for="eventTitle">Event Title *</label>
+                    <input type="text" id="eventTitle" class="form-control" placeholder="Enter event title">
+                </div>
+                <div class="form-group">
+                    <label for="eventDate">Date & Time *</label>
+                    <input type="datetime-local" id="eventDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="eventDescription">Description *</label>
+                    <textarea id="eventDescription" class="form-control" placeholder="Enter event description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Add Image (Optional)</label>
+                    <div class="image-upload" id="eventImageUpload">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click to upload an image</p>
+                        <input type="file" id="eventImage" accept="image/*">
+                    </div>
+                    <div class="image-preview" id="eventImagePreview"></div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-accent" id="saveEventBtn">
+                        <i class="fas fa-save"></i> Publish Event
+                    </button>
+                    <button class="btn" style="background: var(--gray);" id="cancelEventBtn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+            
+            <div class="posts-list" id="eventsList">
+                <div style="text-align: center; padding: 40px; color: var(--gray);">
+                    <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <p>No events scheduled yet. Create your first event!</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // API Configuration
+       const API_BASE_URL = 'http://localhost:5000/api';
+        
         // Menu Navigation
         document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', function() {
@@ -660,6 +791,15 @@
                 this.classList.add('active');
                 document.querySelectorAll('.content-box').forEach(box => box.classList.remove('active'));
                 document.getElementById(this.getAttribute('data-target')).classList.add('active');
+                
+                // Load data when switching tabs
+                if (this.getAttribute('data-target') === 'dashboard') {
+                    loadDashboardStats();
+                } else if (this.getAttribute('data-target') === 'announcements') {
+                    loadAnnouncements();
+                } else if (this.getAttribute('data-target') === 'events') {
+                    loadEvents();
+                }
             });
         });
 
@@ -679,9 +819,16 @@
 
         // Toggle forms
         document.getElementById('addAnnouncementBtn').addEventListener('click', () => document.getElementById('announcementForm').style.display = 'block');
-        document.getElementById('cancelAnnouncementBtn').addEventListener('click', () => { document.getElementById('announcementForm').style.display = 'none'; resetForm('announcement'); });
+        document.getElementById('cancelAnnouncementBtn').addEventListener('click', () => { 
+            document.getElementById('announcementForm').style.display = 'none'; 
+            resetForm('announcement'); 
+        });
+        
         document.getElementById('addEventBtn').addEventListener('click', () => document.getElementById('eventForm').style.display = 'block');
-        document.getElementById('cancelEventBtn').addEventListener('click', () => { document.getElementById('eventForm').style.display = 'none'; resetForm('event'); });
+        document.getElementById('cancelEventBtn').addEventListener('click', () => { 
+            document.getElementById('eventForm').style.display = 'none'; 
+            resetForm('event'); 
+        });
 
         // Image upload
         document.getElementById('announcementImageUpload').addEventListener('click', () => document.getElementById('announcementImage').click());
@@ -690,6 +837,364 @@
         // Image preview
         document.getElementById('announcementImage').addEventListener('change', (e) => handleImagePreview(e, 'announcementImagePreview'));
         document.getElementById('eventImage').addEventListener('change', (e) => handleImagePreview(e, 'eventImagePreview'));
+
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardStats();
+            loadAnnouncements();
+            loadEvents();
+        });
+
+        // ========== DATABASE FUNCTIONS ==========
+
+        // Load Dashboard Statistics
+        async function loadDashboardStats() {
+            try {
+                // In a real implementation, you would fetch these from your API
+                const announcements = await getAnnouncementsFromDB();
+                const events = await getEventsFromDB();
+                
+                document.getElementById('totalAnnouncements').textContent = announcements.length;
+                document.getElementById('totalEvents').textContent = events.length;
+                
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                showAlert('error', 'Error', 'Failed to load dashboard statistics');
+            }
+        }
+
+        // Load Announcements from Database
+        async function loadAnnouncements() {
+            try {
+                const announcements = await getAnnouncementsFromDB();
+                displayAnnouncements(announcements);
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+                showAlert('error', 'Error', 'Failed to load announcements');
+            }
+        }
+
+        // Load Events from Database
+        async function loadEvents() {
+            try {
+                const events = await getEventsFromDB();
+                displayEvents(events);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                showAlert('error', 'Error', 'Failed to load events');
+            }
+        }
+
+        // Save Announcement to Database
+        async function saveAnnouncementToDB(announcementData) {
+            try {
+                // This would be your actual API call to save to MongoDB
+                const response = await fetch(`${API_BASE_URL}/website/announcements`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(announcementData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save announcement');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error saving announcement:', error);
+                throw error;
+            }
+        }
+
+        // Save Event to Database
+        async function saveEventToDB(eventData) {
+            try {
+                // This would be your actual API call to save to MongoDB
+                const response = await fetch(`${API_BASE_URL}/website/events`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(eventData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save event');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error saving event:', error);
+                throw error;
+            }
+        }
+
+        // Get Announcements from Database
+        async function getAnnouncementsFromDB() {
+            try {
+                // This would be your actual API call to get from MongoDB
+                const response = await fetch(`${API_BASE_URL}/website/announcements`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch announcements');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching announcements:', error);
+                // Return empty array as fallback
+                return [];
+            }
+        }
+
+        // Get Events from Database
+        async function getEventsFromDB() {
+            try {
+                // This would be your actual API call to get from MongoDB
+                const response = await fetch(`${API_BASE_URL}/website/events`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch events');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching events:', error);
+                // Return empty array as fallback
+                return [];
+            }
+        }
+
+        // Delete Announcement from Database
+        async function deleteAnnouncementFromDB(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/website/announcements/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete announcement');
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error deleting announcement:', error);
+                throw error;
+            }
+        }
+
+        // Delete Event from Database
+        async function deleteEventFromDB(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/website/events/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete event');
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error deleting event:', error);
+                throw error;
+            }
+        }
+
+        // ========== DISPLAY FUNCTIONS ==========
+
+        function displayAnnouncements(announcements) {
+            const list = document.getElementById('announcementsList');
+            
+            if (announcements.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-bullhorn" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p>No announcements yet. Create your first announcement!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = announcements.map(announcement => `
+                <div class="post-item" id="announcement-${announcement._id}">
+                    <div class="post-header">
+                        <div class="post-title">${announcement.title}</div>
+                        <div class="post-date">${new Date(announcement.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    ${announcement.image ? `
+                        <div class="post-image">
+                            <img src="${announcement.image}" alt="Announcement Image">
+                        </div>
+                    ` : ''}
+                    <div class="post-content">${announcement.content}</div>
+                    <div class="post-actions">
+                        <button class="edit-btn" data-id="${announcement._id}" data-type="announcement">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="delete-btn" data-id="${announcement._id}" data-type="announcement">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Attach event listeners
+            attachPostEvents();
+        }
+
+        function displayEvents(events) {
+            const list = document.getElementById('eventsList');
+            
+            if (events.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-calendar-alt" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p>No events scheduled yet. Create your first event!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = events.map(event => `
+                <div class="post-item" id="event-${event._id}">
+                    <div class="post-header">
+                        <div class="post-title">${event.title}</div>
+                        <div class="post-date">
+                            ${new Date(event.date).toLocaleDateString()} • 
+                            ${new Date(event.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </div>
+                    </div>
+                    ${event.image ? `
+                        <div class="post-image">
+                            <img src="${event.image}" alt="Event Image">
+                        </div>
+                    ` : ''}
+                    <div class="post-content">${event.description}</div>
+                    <div class="post-actions">
+                        <button class="edit-btn" data-id="${event._id}" data-type="event">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="delete-btn" data-id="${event._id}" data-type="event">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Attach event listeners
+            attachPostEvents();
+        }
+
+        // ========== EVENT HANDLERS ==========
+
+        // Save announcement
+        document.getElementById('saveAnnouncementBtn').addEventListener('click', async function() {
+            const title = document.getElementById('announcementTitle').value;
+            const content = document.getElementById('announcementContent').value;
+            const imageFile = document.getElementById('announcementImage').files[0];
+            
+            if (!title || !content) {
+                showAlert('error', 'Error', 'Please fill in all required fields');
+                return;
+            }
+            
+            try {
+                const announcementData = {
+                    title,
+                    content,
+                    image: imageFile ? await convertImageToBase64(imageFile) : null,
+                    createdAt: new Date().toISOString()
+                };
+
+                await saveAnnouncementToDB(announcementData);
+                
+                document.getElementById('announcementForm').style.display = 'none';
+                resetForm('announcement');
+                await loadAnnouncements();
+                await loadDashboardStats();
+                
+                showAlert('success', 'Success', 'Announcement published successfully!');
+            } catch (error) {
+                showAlert('error', 'Error', 'Failed to save announcement');
+            }
+        });
+
+        // Save event
+        document.getElementById('saveEventBtn').addEventListener('click', async function() {
+            const title = document.getElementById('eventTitle').value;
+            const date = document.getElementById('eventDate').value;
+            const description = document.getElementById('eventDescription').value;
+            const imageFile = document.getElementById('eventImage').files[0];
+            
+            if (!title || !date || !description) {
+                showAlert('error', 'Error', 'Please fill in all required fields');
+                return;
+            }
+            
+            try {
+                const eventData = {
+                    title,
+                    date,
+                    description,
+                    image: imageFile ? await convertImageToBase64(imageFile) : null,
+                    createdAt: new Date().toISOString()
+                };
+
+                await saveEventToDB(eventData);
+                
+                document.getElementById('eventForm').style.display = 'none';
+                resetForm('event');
+                await loadEvents();
+                await loadDashboardStats();
+                
+                showAlert('success', 'Success', 'Event published successfully!');
+            } catch (error) {
+                showAlert('error', 'Error', 'Failed to save event');
+            }
+        });
+
+        // ========== HELPER FUNCTIONS ==========
+
+        function attachPostEvents() {
+            // Edit buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const type = this.getAttribute('data-type');
+                    // Implement edit functionality
+                    showAlert('info', 'Edit Feature', 'Edit functionality will be implemented soon!');
+                });
+            });
+
+            // Delete buttons
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const type = this.getAttribute('data-type');
+                    
+                    showAlert('info', 'Delete', 'Are you sure you want to delete this ' + type + '?', true, async function(confirmed) {
+                        if (confirmed) {
+                            try {
+                                if (type === 'announcement') {
+                                    await deleteAnnouncementFromDB(id);
+                                    await loadAnnouncements();
+                                } else {
+                                    await deleteEventFromDB(id);
+                                    await loadEvents();
+                                }
+                                await loadDashboardStats();
+                                showAlert('success', 'Success', type + ' deleted successfully!');
+                            } catch (error) {
+                                showAlert('error', 'Error', 'Failed to delete ' + type);
+                            }
+                        }
+                    });
+                });
+            });
+        }
 
         function handleImagePreview(event, previewId) {
             const file = event.target.files[0];
@@ -704,118 +1209,21 @@
             }
         }
 
-        // Save announcement
-        document.getElementById('saveAnnouncementBtn').addEventListener('click', function() {
-            const title = document.getElementById('announcementTitle').value;
-            const content = document.getElementById('announcementContent').value;
-            const imageFile = document.getElementById('announcementImage').files[0];
-            
-            if (!title || !content) {
-                showAlert('error', 'Error', 'Please fill in all required fields');
-                return;
-            }
-            
-            const postId = 'announcement-' + Date.now();
-            createPost('announcementsList', postId, title, content, imageFile, 'announcement');
-            document.getElementById('announcementForm').style.display = 'none';
-            resetForm('announcement');
-            showAlert('success', 'Success', 'Announcement published successfully!');
-        });
-
-        // Save event
-        document.getElementById('saveEventBtn').addEventListener('click', function() {
-            const title = document.getElementById('eventTitle').value;
-            const date = document.getElementById('eventDate').value;
-            const description = document.getElementById('eventDescription').value;
-            const imageFile = document.getElementById('eventImage').files[0];
-            
-            if (!title || !date || !description) {
-                showAlert('error', 'Error', 'Please fill in all required fields');
-                return;
-            }
-            
-            const postId = 'event-' + Date.now();
-            createPost('eventsList', postId, title, description, imageFile, 'event', date);
-            document.getElementById('eventForm').style.display = 'none';
-            resetForm('event');
-            showAlert('success', 'Success', 'Event published successfully!');
-        });
-
-        // Create post function
-        function createPost(listId, postId, title, content, imageFile, type, date = null) {
-            const list = document.getElementById(listId);
-            const postItem = document.createElement('div');
-            postItem.className = 'post-item';
-            postItem.id = postId;
-            
-            const formattedDate = date ? new Date(date).toLocaleDateString() + ' • ' + new Date(date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : new Date().toLocaleDateString();
-            
-            let imageHTML = '';
-            if (imageFile) {
+        async function convertImageToBase64(file) {
+            return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    imageHTML = `<div class="post-image"><img src="${e.target.result}" alt="${type} Image"></div>`;
-                    postItem.innerHTML = getPostHTML(title, content, imageHTML, formattedDate, postId, type);
-                    attachPostEvents(postId, type);
-                }
-                reader.readAsDataURL(imageFile);
-            } else {
-                postItem.innerHTML = getPostHTML(title, content, imageHTML, formattedDate, postId, type);
-                attachPostEvents(postId, type);
-            }
-            
-            list.prepend(postItem);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
         }
 
-        // Get post HTML
-        function getPostHTML(title, content, imageHTML, date, postId, type) {
-            return `
-                <div class="post-header">
-                    <div class="post-title">${title}</div>
-                    <div class="post-date">${date}</div>
-                </div>
-                ${imageHTML}
-                <div class="post-content">${content}</div>
-                <div class="post-actions">
-                    <button class="edit-btn" data-id="${postId}" data-type="${type}"><i class="fas fa-edit"></i> Edit</button>
-                    <button class="delete-btn" data-id="${postId}"><i class="fas fa-trash"></i> Delete</button>
-                </div>
-            `;
-        }
-
-        // Attach events to post buttons
-        function attachPostEvents(postId, type) {
-            const postElement = document.getElementById(postId);
+        function showContent(contentId) {
+            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.content-box').forEach(box => box.classList.remove('active'));
             
-            // Edit button
-            const editBtn = postElement.querySelector('.edit-btn');
-            editBtn.addEventListener('click', function() {
-                const title = postElement.querySelector('.post-title').textContent;
-                const content = postElement.querySelector('.post-content').textContent;
-                
-                if (type === 'announcement') {
-                    document.getElementById('announcementTitle').value = title;
-                    document.getElementById('announcementContent').value = content;
-                    document.getElementById('announcementForm').style.display = 'block';
-                    postElement.remove();
-                } else {
-                    document.getElementById('eventTitle').value = title;
-                    document.getElementById('eventDescription').value = content;
-                    document.getElementById('eventForm').style.display = 'block';
-                    postElement.remove();
-                }
-            });
-
-            // Delete button
-            const deleteBtn = postElement.querySelector('.delete-btn');
-            deleteBtn.addEventListener('click', function() {
-                showAlert('info', 'Delete', 'Are you sure you want to delete this post?', true, function(confirmed) {
-                    if (confirmed) {
-                        postElement.remove();
-                        showAlert('success', 'Success', 'Post deleted successfully!');
-                    }
-                });
-            });
+            document.querySelector(`[data-target="${contentId}"]`).classList.add('active');
+            document.getElementById(contentId).classList.add('active');
         }
 
         // Beautiful Center Popup Alert System
