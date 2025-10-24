@@ -42,7 +42,7 @@
         /* CONTAINER - Simple and Centralized */
         .container {
             width: 100%;
-            max-width: 400px; 
+            max-width: 900px; /* Increased width to accommodate side-by-side layout */
             text-align: center;
             padding: 30px;
         }
@@ -83,12 +83,26 @@
             text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
 
-        /* BUTTON GROUP - Stacked in the center */
-        .button-group {
+        /* NEW LAYOUT - Two buttons on left, one on right */
+        .button-layout {
             display: flex;
-            flex-direction: column; 
-            gap: 20px; /* Niluwagan nang bahagya (dating 25px) */
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
             margin-bottom: 40px;
+        }
+
+        .left-buttons {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-button {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
         }
 
         /* BUTTON STYLING - "Cyber/Glow" Effect */
@@ -108,6 +122,7 @@
             gap: 15px;
             letter-spacing: 1px;
             text-transform: uppercase;
+            width: 100%;
         }
 
         .login-button i {
@@ -146,8 +161,9 @@
             font-size: 0.95rem; /* Ginawang mas maliit */
             font-weight: 500;
             padding: 14px 25px; /* Ginawang mas maliit */
-            margin-top: 5px; /* Separator lang */
             box-shadow: none;
+            height: 100%;
+            min-height: 140px; /* Ensure it matches the height of the two left buttons */
         }
         #registerButton:hover {
             color: var(--text-light);
@@ -156,7 +172,6 @@
             box-shadow: 0 0 10px rgba(158, 158, 158, 0.3);
             transform: translateY(-2px);
         }
-
 
         /* Messages */
         .message {
@@ -202,6 +217,21 @@
         }
 
         /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .button-layout {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .right-button {
+                justify-content: center;
+            }
+            
+            #registerButton {
+                min-height: auto;
+            }
+        }
+        
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
@@ -218,27 +248,31 @@
             <div class="logo-icon">
                 <i class="fas fa-church"></i>
             </div>
-            <div class="logo-text">San Jose Manggagawa Parish | ACCESS CONSOLE</div>
+            <div class="logo-text">San Jose Manggagawa Parish</div>
         </div>
         
         <h1>SYSTEM LOGIN</h1>
-        <p class="subtitle">> AUTHENTICATION REQUIRED: SELECT ACCESS LEVEL</p>
+        <p class="subtitle"> AUTHENTICATION REQUIRED: SELECT ACCESS LEVEL</p>
 
-        <div class="button-group">
-            <a href="adminwebsite/adminlogin.html" id="adminButton" class="login-button" role="button" onclick="loginAsAdmin(event)">
-                <i class="fas fa-user-shield"></i>
-                ADMIN ACCESS
-            </a>
+        <div class="button-layout">
+            <div class="left-buttons">
+                <a href="adminwebsite/adminlogin.html" id="adminButton" class="login-button" role="button" onclick="loginAsAdmin(event)">
+                    <i class="fas fa-user-shield"></i>
+                    ADMIN ACCESS
+                </a>
+                
+                <a href="index.html" id="superAdminButton" class="login-button" role="button" onclick="loginAsSuperAdmin(event)">
+                    <i class="fas fa-crown"></i>
+                    SUPER ADMIN ACCESS
+                </a>
+            </div>
             
-            <a href="index.html" id="superAdminButton" class="login-button" role="button" onclick="loginAsSuperAdmin(event)">
-                <i class="fas fa-crown"></i>
-                SUPER ADMIN ACCESS
-            </a>
-            
-            <a href="register.html" id="registerButton" class="login-button" role="button" onclick="registerUser(event)">
-                <i class="fas fa-user-plus"></i>
-                REGISTER NEW USER
-            </a>
+            <div class="right-button">
+                <a href="register.html" id="registerButton" class="login-button" role="button" onclick="registerUser(event)">
+                    <i class="fas fa-user-plus"></i>
+                    REGISTER NEW USER
+                </a>
+            </div>
         </div>
         
         <p id="messageArea" class="message"></p>
@@ -246,7 +280,7 @@
         <div class="features"></div>
         
         <div class="footer">
-            &copy; 2025 SAN JOSE MANGGAGAWA PARISH | SECURED SYSTEM V3.1
+            &copy; 2025 SAN JOSE MANGGAGAWA PARISH | SECURED SYSTEM
         </div>
     </div>
 
@@ -268,18 +302,18 @@
 
         function loginAsAdmin(event) {
             // 'adminwebsite/adminlogin.html' is the redirect URL (taken from href)
-            showMessageAndRedirect(event, '> ACCESS GRANTED: PARISH ADMIN. REDIRECTING...', 'success');
+            showMessageAndRedirect(event, ' ACCESS GRANTED: PARISH ADMIN. REDIRECTING...', 'success');
         }
 
         function loginAsSuperAdmin(event) {
             // 'index.html' is the redirect URL (taken from href)
-            showMessageAndRedirect(event, '> OVERRIDE INITIATED: SUPERUSER. REDIRECTING...', 'info');
+            showMessageAndRedirect(event, ' OVERRIDE INITIATED: SUPERUSER. REDIRECTING...', 'info');
         }
 
         // NEW FUNCTION FOR REGISTER BUTTON
         function registerUser(event) {
             // 'registration.html' is the redirect URL (taken from href)
-            showMessageAndRedirect(event, '> REGISTER CONSOLE: PROCEED TO REGISTRATION FORM...', 'register');
+            showMessageAndRedirect(event, ' REGISTER CONSOLE: PROCEED TO REGISTRATION FORM...', 'register');
         }
     </script>
 </body>

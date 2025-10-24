@@ -31,17 +31,17 @@ body {
 .dashboard-container { 
     display: flex; 
     min-height: 100vh; 
-    position: relative; /* Added for sidebar positioning */
+    position: relative;
 }
 
-/* Sidebar - FIXED */
+/* Sidebar */
 .sidebar {
     width: 260px;
     background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
     color: #fff;
     transition: all 0.3s ease;
-    position: relative; /* Added for toggle positioning */
-    z-index: 1000; /* Ensure sidebar is above content */
+    position: relative;
+    z-index: 1000;
 }
 
 .sidebar.collapsed { 
@@ -68,7 +68,7 @@ body {
     align-items: center;
     padding: 20px 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative; /* For toggle positioning */
+    position: relative;
 }
 
 .church-logo i { font-size: 24px; margin-right: 10px; color: #4CAF50; }
@@ -111,11 +111,11 @@ body {
 .nav-logout a { color: #e74c3c; }
 .nav-logout a:hover { background-color: rgba(231, 76, 60, 0.1); }
 
-/* Sidebar Toggle - FIXED POSITION */
+/* Sidebar Toggle */
 .sidebar-toggle {
     position: absolute;
     top: 20px;
-    right: -12px; /* Adjusted to be properly positioned */
+    right: -12px;
     background: #2c3e50;
     color: white;
     border: none;
@@ -128,7 +128,7 @@ body {
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-    z-index: 1001; /* Higher than sidebar */
+    z-index: 1001;
     font-size: 12px;
 }
 
@@ -404,7 +404,7 @@ body {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1100; /* Higher than sidebar */
+    z-index: 1100;
     left: 0;
     top: 0;
     width: 100%;
@@ -498,7 +498,7 @@ body {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 1200; /* Highest z-index */
+    z-index: 1200;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -551,6 +551,26 @@ body {
 .detail-value { padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 1px solid var(--color-border); font-size: 0.9rem; }
 .detail-textarea { padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 1px solid var(--color-border); min-height: 80px; font-size: 0.9rem; white-space: pre-wrap; }
 
+/* Schedule Conflict Warning */
+.schedule-conflict {
+    background-color: #FFF9C4;
+    border: 1px solid #F57F17;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #F57F17;
+    display: none;
+}
+
+.schedule-conflict.show {
+    display: block;
+}
+
+.schedule-conflict ul {
+    margin: 5px 0 0 20px;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
     .sidebar { 
@@ -579,7 +599,7 @@ body {
     }
     
     .main-content {
-        margin-left: 70px; /* Account for collapsed sidebar */
+        margin-left: 70px;
     }
 }
 
@@ -777,13 +797,18 @@ body {
   </main>
 </div>
 
-<!-- Rest of your modals remain the same -->
 <!-- Add Request Modal -->
 <div id="addRequestModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
       <h2>Add Blessing Request</h2>
       <span class="close-btn">&times;</span>
+    </div>
+    <div class="schedule-conflict" id="scheduleConflict">
+      <strong><i class="fa-solid fa-triangle-exclamation"></i> Schedule Conflict Detected!</strong>
+      <p>The selected date and time conflicts with the following existing blessings:</p>
+      <ul id="conflictList"></ul>
+      <p>Please select a different date or time.</p>
     </div>
     <form id="addRequestForm">
       <h3 class="form-section-header">Impormasyon ng Humihiling</h3>
@@ -887,13 +912,12 @@ body {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Sidebar toggle functionality - FIXED
+    // Sidebar toggle functionality
     const sidebarToggle = document.querySelector('.sidebar-toggle');
     const sidebar = document.querySelector('.sidebar');
     
     sidebarToggle.addEventListener('click', function() {
         sidebar.classList.toggle('collapsed');
-        // Toggle between bars and times icon
         const icon = this.querySelector('i');
         if (icon.classList.contains('fa-bars')) {
             icon.classList.remove('fa-bars');
@@ -904,7 +928,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Rest of your JavaScript code remains the same...
     // Dropdown functionality
     document.querySelectorAll('.nav-dropdown > a').forEach(function(dropdown) {
         dropdown.addEventListener('click', function(e) {
@@ -932,6 +955,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const completedCount = document.getElementById('completedCount');
     const headerSearchInput = document.getElementById('headerSearch');
     const tableSearchInput = document.getElementById('tableSearch');
+    const scheduleConflict = document.getElementById('scheduleConflict');
+    const conflictList = document.getElementById('conflictList');
 
     const detailsModal = document.getElementById('detailsModal');
     const closeDetails = document.getElementById('closeDetails');
@@ -1055,6 +1080,54 @@ document.addEventListener('DOMContentLoaded', function() {
                 fee: request.fee || blessingFees[request.blessingType] || 500
             };
         });
+    }
+
+    // Check for schedule conflicts
+    function checkScheduleConflicts(date, time, currentRequestId = null) {
+        const selectedDateTime = new Date(`${date}T${time}`);
+        const conflicts = [];
+        
+        requests.forEach(request => {
+            // Skip the current request if we're editing
+            if (currentRequestId && request._id === currentRequestId) return;
+            
+            if (request.date && request.time && (request.status === 'scheduled' || request.status === 'in-process')) {
+                const requestDateTime = new Date(`${request.date}T${request.time}`);
+                
+                // Check if dates are the same and times are within 2 hours of each other
+                if (request.date === date && Math.abs(selectedDateTime - requestDateTime) < 2 * 60 * 60 * 1000) {
+                    conflicts.push({
+                        name: request.name,
+                        date: request.date,
+                        time: request.time,
+                        type: request.blessingType
+                    });
+                }
+            }
+        });
+        
+        return conflicts;
+    }
+
+    // Update schedule conflict display
+    function updateScheduleConflictDisplay(date, time, currentRequestId = null) {
+        const conflicts = checkScheduleConflicts(date, time, currentRequestId);
+        
+        if (conflicts.length > 0) {
+            scheduleConflict.classList.add('show');
+            conflictList.innerHTML = '';
+            
+            conflicts.forEach(conflict => {
+                const li = document.createElement('li');
+                li.textContent = `${conflict.name} - ${formatDate(conflict.date)} at ${formatTime(conflict.time)} (${conflict.type})`;
+                conflictList.appendChild(li);
+            });
+            
+            return true;
+        } else {
+            scheduleConflict.classList.remove('show');
+            return false;
+        }
     }
 
     async function fetchRequests() {
@@ -1253,29 +1326,69 @@ document.addEventListener('DOMContentLoaded', function() {
         alert.querySelector('.close-notif').addEventListener('click',()=>alert.remove());
     }
 
-    // Modal handling
-    addRequestBtn.addEventListener('click', ()=>modal.classList.add('show'));
-    exportBtn.addEventListener('click', ()=>exportModal.classList.add('show'));
-    closeBtn.addEventListener('click', ()=>{
+    // Modal handling - FIXED ALL BUTTONS
+    addRequestBtn.addEventListener('click', function() {
+        console.log("Add request button clicked");
+        modal.classList.add('show');
+    });
+    
+    exportBtn.addEventListener('click', function() {
+        console.log("Export data button clicked");
+        exportModal.classList.add('show');
+    });
+    
+    closeBtn.addEventListener('click', function(){
+        console.log("Close button clicked");
         modal.classList.remove('show'); 
         addRequestForm.reset();
+        scheduleConflict.classList.remove('show');
     });
-    closeExport.addEventListener('click', ()=>{
+    
+    closeExport.addEventListener('click', function(){
+        console.log("Close export button clicked");
         exportModal.classList.remove('show');
     });
-    window.addEventListener('click', (e)=>{
-        if(e.target===modal){
+    
+    window.addEventListener('click', function(e){
+        if(e.target === modal){
             modal.classList.remove('show'); 
             addRequestForm.reset();
+            scheduleConflict.classList.remove('show');
         }
-        if(e.target===exportModal){
+        if(e.target === exportModal){
             exportModal.classList.remove('show');
         }
     });
 
+    // Schedule conflict detection
+    document.getElementById('blessingDate').addEventListener('change', function() {
+        const date = this.value;
+        const time = document.getElementById('blessingTime').value;
+        if (date && time) {
+            updateScheduleConflictDisplay(date, time);
+        }
+    });
+
+    document.getElementById('blessingTime').addEventListener('change', function() {
+        const time = this.value;
+        const date = document.getElementById('blessingDate').value;
+        if (date && time) {
+            updateScheduleConflictDisplay(date, time);
+        }
+    });
+
     // Form submission
-    addRequestForm.addEventListener('submit', (e)=>{
+    addRequestForm.addEventListener('submit', function(e){
         e.preventDefault();
+        
+        const date = document.getElementById('blessingDate').value;
+        const time = document.getElementById('blessingTime').value;
+        
+        // Check for schedule conflicts before submitting
+        if (updateScheduleConflictDisplay(date, time)) {
+            showNotification('Please resolve the schedule conflict before submitting the request.', 'error');
+            return;
+        }
         
         const timestamp = Date.now();
         const randomString = Math.random().toString(36).substring(2, 10);
@@ -1302,10 +1415,11 @@ document.addEventListener('DOMContentLoaded', function() {
         addRequest(newRequest);
         modal.classList.remove('show'); 
         addRequestForm.reset();
+        scheduleConflict.classList.remove('show');
     });
 
     filterButtons.forEach(button=>{
-        button.addEventListener('click', ()=>{
+        button.addEventListener('click', function(){
             filterButtons.forEach(btn=>btn.classList.remove('active'));
             button.classList.add('active');
             currentFilter = button.dataset.status;
@@ -1323,7 +1437,7 @@ document.addEventListener('DOMContentLoaded', function() {
     tableSearchInput.addEventListener('input', handleSearchInput);
 
     // Table row click handling
-    requestsTableBody.addEventListener('click',(e)=>{
+    requestsTableBody.addEventListener('click', function(e){
         const row = e.target.closest('tr'); 
         if(!row || !row.dataset.id) return;
         const id = row.dataset.id; 
@@ -1359,6 +1473,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return; 
         }
         if(e.target.closest('.export-individual-btn')) { 
+            console.log("Export individual button clicked for:", request.name);
             exportIndividualRequest(request);
             return; 
         }
@@ -1463,137 +1578,203 @@ document.addEventListener('DOMContentLoaded', function() {
         detailsModal.classList.add('show');
     }
 
-    closeDetails.addEventListener('click',()=>{
+    closeDetails.addEventListener('click', function(){
         detailsModal.classList.remove('show');
         currentDetailsRequest = null;
     });
-    window.addEventListener('click',(e)=>{
-        if(e.target===detailsModal) {
+    
+    window.addEventListener('click', function(e){
+        if(e.target === detailsModal) {
             detailsModal.classList.remove('show');
             currentDetailsRequest = null;
         }
     });
 
-    // Individual export functionality
-    function exportIndividualRequest(request) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-        });
-        
-        // Set document properties
-        doc.setProperties({
-            title: `Blessing Request - ${request.name}`,
-            subject: 'Blessing Request Details',
-            author: 'San Jose Parish',
-            keywords: 'blessing, request, parish',
-            creator: 'San Jose Parish Management System'
-        });
-        
-        // Add header
-        doc.setFontSize(20);
-        doc.setTextColor(27, 94, 32);
+    // Individual export functionality - EXACT FORMAT FROM YOUR IMAGE
+    // Individual export functionality - COMPLETE FIELDS AND PROPER FORMATTING
+function exportIndividualRequest(request) {
+    console.log("Exporting individual request:", request);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+    });
+    
+    // Set document properties
+    doc.setProperties({
+        title: `Blessing Request - ${request.name}`,
+        subject: 'Blessing Request Details',
+        author: 'San Jose Parish',
+        keywords: 'blessing, request, parish',
+        creator: 'San Jose Parish Management System'
+    });
+    
+    // Add header exactly like in your image
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    
+    // Top header with diocese and parish names - PROPERLY CENTERED
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'bold');
+    
+    // DIOCESE on left
+    doc.text('DIOCESE OF ANTIPOLO',pageWidth / 2, 15, { align: 'center' });
+    
+    // PARISH INFO centered
+    doc.text('SAN JOSE MANGGAGAWA PARISH', pageWidth / 2, 15, { align: 'center' });
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text('San Jose, Rodriguez, Rizal', pageWidth / 2, 20, { align: 'center' });
+    doc.text('Cellphone No.: 0967-431-6482', pageWidth / 2, 25, { align: 'center' });
+    
+    // Main title
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('REQUEST FOR BLESSING OF:', pageWidth / 2, 40, { align: 'center' });
+    
+    // Draw the main form box
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.rect(15, 45, pageWidth - 30, pageHeight - 80);
+    
+    // Form fields - exactly like in your image
+    let yPosition = 55;
+    
+    // REQUEST FOR BLESSING OF field
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('  ', 20, yPosition);
+    
+   yPosition += 10;
+    
+    // BLESSING TYPE field
+    doc.setFont('helvetica', 'bold');
+    doc.text('BLESSING TYPE:', 20, yPosition);
+    
+    // Draw underline for the field
+ 
+    // Add the actual blessing type
+    doc.setFont('helvetica', 'normal');
+    doc.text(request.blessingType || 'N/A', 80, yPosition);
+    
+    yPosition += 12;
+    
+    // NAME field - ADDED THIS MISSING FIELD
+    doc.setFont('helvetica', 'bold');
+    doc.text('NAME:', 20, yPosition);
+    
+    // Draw underline for the field
+ 
+    
+    // Add the actual name
+    doc.setFont('helvetica', 'normal');
+    doc.text(request.name || 'N/A', 45, yPosition);
+    
+    yPosition += 12;
+    
+    // ADDRESS field
+    doc.setFont('helvetica', 'bold');
+    doc.text('ADDRESS:', 20, yPosition);
+    
+    // Draw underline for the field
+   
+    
+    // Add the actual address
+    doc.setFont('helvetica', 'normal');
+    const addressLines = doc.splitTextToSize(request.address || 'N/A', pageWidth - 65);
+    doc.text(addressLines, 50, yPosition);
+    yPosition += (addressLines.length * 5) + 5;
+    
+    // CONTACT NUMBER field
+    doc.setFont('helvetica', 'bold');
+    doc.text('CONTACT NUMBER:', 20, yPosition);
+    
+    // Draw underline for the field
+   
+    
+    // Add the actual contact number
+    doc.setFont('helvetica', 'normal');
+    doc.text(request.contactNumber || 'N/A', 70, yPosition);
+    
+    yPosition += 12;
+    
+    // DATE field - ADDED THIS MISSING FIELD
+    doc.setFont('helvetica', 'bold');
+    doc.text('DATE:', 20, yPosition);
+    
+    // Draw underline for the field
+    
+    
+    // Add the actual date
+    doc.setFont('helvetica', 'normal');
+    doc.text(formatDate(request.date) || 'N/A', 45, yPosition);
+    
+    yPosition += 15;
+    
+    // TIME field - ADDED THIS MISSING FIELD
+    doc.setFont('helvetica', 'bold');
+    doc.text('TIME:', 20, yPosition);
+    
+    // Draw underline for the field
+   
+    
+    // Add the actual time
+    doc.setFont('helvetica', 'normal');
+    doc.text(formatTime(request.time) || 'N/A', 45, yPosition);
+    
+    // Add additional details if available
+    yPosition += 15;
+    
+    if (request.requestForDetails) {
         doc.setFont('helvetica', 'bold');
-        doc.text('SAN JOSE PARISH', 105, 20, { align: 'center' });
-        
-        doc.setFontSize(16);
-        doc.setTextColor(0, 0, 0);
-        doc.text('BLESSING REQUEST DETAILS', 105, 30, { align: 'center' });
-        
-        // Add request details
-        let yPosition = 50;
-        
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('REQUEST INFORMATION:', 20, yPosition);
-        yPosition += 10;
+        doc.text('ADDITIONAL DETAILS:', 20, yPosition);
+        yPosition += 5;
         
         doc.setFont('helvetica', 'normal');
-        doc.text(`Request Number: ${request.requestNumber || 'N/A'}`, 20, yPosition);
-        yPosition += 7;
-        doc.text(`Status: ${request.status.toUpperCase()}`, 20, yPosition);
-        yPosition += 7;
-        doc.text(`Created: ${request.createdAt ? formatDate(request.createdAt) : 'N/A'}`, 20, yPosition);
-        yPosition += 15;
-        
-        // Requester Information
-        doc.setFont('helvetica', 'bold');
-        doc.text('REQUESTER INFORMATION:', 20, yPosition);
-        yPosition += 10;
-        
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Name: ${request.name || 'N/A'}`, 20, yPosition);
-        yPosition += 7;
-        doc.text(`Contact: ${request.contactNumber || 'N/A'}`, 20, yPosition);
-        yPosition += 7;
-        
-        // Handle address with text wrapping
-        const addressLines = doc.splitTextToSize(`Address: ${request.address || 'N/A'}`, 170);
-        doc.text(addressLines, 20, yPosition);
-        yPosition += (addressLines.length * 7);
-        yPosition += 8;
-        
-        // Blessing Details
-        doc.setFont('helvetica', 'bold');
-        doc.text('BLESSING DETAILS:', 20, yPosition);
-        yPosition += 10;
-        
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Type: ${request.blessingType || 'N/A'}`, 20, yPosition);
-        yPosition += 7;
-        doc.text(`Date: ${formatDate(request.date)}`, 20, yPosition);
-        yPosition += 7;
-        doc.text(`Time: ${formatTime(request.time)}`, 20, yPosition);
-        yPosition += 7;
-        
-        if (request.requestForDetails) {
-            const detailsLines = doc.splitTextToSize(`Details: ${request.requestForDetails}`, 170);
-            doc.text(detailsLines, 20, yPosition);
-            yPosition += (detailsLines.length * 7);
-        }
-        
-        yPosition += 8;
-        
-        // Payment Information
-        doc.setFont('helvetica', 'bold');
-        doc.text('PAYMENT INFORMATION:', 20, yPosition);
-        yPosition += 10;
-        
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Status: ${request.paymentStatus.toUpperCase()}`, 20, yPosition);
-        yPosition += 7;
-        doc.text(`Fee: ₱${request.fee || 500}.00`, 20, yPosition);
-        yPosition += 7;
-        
-        if (request.paymentDate) {
-            doc.text(`Paid on: ${formatDate(request.paymentDate)}`, 20, yPosition);
-            yPosition += 7;
-        }
-        
-        if (request.paymentMethod) {
-            doc.text(`Method: ${request.paymentMethod}`, 20, yPosition);
-            yPosition += 7;
-        }
-        
-        // Add footer
-        const pageHeight = doc.internal.pageSize.height;
-        doc.setFontSize(10);
-        doc.setTextColor(128, 128, 128);
-        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, pageHeight - 20);
-        doc.text('San Jose Parish Management System', 105, pageHeight - 20, { align: 'center' });
-        doc.text(`Page 1 of 1`, 190, pageHeight - 20, { align: 'right' });
-        
-        // Save the PDF
-        const fileName = `Blessing_Request_${request.name.replace(/\s+/g, '_')}.pdf`;
-        doc.save(fileName);
-        
-        showNotification('Request exported as PDF successfully!', 'success');
+        const detailsLines = doc.splitTextToSize(request.requestForDetails, pageWidth - 40);
+        doc.text(detailsLines, 20, yPosition);
+        yPosition += (detailsLines.length * 5) + 10;
     }
+    
+   
+    // Add footer with date and signature lines
+    yPosition = pageHeight - 40;
+    
+    // Date line
+    doc.setFontSize(10);
+    doc.text(`Date Prepared: ${new Date().toLocaleDateString()}`, 20, yPosition);
+    
+    // Signature lines
+    yPosition += 15;
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    
+    // Requester signature
+    doc.line(20, yPosition, 80, yPosition);
+    doc.text('Requester Signature', 50, yPosition + 5, { align: 'center' });
+    
+    // Parish representative signature
+    doc.line(120, yPosition, 180, yPosition);
+    doc.text('Parish Representative', 150, yPosition + 5, { align: 'center' });
+    
+    // Footer
+    yPosition = pageHeight - 10;
+    doc.setFontSize(8);
+    doc.text('San Jose Parish Management System', pageWidth / 2, yPosition, { align: 'center' });
+    
+    // Save the PDF
+    const fileName = `Blessing_Request_${request.name.replace(/\s+/g, '_')}.pdf`;
+    doc.save(fileName);
+    
+    showNotification('Request exported as PDF successfully!', 'success');
+}
 
-    // Bulk export functionality
+    // Bulk export functionality - FIXED
     document.getElementById('submitExportBtn').addEventListener('click', function() {
+        console.log("Submit export button clicked!");
         const exportRange = document.getElementById('exportRange').value;
         let dataToExport = [];
         
@@ -1613,6 +1794,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function exportMultipleRequests(requests) {
+        console.log("Exporting multiple requests:", requests.length);
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({
             orientation: 'portrait',
@@ -1633,24 +1815,35 @@ document.addEventListener('DOMContentLoaded', function() {
         const maxRowsPerPage = 20;
         let rowCount = 0;
         
-        // Add header
-        doc.setFontSize(20);
+        // Add header with logos
+        const pageWidth = doc.internal.pageSize.width;
+        const pageHeight = doc.internal.pageSize.height;
+        
+        try {
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('DIOCESE OF ANTIPOLO', 20, 15);
+            
+            doc.text('SAN JOSE MANGGAGAWA PARISH', pageWidth - 20, 15, { align: 'right' });
+            doc.text('San Jose, Rodriguez, Rizal', pageWidth - 20, 20, { align: 'right' });
+        } catch (e) {
+            console.log("Could not load logos:", e);
+        }
+        
+        // Add title
+        doc.setFontSize(16);
         doc.setTextColor(27, 94, 32);
         doc.setFont('helvetica', 'bold');
-        doc.text('SAN JOSE PARISH', 105, 20, { align: 'center' });
-        
-        doc.setFontSize(16);
-        doc.setTextColor(0, 0, 0);
-        doc.text('BLESSING REQUESTS REPORT', 105, 30, { align: 'center' });
+        doc.text('BLESSING REQUESTS REPORT', pageWidth / 2, 35, { align: 'center' });
         
         doc.setFontSize(10);
         doc.setTextColor(128, 128, 128);
-        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 40);
-        doc.text(`Total Requests: ${requests.length}`, 105, 40, { align: 'center' });
-        doc.text(`Page: ${currentPage}`, 190, 40, { align: 'right' });
+        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 45);
+        doc.text(`Total Requests: ${requests.length}`, pageWidth / 2, 45, { align: 'center' });
+        doc.text(`Page: ${currentPage}`, pageWidth - 20, 45, { align: 'right' });
         
         // Table headers
-        let yPosition = 50;
+        let yPosition = 55;
         doc.setFontSize(10);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
@@ -1683,8 +1876,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Add header for new page
                 doc.setFontSize(10);
                 doc.setTextColor(128, 128, 128);
-                doc.text(`Page: ${currentPage}`, 190, yPosition, { align: 'right' });
-                yPosition += 20;
+                doc.text(`Page: ${currentPage}`, pageWidth - 20, yPosition, { align: 'right' });
+                yPosition += 25;
                 
                 // Table headers for new page
                 doc.setFontSize(10);
@@ -1728,10 +1921,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Add footer
-        const pageHeight = doc.internal.pageSize.height;
         doc.setFontSize(8);
         doc.setTextColor(128, 128, 128);
-        doc.text('San Jose Parish Management System', 105, pageHeight - 10, { align: 'center' });
+        doc.text('San Jose Parish Management System', pageWidth / 2, pageHeight - 10, { align: 'center' });
         
         // Save the PDF
         const fileName = `Blessing_Requests_Report_${new Date().toISOString().split('T')[0]}.pdf`;
@@ -1740,11 +1932,14 @@ document.addEventListener('DOMContentLoaded', function() {
         showNotification(`${requests.length} requests exported as PDF successfully!`, 'success');
     }
 
-    // Individual export button in details modal
+    // Individual export button in details modal - FIXED
     exportIndividualBtn.addEventListener('click', function() {
+        console.log("Export individual button in modal clicked");
         if (currentDetailsRequest) {
             exportIndividualRequest(currentDetailsRequest);
             detailsModal.classList.remove('show');
+        } else {
+            showNotification('No request selected for export!', 'error');
         }
     });
 
@@ -1753,7 +1948,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Logout
     const logoutLink = document.getElementById("logoutLink");
-    logoutLink.addEventListener("click",(e)=>{
+    logoutLink.addEventListener("click", function(e){
         e.preventDefault();
         Swal.fire({
             title:'Are you sure you want to log out?',

@@ -206,103 +206,103 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    const loginBtn = document.getElementById("loginBtn");
-    const originalText = loginBtn.innerHTML;
-    
-    // Show loading state
-    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> LOGGING IN...';
-    loginBtn.disabled = true;
+        const loginBtn = document.getElementById("loginBtn");
+        const originalText = loginBtn.innerHTML;
+        
+        // Show loading state
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> LOGGING IN...';
+        loginBtn.disabled = true;
 
-    const data = {
-        username: document.getElementById("username").value.trim(),
-        password: document.getElementById("password").value.trim()
-    };
+        const data = {
+            username: document.getElementById("username").value.trim(),
+            password: document.getElementById("password").value.trim()
+        };
 
-    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
 
-    try {
-        const res = await fetch("http://localhost:5000/website/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-
-        const result = await res.json();
-
-        if (res.ok && result.success) {
-            // ✅ STORE USER DATA IN LOCALSTORAGE FOR SESSION MANAGEMENT
-            localStorage.setItem('user', JSON.stringify(result.user));
-            localStorage.setItem('userType', result.userType);
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('loginTime', new Date().toISOString());
-            
-            console.log('✅ User data stored:', result.user);
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'Login Successful!',
-                html: `Welcome back, <strong>${result.user.name}</strong>!`,
-                timer: 2000,
-                showConfirmButton: false
-            }).then(() => {
-                // Redirect to website dashboard
-                window.location.href = "websitedashboard.html";
+        try {
+            const res = await fetch("http://localhost:5000/website/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
             });
-        } else {
+
+            const result = await res.json();
+
+            if (res.ok && result.success) {
+                // ✅ STORE USER DATA IN LOCALSTORAGE FOR SESSION MANAGEMENT
+                localStorage.setItem('user', JSON.stringify(result.user));
+                localStorage.setItem('userType', result.userType);
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('loginTime', new Date().toISOString());
+                
+                console.log('✅ User data stored:', result.user);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Login Successful!',
+                    html: `Welcome back, <strong>${result.user.name}</strong>!`,
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    // Redirect to website dashboard
+                    window.location.href = "websitedashboard.html";
+                });
+            } else {
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Login Failed', 
+                    text: result.message || 'Invalid credentials',
+                    confirmButtonColor: primaryColor
+                });
+            }
+        } catch (err) {
+            console.error('Login error:', err);
             Swal.fire({ 
-                icon: 'error', 
-                title: 'Login Failed', 
-                text: result.message || 'Invalid credentials',
+                icon: 'warning', 
+                title: 'Server Connection Error', 
+                text: 'Cannot connect to the backend server. Please make sure the server is running on port 5000.',
                 confirmButtonColor: primaryColor
             });
+        } finally {
+            // Restore button state
+            loginBtn.innerHTML = originalText;
+            loginBtn.disabled = false;
         }
-    } catch (err) {
-        console.error('Login error:', err);
-        Swal.fire({ 
-            icon: 'warning', 
-            title: 'Server Connection Error', 
-            text: 'Cannot connect to the backend server. Please make sure the server is running on port 5000.',
-            confirmButtonColor: primaryColor
-        });
-    } finally {
-        // Restore button state
-        loginBtn.innerHTML = originalText;
-        loginBtn.disabled = false;
-    }
-});
+    });
 
-// Optional: Check if user is already logged in
-document.addEventListener('DOMContentLoaded', function() {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    const userType = localStorage.getItem('userType');
-    
-    if (isLoggedIn === 'true' && userType === 'staff') {
-        // If staff is already logged in, redirect to dashboard
-        const userData = JSON.parse(localStorage.getItem('user') || '{}');
-        console.log('User already logged in:', userData.name);
+    // Optional: Check if user is already logged in
+    document.addEventListener('DOMContentLoaded', function() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const userType = localStorage.getItem('userType');
         
-        // Optional: Show welcome message
-        // Swal.fire({
-        //     icon: 'info',
-        //     title: 'Already Logged In',
-        //     html: `You are already logged in as <strong>${userData.name}</strong>. Redirecting to dashboard...`,
-        //     timer: 1500,
-        //     showConfirmButton: false
-        // }).then(() => {
-        //     window.location.href = "websitedashboard.html";
-        // });
-    }
-});
+        if (isLoggedIn === 'true' && userType === 'staff') {
+            // If staff is already logged in, redirect to dashboard
+            const userData = JSON.parse(localStorage.getItem('user') || '{}');
+            console.log('User already logged in:', userData.name);
+            
+            // Optional: Show welcome message
+            // Swal.fire({
+            //     icon: 'info',
+            //     title: 'Already Logged In',
+            //     html: `You are already logged in as <strong>${userData.name}</strong>. Redirecting to dashboard...`,
+            //     timer: 1500,
+            //     showConfirmButton: false
+            // }).then(() => {
+            //     window.location.href = "websitedashboard.html";
+            // });
+        }
+    });
 
-// Optional: Enter key to submit form
-document.getElementById('password').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-    }
-});
+    // Optional: Enter key to submit form
+    document.getElementById('password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        }
+    });
 </script>
 
 </body>

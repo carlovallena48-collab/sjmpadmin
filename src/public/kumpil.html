@@ -2409,105 +2409,497 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function exportIndividualToPDF(request) {
         try {
-            const documentDefinition = {
-                content: [
-                    { text: 'CONFIRMATION REQUEST DETAILS', style: 'header', alignment: 'center' },
-                    { text: `Generated on: ${new Date().toLocaleDateString()}`, style: 'subheader', alignment: 'center', margin: [0, 0, 0, 20] },
-                    
-                    { text: 'Impormasyon ng Kukumpilan', style: 'sectionHeader' },
-                    {
-                        table: {
-                            widths: ['*', '*'],
-                            body: [
-                                ['Pangalan ng Kukumpilan:', request.confirmandName],
-                                ['Kapanganakan:', `${formatDate(request.birthDate)} sa ${request.birthPlace}`],
-                                ['Edad:', request.age || 'N/A']
-                            ]
+            // Create a function to convert image to base64
+            function getBase64FromImage(src) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'Anonymous';
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas.toDataURL('image/png'));
+                    };
+                    img.onerror = reject;
+                    img.src = src;
+                });
+            }
+
+            // Use the image files from your directory
+            const dioceseLogo = './images/Diocese.png';
+            const parishLogo = './images/LOGO.png';
+
+            Promise.all([
+                getBase64FromImage(dioceseLogo),
+                getBase64FromImage(parishLogo)
+            ]).then(([dioceseBase64, parishBase64]) => {
+                const documentDefinition = {
+                    pageSize: 'A4',
+                    pageMargins: [40, 80, 40, 60],
+                    content: [
+                        // Header with logos and church information
+                        {
+                            columns: [
+                                {
+                                    image: dioceseBase64,
+                                    width: 60,
+                                    height: 60,
+                                    margin: [0, 0, 10, 0]
+                                },
+                                {
+                                    stack: [
+                                        { 
+                                            text: 'Diocese of Antipolo\nSan Jose Manggagawa Parish', 
+                                            alignment: 'center', 
+                                            bold: true,
+                                            fontSize: 14,
+                                            lineHeight: 1.2,
+                                            margin: [0, 5, 0, 0]
+                                        },
+                                        { 
+                                            text: 'E. Rodriguez Highway, San Jose, Rodriguez, Rizal\n📌 (8) 633-80-20', 
+                                            alignment: 'center', 
+                                            fontSize: 10,
+                                            lineHeight: 1.2,
+                                            margin: [0, 5, 0, 0]
+                                        }
+                                    ],
+                                    width: '*'
+                                },
+                                {
+                                    image: parishBase64,
+                                    width: 60,
+                                    height: 60,
+                                    margin: [10, 0, 0, 0],
+                                    alignment: 'right'
+                                }
+                            ],
+                            margin: [0, 0, 0, 20]
                         },
-                        margin: [0, 0, 0, 15]
-                    },
-                    
-                    { text: 'Impormasyon ng Magulang', style: 'sectionHeader' },
-                    {
-                        table: {
-                            widths: ['*', '*'],
-                            body: [
-                                ['Pangalan ng Ama:', request.fatherName],
-                                ['Pangalan ng Ina:', request.motherName]
-                            ]
+
+                        // Title
+                        {
+                            text: 'CONFIRMATION REQUEST FORM',
+                            alignment: 'center',
+                            bold: true,
+                            fontSize: 16,
+                            margin: [0, 0, 0, 30]
                         },
-                        margin: [0, 0, 0, 15]
-                    },
-                    
-                    { text: 'Impormasyon ng Ninong at Ninang', style: 'sectionHeader' },
-                    {
-                        table: {
-                            widths: ['*', '*'],
-                            body: [
-                                ['Pangalan ng Ninong:', request.godfatherName],
-                                ['Pangalan ng Ninang:', request.godmotherName]
-                            ]
+
+                        // Form content - EXACTLY MATCHING THE IMAGE FORMAT
+                        {
+                            stack: [
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Pangalan ng Kukumpilan',
+                                            width: '40%'
+                                        },
+                                        {
+                                            text: request.confirmandName || '____________________',
+                                            width: '60%'
+                                        }
+                                    ]
+                                },
+                                { text: '', margin: [0, 10, 0, 0] },
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Saan Ipinanganak',
+                                            width: '40%'
+                                        },
+                                        {
+                                            text: request.birthPlace || '____________________',
+                                            width: '60%'
+                                        }
+                                    ]
+                                },
+                                { text: '', margin: [0, 10, 0, 0] },
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Kailan Bininyagan',
+                                            width: '40%'
+                                        },
+                                        {
+                                            text: formatDate(request.baptismDate) || '____________________',
+                                            width: '60%'
+                                        }
+                                    ]
+                                },
+                                { text: '', margin: [0, 10, 0, 0] },
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Simbahan kung Saan Bininyagan',
+                                            width: '40%'
+                                        },
+                                        {
+                                            text: request.baptismChurch || 'San Jose Manggagawa Parish',
+                                            width: '60%'
+                                        }
+                                    ]
+                                },
+                                { text: '', margin: [0, 10, 0, 0] },
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Pangalan ng Ama',
+                                            width: '40%'
+                                        },
+                                        {
+                                            text: request.fatherName || '____________________',
+                                            width: '60%'
+                                        }
+                                    ]
+                                },
+                                { text: '', margin: [0, 10, 0, 0] },
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Pangalan ng Ina (Apelyido Noong Dalaga)',
+                                            width: '40%'
+                                        },
+                                        {
+                                            text: request.motherName || '____________________',
+                                            width: '60%'
+                                        }
+                                    ]
+                                },
+                                { text: '', margin: [0, 10, 0, 0] },
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Kasalukuyang Tirahan',
+                                            width: '40%'
+                                        },
+                                        {
+                                            text: request.currentAddress || '____________________',
+                                            width: '60%'
+                                        }
+                                    ]
+                                },
+                                { text: '', margin: [0, 10, 0, 0] },
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Pangalan ng Ninong',
+                                            width: '40%'
+                                        },
+                                        {
+                                            text: request.godfatherName || '____________________',
+                                            width: '60%'
+                                        }
+                                    ]
+                                },
+                                { text: '', margin: [0, 10, 0, 0] },
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Pangalan ng Ninang',
+                                            width: '40%'
+                                        },
+                                        {
+                                            text: request.godmotherName || '____________________',
+                                            width: '60%'
+                                        }
+                                    ]
+                                },
+                                { text: '', margin: [0, 20, 0, 0] },
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Araw ng Kumpil',
+                                            width: '30%'
+                                        },
+                                        {
+                                            text: formatDate(request.kumpilDate) || '____________________',
+                                            width: '20%'
+                                        },
+                                        {
+                                            text: 'Oras',
+                                            width: '15%'
+                                        },
+                                        {
+                                            text: formatTime(request.kumpilTime) || '____________________',
+                                            width: '15%'
+                                        },
+                                        {
+                                            text: 'Fee: ₱300.00',
+                                            width: '20%',
+                                            alignment: 'right'
+                                        }
+                                    ]
+                                }
+                            ],
+                            lineHeight: 2
                         },
-                        margin: [0, 0, 0, 15]
-                    },
-                    
-                    { text: 'Impormasyon sa Pakikipag-ugnayan at Kumpil', style: 'sectionHeader' },
-                    {
-                        table: {
-                            widths: ['*', '*'],
-                            body: [
-                                ['Kasalukuyang Tirahan:', request.currentAddress],
-                                ['Contact Number:', request.contactNo],
-                                ['Petsa ng Kumpil:', formatDate(request.kumpilDate)],
-                                ['Oras ng Kumpil:', formatTime(request.kumpilTime)],
-                                ['Confirmation Type:', request.confirmationType]
+
+                        // Footer with date and signature
+                        {
+                            stack: [
+                                { text: '', margin: [0, 40, 0, 0] },
+                                {
+                                    columns: [
+                                        {
+                                            text: 'Date: ____________________',
+                                            width: '50%'
+                                        },
+                                        {
+                                            text: 'Signature: ____________________',
+                                            width: '50%',
+                                            alignment: 'right'
+                                        }
+                                    ]
+                                }
                             ]
-                        },
-                        margin: [0, 0, 0, 15]
+                        }
+                    ],
+                    styles: {
+                        header: {
+                            fontSize: 18,
+                            bold: true
+                        }
                     },
-                    
-                    { text: 'Status at Payment', style: 'sectionHeader' },
-                    {
-                        table: {
-                            widths: ['*', '*'],
-                            body: [
-                                ['Status:', request.status],
-                                ['Payment Status:', request.paymentStatus],
-                                ['Fee:', `₱${request.fee}.00`]
-                            ]
-                        },
-                        margin: [0, 0, 0, 15]
-                    }
-                ],
-                styles: {
-                    header: {
-                        fontSize: 20,
-                        bold: true,
-                        margin: [0, 0, 0, 10]
-                    },
-                    subheader: {
+                    defaultStyle: {
                         fontSize: 12,
-                        margin: [0, 0, 0, 10]
-                    },
-                    sectionHeader: {
-                        fontSize: 14,
-                        bold: true,
-                        margin: [0, 10, 0, 5],
-                        color: '#1B5E20'
+                        lineHeight: 1.3
                     }
-                },
-                defaultStyle: {
-                    fontSize: 10,
-                    lineHeight: 1.3
-                }
-            };
-            
-            pdfMake.createPdf(documentDefinition).download(`confirmation_request_${request.confirmandName.replace(/\s+/g, '_')}.pdf`);
-            showNotification('PDF file exported successfully!', 'success');
+                };
+
+                pdfMake.createPdf(documentDefinition).download(`confirmation_request_${request.confirmandName.replace(/\s+/g, '_')}.pdf`);
+                showNotification('PDF file exported successfully!', 'success');
+            }).catch(error => {
+                console.error('Error loading images:', error);
+                // Fallback PDF without images
+                createFallbackPDF(request);
+            });
         } catch (error) {
             console.error('Error exporting individual PDF:', error);
             showNotification('Error exporting to PDF format.', 'error');
         }
+    }
+
+    function createFallbackPDF(request) {
+        const documentDefinition = {
+            pageSize: 'A4',
+            pageMargins: [40, 80, 40, 60],
+            content: [
+                // Header with church information only
+                {
+                    stack: [
+                        { 
+                            text: 'Diocese of Antipolo\nSan Jose Manggagawa Parish', 
+                            alignment: 'center', 
+                            bold: true,
+                            fontSize: 14,
+                            lineHeight: 1.2,
+                            margin: [0, 0, 0, 5]
+                        },
+                        { 
+                            text: 'E. Rodriguez Highway, San Jose, Rodriguez, Rizal\n📌 (8) 633-80-20', 
+                            alignment: 'center', 
+                            fontSize: 10,
+                            lineHeight: 1.2,
+                            margin: [0, 0, 0, 20]
+                        }
+                    ]
+                },
+
+                // Title
+                {
+                    text: 'CONFIRMATION REQUEST FORM',
+                    alignment: 'center',
+                    bold: true,
+                    fontSize: 16,
+                    margin: [0, 0, 0, 30]
+                },
+
+                // Form content - EXACTLY MATCHING THE IMAGE FORMAT
+                {
+                    stack: [
+                        {
+                            columns: [
+                                {
+                                    text: 'Pangalan ng Kukumpilan',
+                                    width: '40%'
+                                },
+                                {
+                                    text: request.confirmandName || '____________________',
+                                    width: '60%'
+                                }
+                            ]
+                        },
+                        { text: '', margin: [0, 10, 0, 0] },
+                        {
+                            columns: [
+                                {
+                                    text: 'Saan Ipinanganak',
+                                    width: '40%'
+                                },
+                                {
+                                    text: request.birthPlace || '____________________',
+                                    width: '60%'
+                                }
+                            ]
+                        },
+                        { text: '', margin: [0, 10, 0, 0] },
+                        {
+                            columns: [
+                                {
+                                    text: 'Kailan Bininyagan',
+                                    width: '40%'
+                                },
+                                {
+                                    text: formatDate(request.baptismDate) || '____________________',
+                                    width: '60%'
+                                }
+                            ]
+                        },
+                        { text: '', margin: [0, 10, 0, 0] },
+                        {
+                            columns: [
+                                {
+                                    text: 'Simbahan kung Saan Bininyagan',
+                                    width: '40%'
+                                },
+                                {
+                                    text: request.baptismChurch || 'San Jose Manggagawa Parish',
+                                    width: '60%'
+                                }
+                            ]
+                        },
+                        { text: '', margin: [0, 10, 0, 0] },
+                        {
+                            columns: [
+                                {
+                                    text: 'Pangalan ng Ama',
+                                    width: '40%'
+                                },
+                                {
+                                    text: request.fatherName || '____________________',
+                                    width: '60%'
+                                }
+                            ]
+                        },
+                        { text: '', margin: [0, 10, 0, 0] },
+                        {
+                            columns: [
+                                {
+                                    text: 'Pangalan ng Ina (Apelyido Noong Dalaga)',
+                                    width: '40%'
+                                },
+                                {
+                                    text: request.motherName || '____________________',
+                                    width: '60%'
+                                }
+                            ]
+                        },
+                        { text: '', margin: [0, 10, 0, 0] },
+                        {
+                            columns: [
+                                {
+                                    text: 'Kasalukuyang Tirahan',
+                                    width: '40%'
+                                },
+                                {
+                                    text: request.currentAddress || '____________________',
+                                    width: '60%'
+                                }
+                            ]
+                        },
+                        { text: '', margin: [0, 10, 0, 0] },
+                        {
+                            columns: [
+                                {
+                                    text: 'Pangalan ng Ninong',
+                                    width: '40%'
+                                },
+                                {
+                                    text: request.godfatherName || '____________________',
+                                    width: '60%'
+                                }
+                            ]
+                        },
+                        { text: '', margin: [0, 10, 0, 0] },
+                        {
+                            columns: [
+                                {
+                                    text: 'Pangalan ng Ninang',
+                                    width: '40%'
+                                },
+                                {
+                                    text: request.godmotherName || '____________________',
+                                    width: '60%'
+                                }
+                            ]
+                        },
+                        { text: '', margin: [0, 20, 0, 0] },
+                        {
+                            columns: [
+                                {
+                                    text: 'Araw ng Kumpil',
+                                    width: '30%'
+                                },
+                                {
+                                    text: formatDate(request.kumpilDate) || '____________________',
+                                    width: '20%'
+                                },
+                                {
+                                    text: 'Oras',
+                                    width: '15%'
+                                },
+                                {
+                                    text: formatTime(request.kumpilTime) || '____________________',
+                                    width: '15%'
+                                },
+                                {
+                                    text: 'Fee: ₱300.00',
+                                    width: '20%',
+                                    alignment: 'right'
+                                }
+                            ]
+                        }
+                    ],
+                    lineHeight: 2
+                },
+
+                // Footer with date and signature
+                {
+                    stack: [
+                        { text: '', margin: [0, 40, 0, 0] },
+                        {
+                            columns: [
+                                {
+                                    text: 'Date: ____________________',
+                                    width: '50%'
+                                },
+                                {
+                                    text: 'Signature: ____________________',
+                                    width: '50%',
+                                    alignment: 'right'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 18,
+                    bold: true
+                }
+            },
+            defaultStyle: {
+                fontSize: 12,
+                lineHeight: 1.3
+            }
+        };
+
+        pdfMake.createPdf(documentDefinition).download(`confirmation_request_${request.confirmandName.replace(/\s+/g, '_')}.pdf`);
+        showNotification('PDF file exported successfully!', 'success');
     }
 
     requestsTableBody.addEventListener('click',(e)=>{

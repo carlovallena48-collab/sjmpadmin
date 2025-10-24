@@ -9,7 +9,8 @@ require("dotenv").config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 /* =========================================================
   MONGODB CONNECTION
@@ -22,7 +23,7 @@ mongoose
 /* =========================================================
   SCHEMAS & MODELS
   ========================================================= */
-// Admin Account
+// Admin Account (for super admin)
 const adminSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   username: { type: String, unique: true, required: true, trim: true, lowercase: true },
@@ -34,7 +35,7 @@ const adminSchema = new mongoose.Schema({
 
 const AdminAccount = mongoose.model("AdminAccount", adminSchema, "adminaccount");
 
-// Website Admin (Staff) Account
+// Website Admin (Staff) Account - FIXED: This is for staff login
 const websiteAdminSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   username: { type: String, unique: true, required: true, trim: true, lowercase: true },
@@ -43,11 +44,17 @@ const websiteAdminSchema = new mongoose.Schema({
   permissions: { type: [String], default: ["announcements", "events"] },
   address: String,
   contact: String,
+  position: String,
+  department: String,
+  notes: String,
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+  lastUpdated: { type: Date, default: Date.now }
 }, { suppressReservedKeysWarning: true });
 
 const WebsiteAdmin = mongoose.model("WebsiteAdmin", websiteAdminSchema, "websiteadmins");
 
-// User Account
+// User Account (for regular users/members)
 const userSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true, lowercase: true },
@@ -99,6 +106,7 @@ const baptismSchema = new mongoose.Schema({
   paymentMethod: String,
   paymentReference: String,
   paymentNotes: String,
+  submittedByEmail: String,
   createdAt: { type: Date, default: Date.now }
 }, { suppressReservedKeysWarning: true });
 
@@ -464,7 +472,7 @@ function formatTimeForDisplay(timeString) {
 }
 
 /* =========================================================
-  AUTHENTICATION ROUTES
+  AUTHENTICATION ROUTES - FIXED VERSION
   ========================================================= */
 
 // REGISTER - FIXED: Now properly handles both admin and staff registration
@@ -577,7 +585,321 @@ app.post("/website/login", async (req, res) => {
 });
 
 /* =========================================================
-  SACRAMENT REQUEST ROUTES
+  STAFF MANAGEMENT ROUTES - USING WEBSITEADMIN COLLECTION
+  ========================================================= */
+
+// GET all staff (from WebsiteAdmin collection)
+app.get("/api/staff", async (req, res) => {
+  try {
+    console.log("📤 Fetching all staff members...");
+    const staff = await WebsiteAdmin.find().sort({ createdAt: -1 });
+    console.log(`✅ Found ${staff.length} staff members`);
+    
+    // Format the response to include all necessary fields
+    const formattedStaff = staff.map(staffMember => ({
+      _id: staffMember._id,
+      name: staffMember.name,
+      username: staffMember.username,
+      role: staffMember.role,
+      address: staffMember.address,
+      contact: staffMember.contact,
+      position: staffMember.position || "Staff",
+      department: staffMember.department || "Administration",
+      notes: staffMember.notes || "",
+      isActive: staffMember.isActive !== undefined ? staffMember.isActive : true,
+      createdAt: staffMember.createdAt,
+      lastUpdated: staffMember.lastUpdated
+    }));
+    
+    res.json(formattedStaff);
+  } catch (err) {
+    console.error("❌ Failed to fetch staff:", err.message);
+    res.status(500).json({ message: "Failed to fetch staff" });
+  }
+});
+
+// POST - Add new staff (to WebsiteAdmin collection)
+app.post("/api/staff", async (req, res) => {
+  const { name, username, password, address, contact, notes, position, department } = req.body;
+  
+  if (!name || !username || !password) {
+    return res.status(400).json({ message: "Name, username, and password are required" });
+  }
+
+  try {
+    // Check if username already exists in WebsiteAdmin collection
+    const existingUser = await WebsiteAdmin.findOne({ username: username.trim().toLowerCase() });
+    if (existingUser) {
+      return res.status(409).json({ message: "Username already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const newStaff = await WebsiteAdmin.create({
+      name: name.trim(),
+      username: username.trim().toLowerCase(),
+      password: hashedPassword,
+      role: "Website Manager", // Set as Website Manager for staff
+      address: address || "",
+      contact: contact || "",
+      position: position || "Staff",
+      department: department || "Administration",
+      notes: notes || "",
+      isActive: true, // Default to active
+      createdAt: new Date(),
+      lastUpdated: new Date()
+    });
+
+    await logActivity("CREATE", "websiteadmins", name, username);
+    
+    console.log("✅ Staff member created:", newStaff);
+    
+    // Return formatted response
+    const formattedResponse = {
+      _id: newStaff._id,
+      name: newStaff.name,
+      username: newStaff.username,
+      role: newStaff.role,
+      address: newStaff.address,
+      contact: newStaff.contact,
+      position: newStaff.position,
+      department: newStaff.department,
+      notes: newStaff.notes,
+      isActive: newStaff.isActive,
+      createdAt: newStaff.createdAt,
+      lastUpdated: newStaff.lastUpdated
+    };
+    
+    res.status(201).json(formattedResponse);
+    
+  } catch (err) {
+    console.error("❌ Failed to add staff:", err.message);
+    res.status(400).json({ message: "Failed to add staff: " + err.message });
+  }
+});
+
+// PUT - Update staff (in WebsiteAdmin collection)
+app.put("/api/staff/:id", async (req, res) => {
+  try {
+    const { name, username, address, contact, notes, position, department, isActive } = req.body;
+    
+    const updateData = {
+      name: name?.trim(),
+      username: username?.trim().toLowerCase(),
+      address: address || "",
+      contact: contact || "",
+      notes: notes || "",
+      position: position || "Staff",
+      department: department || "Administration",
+      isActive: isActive !== undefined ? isActive : true,
+      lastUpdated: new Date()
+    };
+
+    // Check if username is being changed and if it's already taken
+    if (username) {
+      const existingUser = await WebsiteAdmin.findOne({ 
+        username: username.trim().toLowerCase(),
+        _id: { $ne: req.params.id }
+      });
+      if (existingUser) {
+        return res.status(409).json({ message: "Username already exists" });
+      }
+    }
+
+    const updatedStaff = await WebsiteAdmin.findByIdAndUpdate(
+      req.params.id, 
+      updateData, 
+      { new: true }
+    );
+
+    if (!updatedStaff) {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    await logActivity("UPDATE", "websiteadmins", updatedStaff.name, updatedStaff.username);
+    console.log("✅ Staff member updated:", updatedStaff);
+    
+    // Return formatted response
+    const formattedResponse = {
+      _id: updatedStaff._id,
+      name: updatedStaff.name,
+      username: updatedStaff.username,
+      role: updatedStaff.role,
+      address: updatedStaff.address,
+      contact: updatedStaff.contact,
+      position: updatedStaff.position,
+      department: updatedStaff.department,
+      notes: updatedStaff.notes,
+      isActive: updatedStaff.isActive,
+      createdAt: updatedStaff.createdAt,
+      lastUpdated: updatedStaff.lastUpdated
+    };
+    
+    res.json(formattedResponse);
+
+  } catch (err) {
+    console.error("❌ Failed to update staff:", err.message);
+    res.status(400).json({ message: "Failed to update staff: " + err.message });
+  }
+});
+
+// PUT - Toggle staff active status
+app.put("/api/staff/:id/toggle-status", async (req, res) => {
+  try {
+    const staffMember = await WebsiteAdmin.findById(req.params.id);
+    
+    if (!staffMember) {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    const newStatus = !staffMember.isActive;
+    
+    const updatedStaff = await WebsiteAdmin.findByIdAndUpdate(
+      req.params.id, 
+      { 
+        isActive: newStatus,
+        lastUpdated: new Date()
+      }, 
+      { new: true }
+    );
+
+    const action = newStatus ? "ACTIVATED" : "DEACTIVATED";
+    await logActivity(action, "websiteadmins", updatedStaff.name, updatedStaff.username);
+    
+    console.log(`✅ Staff member ${newStatus ? 'activated' : 'deactivated'}:`, updatedStaff.name);
+    
+    // Return formatted response
+    const formattedResponse = {
+      _id: updatedStaff._id,
+      name: updatedStaff.name,
+      username: updatedStaff.username,
+      role: updatedStaff.role,
+      address: updatedStaff.address,
+      contact: updatedStaff.contact,
+      position: updatedStaff.position,
+      department: updatedStaff.department,
+      notes: updatedStaff.notes,
+      isActive: updatedStaff.isActive,
+      createdAt: updatedStaff.createdAt,
+      lastUpdated: updatedStaff.lastUpdated
+    };
+    
+    res.json(formattedResponse);
+
+  } catch (err) {
+    console.error("❌ Failed to toggle staff status:", err.message);
+    res.status(400).json({ message: "Failed to toggle staff status" });
+  }
+});
+
+// DELETE - Remove staff (from WebsiteAdmin collection)
+app.delete("/api/staff/:id", async (req, res) => {
+  try {
+    const deletedStaff = await WebsiteAdmin.findByIdAndDelete(req.params.id);
+    
+    if (!deletedStaff) {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    await logActivity("DELETE", "websiteadmins", deletedStaff.name, deletedStaff.username);
+    console.log("✅ Staff member deleted:", deletedStaff.name);
+    res.json({ message: "Staff member deleted successfully" });
+
+  } catch (err) {
+    console.error("❌ Failed to delete staff:", err.message);
+    res.status(400).json({ message: "Failed to delete staff" });
+  }
+});
+
+// GET single staff member
+app.get("/api/staff/:id", async (req, res) => {
+  try {
+    const staffMember = await WebsiteAdmin.findById(req.params.id);
+    
+    if (!staffMember) {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    // Return formatted response
+    const formattedResponse = {
+      _id: staffMember._id,
+      name: staffMember.name,
+      username: staffMember.username,
+      role: staffMember.role,
+      address: staffMember.address,
+      contact: staffMember.contact,
+      position: staffMember.position,
+      department: staffMember.department,
+      notes: staffMember.notes,
+      isActive: staffMember.isActive,
+      createdAt: staffMember.createdAt,
+      lastUpdated: staffMember.lastUpdated
+    };
+    
+    res.json(formattedResponse);
+    
+  } catch (err) {
+    console.error("❌ Failed to fetch staff member:", err.message);
+    res.status(400).json({ message: "Failed to fetch staff member" });
+  }
+});
+
+/* =========================================================
+  USER MANAGEMENT ROUTES (Regular Users/Members)
+  ========================================================= */
+app.post("/api/users", async (req, res) => {
+  const { password, fullName, email, address, contact } = req.body;
+  if (!password || !fullName || !email) return res.status(400).json({ message: "Missing required fields" });
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({ fullName, email: email.toLowerCase(), password: hashedPassword, address, contact });
+    await logActivity("CREATE", "users", fullName, email);
+    res.status(201).json(newUser);
+  } catch (err) {
+    console.error("❌ Failed to add user:", err.message);
+    res.status(400).json({ message: "Failed to add user" });
+  }
+});
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
+    res.json(users);
+  } catch (err) {
+    console.error("❌ Failed to fetch users:", err.message);
+    res.status(500).json({ message: "Failed to fetch users" });
+  }
+});
+
+app.put("/api/users/:id", async (req, res) => {
+  try {
+    const updateData = { ...req.body };
+    if (updateData.password) updateData.password = await bcrypt.hash(updateData.password, 10);
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    if (!updatedUser) return res.status(404).json({ message: "User not found" });
+    await logActivity("UPDATE", "users", updatedUser.fullName, updatedUser.email);
+    res.json(updatedUser);
+  } catch (err) {
+    console.error("❌ Failed to update user:", err.message);
+    res.status(400).json({ message: "Failed to update user" });
+  }
+});
+
+app.delete("/api/users/:id", async (req, res) => {
+  try {
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    if (!deletedUser) return res.status(404).json({ message: "User not found" });
+    await logActivity("DELETE", "users", deletedUser.fullName, deletedUser.email);
+    res.json({ message: "User deleted" });
+  } catch (err) {
+    console.error("❌ Failed to delete user:", err.message);
+    res.status(400).json({ message: "Failed to delete user" });
+  }
+});
+
+/* =========================================================
+  SACRAMENT REQUEST ROUTES (Keep all your existing routes)
   ========================================================= */
 
 // BAPTISM ROUTES
@@ -1764,60 +2086,6 @@ app.delete("/api/volunteer/:id", async (req, res) => {
 });
 
 /* =========================================================
-  USER MANAGEMENT ROUTES
-  ========================================================= */
-app.post("/api/users", async (req, res) => {
-  const { password, fullName, email, address, contact } = req.body;
-  if (!password || !fullName || !email) return res.status(400).json({ message: "Missing required fields" });
-
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ fullName, email: email.toLowerCase(), password: hashedPassword, address, contact });
-    await logActivity("CREATE", "users", fullName, email);
-    res.status(201).json(newUser);
-  } catch (err) {
-    console.error("❌ Failed to add user:", err.message);
-    res.status(400).json({ message: "Failed to add user" });
-  }
-});
-
-app.get("/api/users", async (req, res) => {
-  try {
-    const users = await User.find().sort({ createdAt: -1 });
-    res.json(users);
-  } catch (err) {
-    console.error("❌ Failed to fetch users:", err.message);
-    res.status(500).json({ message: "Failed to fetch users" });
-  }
-});
-
-app.put("/api/users/:id", async (req, res) => {
-  try {
-    const updateData = { ...req.body };
-    if (updateData.password) updateData.password = await bcrypt.hash(updateData.password, 10);
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!updatedUser) return res.status(404).json({ message: "User not found" });
-    await logActivity("UPDATE", "users", updatedUser.fullName, updatedUser.email);
-    res.json(updatedUser);
-  } catch (err) {
-    console.error("❌ Failed to update user:", err.message);
-    res.status(400).json({ message: "Failed to update user" });
-  }
-});
-
-app.delete("/api/users/:id", async (req, res) => {
-  try {
-    const deletedUser = await User.findByIdAndDelete(req.params.id);
-    if (!deletedUser) return res.status(404).json({ message: "User not found" });
-    await logActivity("DELETE", "users", deletedUser.fullName, deletedUser.email);
-    res.json({ message: "User deleted" });
-  } catch (err) {
-    console.error("❌ Failed to delete user:", err.message);
-    res.status(400).json({ message: "Failed to delete user" });
-  }
-});
-
-/* =========================================================
   SCHEDULES ROUTES
   ========================================================= */
 app.get("/api/baptism-schedules", async (req, res) => {
@@ -2557,10 +2825,11 @@ app.get("/api/reports/monthly-performance", async (req, res) => {
 });
 
 // GET Recent Sacrament Requests - FIXED VERSION
+// GET Recent Sacrament Requests - FIXED VERSION
 app.get("/api/reports/recent-requests", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
-    console.log(`📊 Fetching ${limit} recent requests...`);
+    console.log(`📊 Fetching ${limit} recent requests...`); // FIXED: Added closing backtick
 
     // Get recent requests from different collections
     const [recentBaptisms, recentConfirmations, recentPamisa] = await Promise.all([
@@ -2613,7 +2882,7 @@ app.get("/api/reports/recent-requests", async (req, res) => {
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, limit);
 
-    console.log(`✅ Found ${sortedRequests.length} recent requests`);
+    console.log(`✅ Found ${sortedRequests.length} recent requests`); // FIXED: This line is now correct
     res.json(sortedRequests);
 
   } catch (err) {
@@ -2835,17 +3104,9 @@ app.get("/api/reports/health", async (req, res) => {
   }
 });
 
-/* =========================================================
-  WEBSITE ROUTES
-  ========================================================= */
-// Import website routes if the file exists
-try {
+
   const websiteRoutes = require('./website-routes.js');
   app.use("/api", websiteRoutes);
-  console.log("✅ Website routes loaded");
-} catch (err) {
-  console.log("ℹ️  No website-routes.js found, continuing without website routes");
-}
 
 /* =========================================================
   START SERVER

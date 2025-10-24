@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>San Jose Dashboard</title>
+  <title>San Jose Superadmin Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     /* Base Styles */
@@ -691,7 +691,7 @@
     </button>
     <div class="church-logo">
       <i class="fa-solid fa-church"></i>
-      <span>SJMP ADMIN</span>
+      <span>SJMP SUPERADMIN</span>
     </div>
     <nav class="main-nav">
       <ul class="nav-links">
@@ -733,11 +733,10 @@
         <input type="text" placeholder="Search for members, events...">
       </div>
       <div class="user-profile">
-        <i class="fa-solid fa-bell"></i>  
-        <i class="fa-solid fa-comment-dots"></i>
+      
         <div class="user-info">
           <span id="userName">Loading...</span>
-          <small id="userRole">Staff</small>
+          <small id="userRole">Superadmin</small>
         </div>
         <img src="../images/LOGO.png" alt="Admin Profile" id="userAvatar">
         
@@ -745,11 +744,9 @@
         <div class="profile-dropdown" id="profileDropdown">
           <div class="profile-header">
             <h4 id="dropdownUserName">Loading...</h4>
-            <p id="dropdownUserRole">Staff Member</p>
+            <p id="dropdownUserRole">Superadmin</p>
           </div>
           <ul class="profile-menu">
-            <li><a href="profile.html"><i class="fas fa-user"></i> My Profile</a></li>
-            <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
             <li><a href="#" id="profileLogoutLink"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
           </ul>
         </div>
@@ -856,30 +853,32 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>  
 // ==================== SESSION MANAGEMENT ====================
-
-// Check user session and redirect if not logged in
 function checkUserSession() {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const userData = localStorage.getItem('user');
-    const userType = localStorage.getItem('userType');
     
-    console.log('Session check:', { isLoggedIn, userType, userData });
+    if (!isLoggedIn || !userData) {
+        window.location.href = 'index.html';
+        return null;
+    }
     
-    if (!isLoggedIn || !userData || userType !== 'staff') {
+    const user = JSON.parse(userData);
+    
+    // Allow both 'superadmin' and 'admin' for testing
+    if (user.role !== 'superadmin' && user.role !== 'admin') {
         Swal.fire({
             icon: 'warning',
             title: 'Access Denied',
-            text: 'Please login as staff to access this page',
-            timer: 2000,
-            showConfirmButton: false
+            text: `Invalid user role: ${user.role}`,
         }).then(() => {
-            window.location.href = 'adminlogin.html';
+            window.location.href = 'index.html';
         });
         return null;
     }
     
-    return JSON.parse(userData);
+    return user;
 }
+
 
 // Display user profile information
 function displayUserProfile() {
@@ -889,12 +888,12 @@ function displayUserProfile() {
     console.log('Displaying user profile:', userData);
     
     // Display user info in header
-    document.getElementById('userName').textContent = userData.name || 'Staff User';
-    document.getElementById('userRole').textContent = userData.role || 'Website Staff';
+    document.getElementById('userName').textContent = userData.name || 'Superadmin';
+    document.getElementById('userRole').textContent = userData.role || 'Superadmin';
     
     // Display user info in dropdown
-    document.getElementById('dropdownUserName').textContent = userData.name || 'Staff User';
-    document.getElementById('dropdownUserRole').textContent = userData.role || 'Website Staff';
+    document.getElementById('dropdownUserName').textContent = userData.name || 'Superadmin';
+    document.getElementById('dropdownUserRole').textContent = userData.role || 'Superadmin';
     
     // You can also add user avatar if available
     const userAvatar = document.getElementById('userAvatar');
@@ -951,7 +950,7 @@ function setupLogout() {
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
-                        window.location.href = 'adminlogin.html';
+                        window.location.href = 'index.html';
                     });
                 }
             });

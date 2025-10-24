@@ -1220,134 +1220,6 @@ body {
     color: white;
 }
 
-/* Print-specific styles for form export */
-@media print {
-    body * {
-        visibility: hidden;
-    }
-    
-    .form-export-container, .form-export-container * {
-        visibility: visible;
-    }
-    
-    .form-export-container {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        padding: 0;
-        margin: 0;
-    }
-    
-    .no-print {
-        display: none !important;
-    }
-}
-
-/* Form export container styles */
-.form-export-container {
-    width: 210mm; /* A4 width */
-    min-height: 297mm; /* A4 height */
-    padding: 20mm;
-    margin: 0 auto;
-    background: white;
-    font-family: 'Inter', sans-serif;
-    color: #000;
-}
-
-.form-export-header {
-    text-align: center;
-    margin-bottom: 10mm;
-    border-bottom: 2px solid #1B5E20;
-    padding-bottom: 5mm;
-}
-
-.form-export-header h1 {
-    color: #1B5E20;
-    margin-bottom: 2mm;
-    font-size: 24pt;
-}
-
-.form-export-header p {
-    color: #546E7A;
-    font-size: 11pt;
-}
-
-.form-export-section {
-    margin-bottom: 8mm;
-}
-
-.form-export-section h3 {
-    color: #1B5E20;
-    border-bottom: 1px solid #1B5E20;
-    padding-bottom: 2mm;
-    margin-bottom: 4mm;
-    font-size: 14pt;
-}
-
-.form-export-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4mm;
-}
-
-.form-export-item {
-    margin-bottom: 3mm;
-}
-
-.form-export-label {
-    font-weight: bold;
-    margin-bottom: 1mm;
-    font-size: 10pt;
-    color: #37474F;
-}
-
-.form-export-value {
-    padding: 2mm;
-    border: 1px solid #B0BEC5;
-    border-radius: 2mm;
-    background: #FAFAFA;
-    font-size: 10pt;
-    min-height: 6mm;
-}
-
-.form-export-textarea {
-    padding: 2mm;
-    border: 1px solid #B0BEC5;
-    border-radius: 2mm;
-    background: #FAFAFA;
-    min-height: 20mm;
-    font-size: 10pt;
-    white-space: pre-wrap;
-}
-
-.form-export-full-width {
-    grid-column: 1 / -1;
-}
-
-.form-export-footer {
-    margin-top: 15mm;
-    text-align: center;
-    font-size: 9pt;
-    color: #78909C;
-    border-top: 1px solid #B0BEC5;
-    padding-top: 5mm;
-}
-
-.form-export-signature {
-    margin-top: 10mm;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10mm;
-}
-
-.form-export-signature-line {
-    border-top: 1px solid #000;
-    padding-top: 15mm;
-    text-align: center;
-    font-size: 10pt;
-}
-
 /* Modal header with export button */
 .modal-header-with-export {
     display: flex;
@@ -1675,9 +1547,6 @@ body {
     </div>
 </div>
 
-<!-- Hidden export container for form PDF generation -->
-<div id="formExportContainer" style="display: none;"></div>
-
 <div id="alertContainer" class="custom-alert-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1739,8 +1608,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentRequestId = document.getElementById('paymentRequestId');
     const paymentName = document.getElementById('paymentName');
     const paymentType = document.getElementById('paymentType');
-
-    const formExportContainer = document.getElementById('formExportContainer');
 
     let requests = [];
     let currentAction = { id: null, type: null };
@@ -2125,291 +1992,150 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Export form functionality
+    // Export form functionality - FIXED VERSION
     exportFormBtn.addEventListener('click', function() {
         if (currentRequestForExport) {
-            exportRequestForm(currentRequestForExport);
+            exportPamisaForm(currentRequestForExport);
         } else {
             showNotification('No request selected for export.', 'error');
         }
     });
 
-    // Export individual request form to PDF
-    function exportRequestForm(request) {
-        showNotification('Generating form PDF...', 'success');
-        
-        // Create PDF document
-        const doc = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-        });
-        
-        // Set initial position
-        let yPosition = 20;
-        
-        // Add header
-        doc.setFontSize(20);
-        doc.setTextColor(27, 94, 32); // Primary green color
-        doc.text('PAMISA REQUEST FORM', 105, yPosition, { align: 'center' });
-        
-        yPosition += 8;
-        doc.setFontSize(12);
-        doc.setTextColor(100, 100, 100);
-        doc.text('San Jose Manggagawa Parish', 105, yPosition, { align: 'center' });
-        
-        yPosition += 5;
-        doc.text(`Generated on: ${new Date().toLocaleDateString('en-PH')}`, 105, yPosition, { align: 'center' });
-        
-        yPosition += 15;
-        
-        // Request Information Section
-        doc.setFontSize(14);
-        doc.setTextColor(27, 94, 32);
-        doc.text('REQUEST INFORMATION', 20, yPosition);
-        
-        yPosition += 8;
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        
-        // Request details in a table-like format
-        const requestDetails = [
-            ['Request Number:', request.requestNumber || 'N/A'],
-            ['Request Status:', request.status.toUpperCase()],
-            ['Date Submitted:', request.createdAt ? formatDate(request.createdAt) : 'N/A'],
-            ['Last Updated:', request.lastUpdated ? formatDate(request.lastUpdated) : 'N/A']
-        ];
-        
-        requestDetails.forEach(([label, value]) => {
-            doc.setFont(undefined, 'bold');
-            doc.text(label, 20, yPosition);
-            doc.setFont(undefined, 'normal');
-            doc.text(value, 60, yPosition);
-            yPosition += 5;
-        });
-        
-        yPosition += 5;
-        
-        // Requester Information Section
-        doc.setFontSize(14);
-        doc.setTextColor(27, 94, 32);
-        doc.text('REQUESTER INFORMATION', 20, yPosition);
-        
-        yPosition += 8;
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        
-        const requesterDetails = [
-            ['Name:', request.requesterName],
-            ['Contact:', request.requesterContact],
-            ['Address:', request.requesterAddress],
-            ['Email:', request.submittedByEmail || 'N/A']
-        ];
-        
-        requesterDetails.forEach(([label, value]) => {
-            doc.setFont(undefined, 'bold');
-            doc.text(label, 20, yPosition);
-            doc.setFont(undefined, 'normal');
-            
-            // Handle long text by splitting into multiple lines
-            const maxWidth = 120;
-            const lines = doc.splitTextToSize(value || 'N/A', maxWidth);
-            doc.text(lines, 60, yPosition);
-            yPosition += (lines.length * 5);
-        });
-        
-        yPosition += 5;
-        
-        // Check if we need a new page
-        if (yPosition > 200) {
-            doc.addPage();
-            yPosition = 20;
-        }
-        
-        // Pamisa Details Section
-        doc.setFontSize(14);
-        doc.setTextColor(27, 94, 32);
-        doc.text('PAMISA DETAILS', 20, yPosition);
-        
-        yPosition += 8;
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        
-        const pamisaDetails = [
-            ['Pamisa Date:', formatDate(request.date)],
-            ['Pamisa Time:', formatTime(request.time)],
-            ['Pamisa Type:', (request.pamisaType || 'regular').toUpperCase()],
-            ['Donation Amount:', `₱${request.donation || '0'}.00`]
-        ];
-        
-        pamisaDetails.forEach(([label, value]) => {
-            doc.setFont(undefined, 'bold');
-            doc.text(label, 20, yPosition);
-            doc.setFont(undefined, 'normal');
-            doc.text(value, 60, yPosition);
-            yPosition += 5;
-        });
-        
-        yPosition += 5;
-        
-        // Intention
-        doc.setFont(undefined, 'bold');
-        doc.text('Intention:', 20, yPosition);
-        yPosition += 5;
-        doc.setFont(undefined, 'normal');
-        const intentionLines = doc.splitTextToSize(request.intention || 'N/A', 170);
-        doc.text(intentionLines, 20, yPosition);
-        yPosition += (intentionLines.length * 5) + 5;
-        
-        // Special Requests
-        if (request.specialRequests && request.specialRequests.trim() !== '') {
-            doc.setFont(undefined, 'bold');
-            doc.text('Special Requests:', 20, yPosition);
-            yPosition += 5;
-            doc.setFont(undefined, 'normal');
-            const specialRequestsLines = doc.splitTextToSize(request.specialRequests, 170);
-            doc.text(specialRequestsLines, 20, yPosition);
-            yPosition += (specialRequestsLines.length * 5) + 5;
-        }
-        
-        // Check if we need a new page for additional sections
-        if (yPosition > 180) {
-            doc.addPage();
-            yPosition = 20;
-        }
-        
-        // Payment Information Section (if available)
-        if (request.paymentStatus === 'paid' || request.paymentDate) {
-            doc.setFontSize(14);
-            doc.setTextColor(27, 94, 32);
-            doc.text('PAYMENT INFORMATION', 20, yPosition);
-            
-            yPosition += 8;
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            
-            const paymentDetails = [
-                ['Payment Status:', request.paymentStatus?.toUpperCase() || 'N/A'],
-                ['Payment Date:', request.paymentDate ? formatDate(request.paymentDate) : 'N/A'],
-                ['Payment Method:', request.paymentMethod || 'N/A'],
-                ['Reference Number:', request.paymentReference || 'N/A']
-            ];
-            
-            paymentDetails.forEach(([label, value]) => {
-                doc.setFont(undefined, 'bold');
-                doc.text(label, 20, yPosition);
-                doc.setFont(undefined, 'normal');
-                doc.text(value, 60, yPosition);
-                yPosition += 5;
+    // Export pamisa form to PDF - EXACT FORMAT LIKE YOUR SCREENSHOT
+    function exportPamisaForm(request) {
+        try {
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
             });
             
-            if (request.paymentNotes && request.paymentNotes.trim() !== '') {
-                yPosition += 2;
-                doc.setFont(undefined, 'bold');
-                doc.text('Payment Notes:', 20, yPosition);
-                yPosition += 5;
-                doc.setFont(undefined, 'normal');
-                const paymentNotesLines = doc.splitTextToSize(request.paymentNotes, 170);
-                doc.text(paymentNotesLines, 20, yPosition);
-                yPosition += (paymentNotesLines.length * 5);
-            }
+            let yPosition = 20;
             
-            yPosition += 5;
-        }
-        
-        // Reason Information Sections (if available)
-        if (request.cancellation_reason) {
-            if (yPosition > 150) {
-                doc.addPage();
-                yPosition = 20;
-            }
-            
-            doc.setFontSize(14);
+            // Add header - EXACT FORMAT LIKE YOUR SCREENSHOT
+            doc.setFontSize(16);
             doc.setTextColor(27, 94, 32);
-            doc.text('CANCELLATION DETAILS', 20, yPosition);
+            doc.text('Diocese of Antipolo', 105, yPosition, { align: 'center' });
             
-            yPosition += 8;
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            
-            doc.setFont(undefined, 'bold');
-            doc.text('Cancellation Reason:', 20, yPosition);
-            yPosition += 5;
-            doc.setFont(undefined, 'normal');
-            const cancellationLines = doc.splitTextToSize(request.cancellation_reason, 170);
-            doc.text(cancellationLines, 20, yPosition);
-            yPosition += (cancellationLines.length * 5) + 3;
-            
-            if (request.cancelled_by) {
-                doc.setFont(undefined, 'bold');
-                doc.text('Cancelled By:', 20, yPosition);
-                doc.setFont(undefined, 'normal');
-                doc.text(request.cancelled_by, 60, yPosition);
-                yPosition += 5;
-            }
-            
-            if (request.cancelled_at) {
-                doc.setFont(undefined, 'bold');
-                doc.text('Cancelled At:', 20, yPosition);
-                doc.setFont(undefined, 'normal');
-                doc.text(formatDate(request.cancelled_at), 60, yPosition);
-                yPosition += 5;
-            }
-        }
-        
-        if (request.rejection_reason) {
-            if (yPosition > 150) {
-                doc.addPage();
-                yPosition = 20;
-            }
-            
+            yPosition += 6;
             doc.setFontSize(14);
-            doc.setTextColor(27, 94, 32);
-            doc.text('REJECTION DETAILS', 20, yPosition);
+            doc.text('SAN JOSE MANGGAGAWA PARISH', 105, yPosition, { align: 'center' });
             
-            yPosition += 8;
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            
-            doc.setFont(undefined, 'bold');
-            doc.text('Rejection Reason:', 20, yPosition);
             yPosition += 5;
-            doc.setFont(undefined, 'normal');
-            const rejectionLines = doc.splitTextToSize(request.rejection_reason, 170);
-            doc.text(rejectionLines, 20, yPosition);
-            yPosition += (rejectionLines.length * 5) + 3;
-            
-            if (request.rejected_by) {
-                doc.setFont(undefined, 'bold');
-                doc.text('Rejected By:', 20, yPosition);
-                doc.setFont(undefined, 'normal');
-                doc.text(request.rejected_by, 60, yPosition);
-                yPosition += 5;
-            }
-            
-            if (request.rejected_at) {
-                doc.setFont(undefined, 'bold');
-                doc.text('Rejected At:', 20, yPosition);
-                doc.setFont(undefined, 'normal');
-                doc.text(formatDate(request.rejected_at), 60, yPosition);
-                yPosition += 5;
-            }
-        }
-        
-        // Add footer
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(8);
+            doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
-            doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
-            doc.text(`Generated by SJMP Admin System - Confidential`, 105, 295, { align: 'center' });
+            doc.text('E. Rodriguez Highway, San Jose, Rodriguez, Rizal', 105, yPosition, { align: 'center' });
+            
+            yPosition += 8;
+            doc.setDrawColor(27, 94, 32);
+            doc.line(20, yPosition, 190, yPosition);
+            
+            yPosition += 10;
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0);
+            doc.text('PAMISA', 105, yPosition, { align: 'center' });
+            
+            yPosition += 15;
+            
+            // Intention checkboxes - EXACT FORMAT LIKE YOUR SCREENSHOT
+            const intentions = [
+                '(  ) Thanksgiving',
+                '(  ) Birthday', 
+                '(  ) Wedding Anniversary',
+                '(  ) Special Intention',
+                '(  ) Speedy Recovery',
+                '(  ) Safe Travel',
+                '(  ) Soul (first name only)'
+            ];
+            
+            intentions.forEach((intention, index) => {
+                doc.setFontSize(12);
+                doc.text(intention, 20, yPosition + (index * 6));
+            });
+            
+            yPosition += (intentions.length * 6) + 10;
+            
+            // Name(s) field
+            doc.setFontSize(12);
+            doc.text('Name(s):', 20, yPosition);
+            
+            yPosition += 8;
+            doc.setDrawColor(0, 0, 0);
+            doc.line(20, yPosition, 190, yPosition);
+            
+            // Add the actual name from the request
+            if (request.names && request.names.length > 0) {
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                const namesText = request.names.join(', ');
+                doc.text(namesText, 25, yPosition - 2);
+            }
+            
+            yPosition += 15;
+            
+            // Date and Time
+            doc.setFontSize(12);
+            doc.text('Date: ', 20, yPosition);
+            doc.text('Time: ', 120, yPosition);
+            
+            // Add actual date and time
+            if (request.date) {
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text(formatDate(request.date), 45, yPosition);
+            }
+            
+            if (request.time) {
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text(formatTime(request.time), 145, yPosition);
+            }
+            
+            yPosition += 10;
+            
+            // Mass Sponsor
+            doc.setFontSize(12);
+            doc.text('Mass Sponsor: ', 20, yPosition);
+            
+            // Add actual mass sponsor
+            if (request.massSponsor) {
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text(request.massSponsor, 55, yPosition);
+            }
+            
+            yPosition += 10;
+            
+            // Donation
+            doc.setFontSize(12);
+            doc.text('Donation:', 20, yPosition);
+            
+            // Add actual donation
+            if (request.donation) {
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text(request.donation, 45, yPosition);
+            }
+            
+            // Add footer with generation info
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Generated on: ${new Date().toLocaleDateString('en-PH')}`, 20, 285);
+                doc.text(`Request ID: ${request.requestNumber || request._id.substring(0, 8)}`, 105, 285, { align: 'center' });
+                doc.text(`SJMP Admin System`, 190, 285, { align: 'right' });
+            }
+            
+            // Save the PDF
+            const fileName = `pamisa_form_${request.requestNumber || request._id.substring(0, 8)}.pdf`;
+            doc.save(fileName);
+            showNotification('Pamisa form exported successfully!', 'success');
+        } catch (error) {
+            console.error('Error exporting pamisa form:', error);
+            showNotification('Error exporting form to PDF.', 'error');
         }
-        
-        // Save the PDF
-        const fileName = `pamisa-request-${request.requestNumber || request._id.substring(0, 8)}.pdf`;
-        doc.save(fileName);
-        showNotification('Form exported successfully!', 'success');
     }
 
     // Update form submission to match your database structure

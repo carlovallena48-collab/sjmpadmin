@@ -39,7 +39,8 @@
             min-height: 100vh;
             line-height: 1.6;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden; /* Changed from hidden to prevent horizontal scroll issues */
+            padding: 20px; /* Added padding for smaller screens */
         }
 
         /* 3D ANIMATED BACKGROUND */
@@ -96,15 +97,16 @@
         .glow:nth-child(2) { bottom: 10%; right: 10%; animation-delay: -10s; animation-duration: 25s; }
 
 
-        /* LOGIN CONTAINER: Ultra-Soft Neumorphic Style */
+        /* LOGIN CONTAINER: Ultra-Soft Neumorphic Style - FIXED SIZE ISSUE */
         .login-container {
             display: flex;
             background: var(--soft-ui-bg);
             border-radius: var(--radius);
             /* Soft, subtle neumorphic shadow */
             box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.1), -10px -10px 30px #ffffff; 
-            width: 950px; 
-            max-width: 95%;
+            width: 100%; /* Changed from fixed 950px to 100% */
+            max-width: 950px; /* Maximum width on large screens */
+            min-width: 320px; /* Minimum width to prevent too small */
             overflow: hidden;
             animation: fadeIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: relative;
@@ -361,22 +363,109 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Responsive Fixes */
+        /* Responsive Fixes - IMPROVED */
         @media (max-width: 900px) {
-            .login-container { flex-direction: column; width: 90%; }
-            .login-left { height: 250px; padding: 30px 20px;} 
-            .login-left h1 { font-size: 2rem; }
-            .login-right { padding: 40px 30px; }
-            .logo-container { margin-bottom: 30px; }
-            .logo { width: 80px; height: 80px; }
-            .back-to-home { top: 15px; left: 50%; transform: translateX(-50%); } 
+            .login-container { 
+                flex-direction: column; 
+                width: 95%; /* Changed from 90% to 95% */
+                max-width: 600px; /* Added max-width for medium screens */
+            }
+            .login-left { 
+                height: 250px; 
+                padding: 30px 20px;
+                flex: none; /* Remove flex ratio on mobile */
+            } 
+            .login-left h1 { 
+                font-size: 2rem; 
+                margin-bottom: 10px;
+            }
+            .login-left p {
+                font-size: 1rem;
+                max-width: 90%;
+            }
+            .login-right { 
+                padding: 40px 30px; 
+            }
+            .logo-container { 
+                margin-bottom: 30px; 
+            }
+            .logo { 
+                width: 80px; 
+                height: 80px; 
+            }
+            .back-to-home { 
+                top: 15px; 
+                left: 50%; 
+                transform: translateX(-50%); 
+            } 
         }
+
+        @media (max-width: 768px) {
+            .login-container {
+                width: 100%;
+                max-width: 500px;
+            }
+        }
+
         @media (max-width: 500px) {
-            .login-right h2 { font-size: 1.8rem; }
-            .logo { width: 60px; height: 60px; }
-            .logo-divider { height: 50px; }
-            .input-wrapper input { padding: 15px 20px; padding-left: 55px; }
-            .input-wrapper .icon { left: 15px; font-size: 1.1rem; }
+            body {
+                padding: 15px; /* More padding on very small screens */
+            }
+            
+            .login-container {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .login-right h2 { 
+                font-size: 1.8rem; 
+                margin-bottom: 30px;
+            }
+            .logo { 
+                width: 60px; 
+                height: 60px; 
+            }
+            .logo-divider { 
+                height: 50px; 
+                margin: 0 10px;
+            }
+            .input-wrapper input { 
+                padding: 15px 20px; 
+                padding-left: 55px; 
+            }
+            .input-wrapper .icon { 
+                left: 15px; 
+                font-size: 1.1rem; 
+            }
+            .login-right {
+                padding: 30px 25px;
+            }
+            .login-left {
+                height: 200px;
+                padding: 20px 15px;
+            }
+            .login-left h1 {
+                font-size: 1.8rem;
+            }
+            .login-left p {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .login-container {
+                max-width: 320px;
+            }
+            .login-right {
+                padding: 25px 20px;
+            }
+            .logo-container {
+                gap: 15px;
+            }
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
         }
     </style>
 </head>
@@ -402,7 +491,7 @@
 
     <div class="login-container">
         <div class="login-left">
-            <h1>Holy Parish Admin Portal</h1>
+            <h1>San Jose Manggagawa Parish Admin Portal</h1>
             <p>Dedicated access for church administration. Manage all sacred records and financial oversight in a secure environment.</p>
         </div>
         
@@ -434,8 +523,6 @@
                 <button type="submit" class="login-btn">
                     <i class="fas fa-lock-open"></i> Access Dashboard
                 </button>
-
-                  
             </form>
         </div>
     </div>
@@ -462,18 +549,29 @@
 
                     const data = await res.json();
 
-                    if (res.ok && data.success) {
-                        // SUCCESS
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Login Successful!',
-                            text: `Welcome ${data.user.name} (${data.user.role})`,
-                            showConfirmButton: false,
-                            timer: 2000,
-                            customClass: { popup: 'swal-popup-custom' }
-                        }).then(() => {
-                            window.location.href = "dashboard.html"; // Redirect to dashboard
-                        });
+                if (res.ok && data.success) {
+// ✅ SUCCESS - STORE USER DATA PROPERLY
+localStorage.setItem('isLoggedIn', 'true');
+localStorage.setItem('user', JSON.stringify(data.user));
+localStorage.setItem('userType', data.user.role); // Make sure this is 'superadmin'
+localStorage.setItem('loginTime', new Date().toISOString());
+
+console.log('✅ LOGIN SUCCESS - Stored:', {
+    user: data.user,
+    userType: data.user.role,
+    isLoggedIn: 'true'
+});
+
+Swal.fire({
+    icon: 'success',
+    title: 'Login Successful!',
+    text: `Welcome ${data.user.name} (${data.user.role})`,
+    showConfirmButton: false,
+    timer: 2000
+}).then(() => {
+    window.location.href = "dashboard.html";
+});
+
                     } else {
                         // FAILED LOGIN
                         Swal.fire({
