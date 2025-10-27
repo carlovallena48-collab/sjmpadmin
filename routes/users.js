@@ -1,5 +1,5 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs"); // ✅ switched from bcrypt to bcryptjs
 const User = require("../models/User");
 const { logActivity } = require("../utils/helpers");
 
@@ -14,9 +14,9 @@ router.get("/", async (req, res) => {
     res.json(users);
   } catch (err) {
     console.error("❌ Failed to fetch users:", err.message);
-    res.status(500).json({ 
+    res.status(500).json({
       message: "Failed to fetch users",
-      error: err.message 
+      error: err.message,
     });
   }
 });
@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
 // POST - Create new user
 router.post("/", async (req, res) => {
   const { password, fullName, email, address, contact, role } = req.body;
-  
+
   if (!password || !fullName || !email) {
     return res.status(400).json({ message: "Missing required fields: password, fullName, email" });
   }
@@ -36,28 +36,29 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "User with this email already exists" });
     }
 
+    // ✅ bcryptjs hashing
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ 
-      fullName, 
-      email: email.toLowerCase(), 
-      password: hashedPassword, 
-      address, 
+    const newUser = await User.create({
+      fullName,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      address,
       contact,
-      role: role || "Member"
+      role: role || "Member",
     });
-    
+
     await logActivity("CREATE", "users", fullName, email);
-    
+
     // Return user without password
     const userResponse = { ...newUser._doc };
     delete userResponse.password;
-    
+
     res.status(201).json(userResponse);
   } catch (err) {
     console.error("❌ Failed to add user:", err.message);
-    res.status(400).json({ 
+    res.status(400).json({
       message: "Failed to add user",
-      error: err.message 
+      error: err.message,
     });
   }
 });
@@ -66,31 +67,27 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const updateData = { ...req.body };
-    
-    // Remove password from update data if it's empty or undefined
+
+    // ✅ Only hash password if provided
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     } else {
       delete updateData.password;
     }
-    
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id, 
-      updateData, 
-      { new: true }
-    ).select("-password");
-    
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, { new: true }).select("-password");
+
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     await logActivity("UPDATE", "users", updatedUser.fullName, updatedUser.email);
     res.json(updatedUser);
   } catch (err) {
     console.error("❌ Failed to update user:", err.message);
-    res.status(400).json({ 
+    res.status(400).json({
       message: "Failed to update user",
-      error: err.message 
+      error: err.message,
     });
   }
 });
@@ -102,21 +99,21 @@ router.delete("/:id", async (req, res) => {
     if (!deletedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     await logActivity("DELETE", "users", deletedUser.fullName, deletedUser.email);
-    res.json({ 
+    res.json({
       message: "User deleted successfully",
       deletedUser: {
         id: deletedUser._id,
         fullName: deletedUser.fullName,
-        email: deletedUser.email
-      }
+        email: deletedUser.email,
+      },
     });
   } catch (err) {
     console.error("❌ Failed to delete user:", err.message);
-    res.status(400).json({ 
+    res.status(400).json({
       message: "Failed to delete user",
-      error: err.message 
+      error: err.message,
     });
   }
 });
@@ -131,9 +128,9 @@ router.get("/:id", async (req, res) => {
     res.json(user);
   } catch (err) {
     console.error("❌ Failed to fetch user:", err.message);
-    res.status(400).json({ 
+    res.status(400).json({
       message: "Failed to fetch user",
-      error: err.message 
+      error: err.message,
     });
   }
 });

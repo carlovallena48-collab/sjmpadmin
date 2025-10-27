@@ -1,5 +1,5 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs"); // ✅ switched from bcrypt to bcryptjs
 const WebsiteAdmin = require("../models/WebsiteAdmin");
 const { logActivity } = require("../utils/helpers");
 
@@ -48,6 +48,7 @@ router.post("/", async (req, res) => {
       return res.status(409).json({ message: "Username already exists" });
     }
 
+    // ✅ bcryptjs hash
     const hashedPassword = await bcrypt.hash(password, 10);
     
     const newStaff = await WebsiteAdmin.create({
@@ -66,7 +67,6 @@ router.post("/", async (req, res) => {
     });
 
     await logActivity("CREATE", "websiteadmins", name, username);
-    
     console.log("✅ Staff member created:", newStaff);
     
     const formattedResponse = {
