@@ -1,5 +1,5 @@
   const express = require("express");
-  const bcrypt = require("bcrypt");
+ const bcrypt = require("bcryptjs");
   const AdminAccount = require("../models/AdminAccount"); // FIXED PATH
   const WebsiteAdmin = require("../models/WebsiteAdmin"); // FIXED PATH
   const { logActivity } = require("../utils/helpers"); // FIXED PATH
