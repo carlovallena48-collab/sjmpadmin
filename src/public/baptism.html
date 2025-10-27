@@ -467,7 +467,66 @@
             box-shadow: var(--shadow-md);
         }
 
+        /* Navigation Controls for Full Screen */
+        .table-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--color-card-background);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--color-border);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition-medium);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .page-info {
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        /* Table Container with Scroll */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+        }
+
         .baptism-table {
+            min-width: 1000px;
             width: 100%;
             border-collapse: separate;
             border-spacing: 0 var(--space-md);
@@ -1084,6 +1143,32 @@
             .search-bar {
                 width: 100%;
             }
+            
+            .table-navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Responsive table */
+        @media (max-width: 1200px) {
+            .table-container {
+                position: relative;
+            }
+            
+            .nav-buttons {
+                position: sticky;
+                left: 0;
+                background: var(--color-card-background);
+                padding: 10px;
+                border-radius: var(--radius-md);
+                z-index: 10;
+            }
         }
     </style>
 </head>
@@ -1104,14 +1189,12 @@
                 <li class="nav-dropdown open">
                     <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
                     <ul class="dropdown-menu">
-                        <li><a href="baptism.html"><span>Baptism</span></a></li>
-                        <li><a href="kumpil.html"><span>Confirmation</span></a></li>
-                        <li><a href="eucharist.html"><span>Eucharist</span></a></li>
-                        <li><a href="confession.html"><span>Confession</span></a></li>
-                        <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
-                        <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
-                        <li><a href="matrimony.html"><span>Matrimony</span></a></li>
-                    </ul>
+            <li><a href="baptism.html"><span>Baptism</span></a></li>
+            <li><a href="kumpil.html"><span>Confirmation</span></a></li>
+            <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
+            <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
+            <li><a href="matrimony.html"><span>Matrimony</span></a></li>
+          </ul>
                 </li>
                 <li class="nav-dropdown open">
                     <a href="#"><i class="fa-solid fa-cross"></i><span>Other Services</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
@@ -1234,6 +1317,21 @@
                         <tbody></tbody>
                     </table>
                     <div class="empty-state" id="emptyState">No baptism requests found.</div>
+                    
+                    <!-- NAVIGATION SECTION -->
+                    <div class="table-navigation">
+                        <div class="nav-buttons">
+                            <button class="nav-btn" id="prevBtn" disabled>
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </button>
+                            <button class="nav-btn" id="nextBtn">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="page-info">
+                            Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1460,7 +1558,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    const baseURL = "http://localhost:5000/api/baptism";
+    const baseURL = "https://sjmpadmin.onrender.com/api/baptism";
     const addRequestBtn = document.getElementById('addRequestBtn');
     const exportIndividualBtn = document.getElementById('exportIndividualBtn');
     const modal = document.getElementById('addRequestModal');
@@ -1492,6 +1590,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentRequestId = document.getElementById('paymentRequestId');
     const paymentName = document.getElementById('paymentName');
     const paymentType = document.getElementById('paymentType');
+
+    // PAGINATION VARIABLES
+    let currentPage = 1;
+    const recordsPerPage = 5;
+    let currentFilteredData = [];
 
     let requests = [];
     let currentAction = { id: null, type: null };
@@ -1837,6 +1940,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return statusWorkflow[currentStatus] || [];
     }
 
+    // UPDATED: Apply filters and search with pagination
     function applyFiltersAndSearch() {
         let filteredData = [...requests];
         
@@ -1854,16 +1958,37 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
         
-        renderTable(filteredData);
+        currentFilteredData = filteredData;
+        currentPage = 1; // Reset to first page when filters change
+        renderTable();
     }
 
-    function renderTable(data) {
+    // UPDATED: Render table with pagination
+    function renderTable() {
         requestsTableBody.innerHTML = '';
-        if(data.length === 0){ 
+        
+        // Calculate pagination
+        const startIndex = (currentPage - 1) * recordsPerPage;
+        const endIndex = startIndex + recordsPerPage;
+        const pageData = currentFilteredData.slice(startIndex, endIndex);
+        const totalPages = Math.ceil(currentFilteredData.length / recordsPerPage);
+        
+        // Update pagination info
+        document.getElementById('currentPage').textContent = currentPage;
+        document.getElementById('totalPages').textContent = totalPages || 1;
+        
+        // Update navigation buttons
+        document.getElementById('prevBtn').disabled = currentPage === 1;
+        document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
+        
+        if(pageData.length === 0){ 
             emptyState.style.display = 'block'; 
+            document.querySelector('.table-navigation').style.display = 'none';
         } else {
             emptyState.style.display = 'none';
-            data.forEach(request => {
+            document.querySelector('.table-navigation').style.display = 'flex';
+            
+            pageData.forEach(request => {
                 const row = document.createElement('tr');
                 row.dataset.id = request._id;
                 const availableActions = getAvailableActions(request.status);
@@ -1918,7 +2043,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 requestsTableBody.appendChild(row);
             });
         }
-        updateCounts(data);
+        updateCounts(currentFilteredData);
     }
 
     function updateCounts(data){
@@ -2066,6 +2191,26 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePaymentStatus(currentPaymentRequest._id, paymentData);
         paymentModal.classList.remove('show');
         paymentForm.reset();
+    });
+
+    // PAGINATION EVENT LISTENERS
+    document.getElementById('prevBtn').addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+            // Scroll to top of table
+            document.querySelector('.table-container').scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', function() {
+        const totalPages = Math.ceil(currentFilteredData.length / recordsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+            // Scroll to top of table
+            document.querySelector('.table-container').scrollIntoView({ behavior: 'smooth' });
+        }
     });
 
     requestsTableBody.addEventListener('click',(e)=>{

@@ -71,6 +71,7 @@
   app.use("/api/dashboard", safeImport("./routes/dashboard"));
   app.use("/api/reports", safeImport("./routes/reports"));
 app.use("/api/sickcall", safeImport("./routes/sickcall"));
+app.use("/api/user-history", safeImport("./routes/user-history"));
   // ===============================================
   // Optional Website Routes
   // ===============================================

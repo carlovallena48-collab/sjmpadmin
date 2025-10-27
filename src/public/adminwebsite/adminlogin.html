@@ -223,7 +223,7 @@
         const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
 
         try {
-            const res = await fetch("http://localhost:5000/api/auth/website/login", {
+            const res = await fetch("https://sjmpadmin.onrender.com/api/auth/website/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)

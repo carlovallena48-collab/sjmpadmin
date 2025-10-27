@@ -618,14 +618,12 @@ body {
         <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
         <li class="nav-dropdown open">
           <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
-          <ul class="dropdown-menu">
+           <ul class="dropdown-menu">
             <li><a href="baptism.html"><span>Baptism</span></a></li>
             <li><a href="kumpil.html"><span>Confirmation</span></a></li>
-            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
-            <li><a href="confession.html"><span>Confession</span></a></li>
             <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
             <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
-            <li><a href="matrimony.html" class="active"><span>Matrimony</span></a></li>
+            <li><a href="matrimony.html"><span>Matrimony</span></a></li>
           </ul>
         </li>
         <li class="nav-dropdown open">
@@ -1017,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    const baseURL = "http://localhost:5000/api/marriage";
+    const baseURL = "https://sjmpadmin.onrender.com/api/marriage";
     const addRequestBtn = document.getElementById('addRequestBtn');
     const exportBtn = document.getElementById('exportBtn');
     const exportIndividualBtn = document.getElementById('exportIndividualBtn');

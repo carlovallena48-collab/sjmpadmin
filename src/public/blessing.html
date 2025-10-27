@@ -400,6 +400,55 @@ body {
 .action-buttons button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(27, 94, 32, 0.1); }
 .action-buttons button:disabled { background: #e0e0e0; color: #9e9e9e; cursor: not-allowed; transform: none; box-shadow: none; }
 
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.pagination-info {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(27, 94, 32, 0.08);
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(27, 94, 32, 0.1);
+}
+
+.pagination-btn:disabled {
+    background: #e0e0e0;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 /* Modal Styles */
 .modal {
     display: none;
@@ -627,6 +676,11 @@ body {
     .main-content {
         margin-left: 0;
     }
+    
+    .pagination {
+        flex-direction: column;
+        gap: 1rem;
+    }
 }
 </style>
 </head>
@@ -643,11 +697,9 @@ body {
         <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
         <li class="nav-dropdown open">
           <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
-          <ul class="dropdown-menu">
+             <ul class="dropdown-menu">
             <li><a href="baptism.html"><span>Baptism</span></a></li>
             <li><a href="kumpil.html"><span>Confirmation</span></a></li>
-            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
-            <li><a href="confession.html"><span>Confession</span></a></li>
             <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
             <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
             <li><a href="matrimony.html"><span>Matrimony</span></a></li>
@@ -791,6 +843,21 @@ body {
             <tbody></tbody>
           </table>
           <div class="empty-state" id="emptyState">No blessing requests found.</div>
+          
+          <!-- Pagination Controls -->
+          <div class="pagination" id="paginationControls" style="display: none;">
+            <div class="pagination-info" id="paginationInfo">
+              Showing 0 to 0 of 0 entries
+            </div>
+            <div class="pagination-controls">
+              <button class="pagination-btn" id="prevPageBtn" disabled>
+                <i class="fa-solid fa-chevron-left"></i> Previous
+              </button>
+              <button class="pagination-btn" id="nextPageBtn" disabled>
+                Next <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -937,7 +1004,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    const baseURL = "http://localhost:5000/api/blessing";
+    const baseURL = "https://sjmpadmin.onrender.com/api/blessing";
     const addRequestBtn = document.getElementById('addRequestBtn');
     const exportBtn = document.getElementById('exportBtn');
     const exportIndividualBtn = document.getElementById('exportIndividualBtn');
@@ -958,6 +1025,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const scheduleConflict = document.getElementById('scheduleConflict');
     const conflictList = document.getElementById('conflictList');
 
+    // Pagination elements
+    const paginationControls = document.getElementById('paginationControls');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+
     const detailsModal = document.getElementById('detailsModal');
     const closeDetails = document.getElementById('closeDetails');
     const detailsContent = document.getElementById('detailsContent');
@@ -967,6 +1040,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentSearchTerm = '';
     let currentFilteredData = [];
     let currentDetailsRequest = null;
+    
+    // Pagination variables
+    let currentPage = 1;
+    const recordsPerPage = 5;
+    let currentDisplayedData = [];
 
     // Define status workflow
     const statusWorkflow = {
@@ -1220,17 +1298,28 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
         
-        currentFilteredData = filteredData;
-        renderTable(filteredData);
+        currentDisplayedData = filteredData;
+        currentPage = 1; // Reset to first page when filters change
+        renderTable();
     }
 
-    function renderTable(data) {
+    function renderTable() {
         requestsTableBody.innerHTML = '';
-        if(data.length === 0){ 
+        
+        if(currentDisplayedData.length === 0){ 
             emptyState.style.display = 'block'; 
+            paginationControls.style.display = 'none';
         } else {
             emptyState.style.display = 'none';
-            data.forEach(request => {
+            paginationControls.style.display = 'flex';
+            
+            // Calculate pagination
+            const totalPages = Math.ceil(currentDisplayedData.length / recordsPerPage);
+            const startIndex = (currentPage - 1) * recordsPerPage;
+            const endIndex = Math.min(startIndex + recordsPerPage, currentDisplayedData.length);
+            const pageData = currentDisplayedData.slice(startIndex, endIndex);
+            
+            pageData.forEach(request => {
                 const row = document.createElement('tr');
                 row.dataset.id = request._id;
                 const availableActions = getAvailableActions(request.status);
@@ -1284,8 +1373,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 requestsTableBody.appendChild(row);
             });
+            
+            // Update pagination info and controls
+            updatePaginationInfo(totalPages, startIndex, endIndex);
         }
-        updateCounts(data);
+        updateCounts(currentDisplayedData);
+    }
+
+    function updatePaginationInfo(totalPages, startIndex, endIndex) {
+        // Update pagination info text
+        paginationInfo.textContent = `Showing ${startIndex + 1} to ${endIndex} of ${currentDisplayedData.length} entries`;
+        
+        // Update button states
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages;
     }
 
     function updateCounts(data){
@@ -1435,6 +1536,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     headerSearchInput.addEventListener('input', handleSearchInput);
     tableSearchInput.addEventListener('input', handleSearchInput);
+
+    // Pagination event handlers
+    prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(currentDisplayedData.length / recordsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    });
 
     // Table row click handling
     requestsTableBody.addEventListener('click', function(e){
@@ -1591,186 +1708,185 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Individual export functionality - EXACT FORMAT FROM YOUR IMAGE
-    // Individual export functionality - COMPLETE FIELDS AND PROPER FORMATTING
-function exportIndividualRequest(request) {
-    console.log("Exporting individual request:", request);
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-    });
-    
-    // Set document properties
-    doc.setProperties({
-        title: `Blessing Request - ${request.name}`,
-        subject: 'Blessing Request Details',
-        author: 'San Jose Parish',
-        keywords: 'blessing, request, parish',
-        creator: 'San Jose Parish Management System'
-    });
-    
-    // Add header exactly like in your image
-    const pageWidth = doc.internal.pageSize.width;
-    const pageHeight = doc.internal.pageSize.height;
-    
-    // Top header with diocese and parish names - PROPERLY CENTERED
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'bold');
-    
-    // DIOCESE on left
-    doc.text('DIOCESE OF ANTIPOLO',pageWidth / 2, 15, { align: 'center' });
-    
-    // PARISH INFO centered
-    doc.text('SAN JOSE MANGGAGAWA PARISH', pageWidth / 2, 15, { align: 'center' });
-    
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.text('San Jose, Rodriguez, Rizal', pageWidth / 2, 20, { align: 'center' });
-    doc.text('Cellphone No.: 0967-431-6482', pageWidth / 2, 25, { align: 'center' });
-    
-    // Main title
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('REQUEST FOR BLESSING OF:', pageWidth / 2, 40, { align: 'center' });
-    
-    // Draw the main form box
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.5);
-    doc.rect(15, 45, pageWidth - 30, pageHeight - 80);
-    
-    // Form fields - exactly like in your image
-    let yPosition = 55;
-    
-    // REQUEST FOR BLESSING OF field
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('  ', 20, yPosition);
-    
-   yPosition += 10;
-    
-    // BLESSING TYPE field
-    doc.setFont('helvetica', 'bold');
-    doc.text('BLESSING TYPE:', 20, yPosition);
-    
-    // Draw underline for the field
- 
-    // Add the actual blessing type
-    doc.setFont('helvetica', 'normal');
-    doc.text(request.blessingType || 'N/A', 80, yPosition);
-    
-    yPosition += 12;
-    
-    // NAME field - ADDED THIS MISSING FIELD
-    doc.setFont('helvetica', 'bold');
-    doc.text('NAME:', 20, yPosition);
-    
-    // Draw underline for the field
- 
-    
-    // Add the actual name
-    doc.setFont('helvetica', 'normal');
-    doc.text(request.name || 'N/A', 45, yPosition);
-    
-    yPosition += 12;
-    
-    // ADDRESS field
-    doc.setFont('helvetica', 'bold');
-    doc.text('ADDRESS:', 20, yPosition);
-    
-    // Draw underline for the field
-   
-    
-    // Add the actual address
-    doc.setFont('helvetica', 'normal');
-    const addressLines = doc.splitTextToSize(request.address || 'N/A', pageWidth - 65);
-    doc.text(addressLines, 50, yPosition);
-    yPosition += (addressLines.length * 5) + 5;
-    
-    // CONTACT NUMBER field
-    doc.setFont('helvetica', 'bold');
-    doc.text('CONTACT NUMBER:', 20, yPosition);
-    
-    // Draw underline for the field
-   
-    
-    // Add the actual contact number
-    doc.setFont('helvetica', 'normal');
-    doc.text(request.contactNumber || 'N/A', 70, yPosition);
-    
-    yPosition += 12;
-    
-    // DATE field - ADDED THIS MISSING FIELD
-    doc.setFont('helvetica', 'bold');
-    doc.text('DATE:', 20, yPosition);
-    
-    // Draw underline for the field
-    
-    
-    // Add the actual date
-    doc.setFont('helvetica', 'normal');
-    doc.text(formatDate(request.date) || 'N/A', 45, yPosition);
-    
-    yPosition += 15;
-    
-    // TIME field - ADDED THIS MISSING FIELD
-    doc.setFont('helvetica', 'bold');
-    doc.text('TIME:', 20, yPosition);
-    
-    // Draw underline for the field
-   
-    
-    // Add the actual time
-    doc.setFont('helvetica', 'normal');
-    doc.text(formatTime(request.time) || 'N/A', 45, yPosition);
-    
-    // Add additional details if available
-    yPosition += 15;
-    
-    if (request.requestForDetails) {
+    function exportIndividualRequest(request) {
+        console.log("Exporting individual request:", request);
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        // Set document properties
+        doc.setProperties({
+            title: `Blessing Request - ${request.name}`,
+            subject: 'Blessing Request Details',
+            author: 'San Jose Parish',
+            keywords: 'blessing, request, parish',
+            creator: 'San Jose Parish Management System'
+        });
+        
+        // Add header exactly like in your image
+        const pageWidth = doc.internal.pageSize.width;
+        const pageHeight = doc.internal.pageSize.height;
+        
+        // Top header with diocese and parish names - PROPERLY CENTERED
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
         doc.setFont('helvetica', 'bold');
-        doc.text('ADDITIONAL DETAILS:', 20, yPosition);
-        yPosition += 5;
+        
+        // DIOCESE on left
+        doc.text('DIOCESE OF ANTIPOLO',pageWidth / 2, 15, { align: 'center' });
+        
+        // PARISH INFO centered
+        doc.text('SAN JOSE MANGGAGAWA PARISH', pageWidth / 2, 15, { align: 'center' });
         
         doc.setFont('helvetica', 'normal');
-        const detailsLines = doc.splitTextToSize(request.requestForDetails, pageWidth - 40);
-        doc.text(detailsLines, 20, yPosition);
-        yPosition += (detailsLines.length * 5) + 10;
-    }
-    
+        doc.setFontSize(10);
+        doc.text('San Jose, Rodriguez, Rizal', pageWidth / 2, 20, { align: 'center' });
+        doc.text('Cellphone No.: 0967-431-6482', pageWidth / 2, 25, { align: 'center' });
+        
+        // Main title
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('REQUEST FOR BLESSING OF:', pageWidth / 2, 40, { align: 'center' });
+        
+        // Draw the main form box
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.rect(15, 45, pageWidth - 30, pageHeight - 80);
+        
+        // Form fields - exactly like in your image
+        let yPosition = 55;
+        
+        // REQUEST FOR BLESSING OF field
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('  ', 20, yPosition);
+        
+       yPosition += 10;
+        
+        // BLESSING TYPE field
+        doc.setFont('helvetica', 'bold');
+        doc.text('BLESSING TYPE:', 20, yPosition);
+        
+        // Draw underline for the field
+ 
+        // Add the actual blessing type
+        doc.setFont('helvetica', 'normal');
+        doc.text(request.blessingType || 'N/A', 80, yPosition);
+        
+        yPosition += 12;
+        
+        // NAME field - ADDED THIS MISSING FIELD
+        doc.setFont('helvetica', 'bold');
+        doc.text('NAME:', 20, yPosition);
+        
+        // Draw underline for the field
+ 
+        
+        // Add the actual name
+        doc.setFont('helvetica', 'normal');
+        doc.text(request.name || 'N/A', 45, yPosition);
+        
+        yPosition += 12;
+        
+        // ADDRESS field
+        doc.setFont('helvetica', 'bold');
+        doc.text('ADDRESS:', 20, yPosition);
+        
+        // Draw underline for the field
    
-    // Add footer with date and signature lines
-    yPosition = pageHeight - 40;
-    
-    // Date line
-    doc.setFontSize(10);
-    doc.text(`Date Prepared: ${new Date().toLocaleDateString()}`, 20, yPosition);
-    
-    // Signature lines
-    yPosition += 15;
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    
-    // Requester signature
-    doc.line(20, yPosition, 80, yPosition);
-    doc.text('Requester Signature', 50, yPosition + 5, { align: 'center' });
-    
-    // Parish representative signature
-    doc.line(120, yPosition, 180, yPosition);
-    doc.text('Parish Representative', 150, yPosition + 5, { align: 'center' });
-    
-    // Footer
-    yPosition = pageHeight - 10;
-    doc.setFontSize(8);
-    doc.text('San Jose Parish Management System', pageWidth / 2, yPosition, { align: 'center' });
-    
-    // Save the PDF
-    const fileName = `Blessing_Request_${request.name.replace(/\s+/g, '_')}.pdf`;
-    doc.save(fileName);
-    
-    showNotification('Request exported as PDF successfully!', 'success');
-}
+        
+        // Add the actual address
+        doc.setFont('helvetica', 'normal');
+        const addressLines = doc.splitTextToSize(request.address || 'N/A', pageWidth - 65);
+        doc.text(addressLines, 50, yPosition);
+        yPosition += (addressLines.length * 5) + 5;
+        
+        // CONTACT NUMBER field
+        doc.setFont('helvetica', 'bold');
+        doc.text('CONTACT NUMBER:', 20, yPosition);
+        
+        // Draw underline for the field
+   
+        
+        // Add the actual contact number
+        doc.setFont('helvetica', 'normal');
+        doc.text(request.contactNumber || 'N/A', 70, yPosition);
+        
+        yPosition += 12;
+        
+        // DATE field - ADDED THIS MISSING FIELD
+        doc.setFont('helvetica', 'bold');
+        doc.text('DATE:', 20, yPosition);
+        
+        // Draw underline for the field
+        
+        
+        // Add the actual date
+        doc.setFont('helvetica', 'normal');
+        doc.text(formatDate(request.date) || 'N/A', 45, yPosition);
+        
+        yPosition += 15;
+        
+        // TIME field - ADDED THIS MISSING FIELD
+        doc.setFont('helvetica', 'bold');
+        doc.text('TIME:', 20, yPosition);
+        
+        // Draw underline for the field
+       
+        
+        // Add the actual time
+        doc.setFont('helvetica', 'normal');
+        doc.text(formatTime(request.time) || 'N/A', 45, yPosition);
+        
+        // Add additional details if available
+        yPosition += 15;
+        
+        if (request.requestForDetails) {
+            doc.setFont('helvetica', 'bold');
+            doc.text('ADDITIONAL DETAILS:', 20, yPosition);
+            yPosition += 5;
+            
+            doc.setFont('helvetica', 'normal');
+            const detailsLines = doc.splitTextToSize(request.requestForDetails, pageWidth - 40);
+            doc.text(detailsLines, 20, yPosition);
+            yPosition += (detailsLines.length * 5) + 10;
+        }
+        
+       
+        // Add footer with date and signature lines
+        yPosition = pageHeight - 40;
+        
+        // Date line
+        doc.setFontSize(10);
+        doc.text(`Date Prepared: ${new Date().toLocaleDateString()}`, 20, yPosition);
+        
+        // Signature lines
+        yPosition += 15;
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        
+        // Requester signature
+        doc.line(20, yPosition, 80, yPosition);
+        doc.text('Requester Signature', 50, yPosition + 5, { align: 'center' });
+        
+        // Parish representative signature
+        doc.line(120, yPosition, 180, yPosition);
+        doc.text('Parish Representative', 150, yPosition + 5, { align: 'center' });
+        
+        // Footer
+        yPosition = pageHeight - 10;
+        doc.setFontSize(8);
+        doc.text('San Jose Parish Management System', pageWidth / 2, yPosition, { align: 'center' });
+        
+        // Save the PDF
+        const fileName = `Blessing_Request_${request.name.replace(/\s+/g, '_')}.pdf`;
+        doc.save(fileName);
+        
+        showNotification('Request exported as PDF successfully!', 'success');
+    }
 
     // Bulk export functionality - FIXED
     document.getElementById('submitExportBtn').addEventListener('click', function() {
@@ -1779,7 +1895,7 @@ function exportIndividualRequest(request) {
         let dataToExport = [];
         
         if (exportRange === 'current') {
-            dataToExport = currentFilteredData;
+            dataToExport = currentDisplayedData;
         } else {
             dataToExport = requests;
         }

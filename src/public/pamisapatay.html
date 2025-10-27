@@ -5,8 +5,1231 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pamisa sa Patay - San Jose Dashboard</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel = "stylesheet" href = "../css/pamisapatay.css">
-    <script src="../js/pamisapatay.js"></script>
+<style>
+/* Enhanced Green Theme */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --color-primary: #1B5E20;
+    --color-primary-light: #2E7D32;
+    --color-primary-dark: #0D3C11;
+    --color-secondary: #4CAF50;
+    --color-secondary-light: #66BB6A;
+    --color-tertiary: #5e35b1;
+    --color-warning: #FFA000;
+    --color-error: #D32F2F;
+    
+    --color-text-primary: #263238;
+    --color-text-secondary: #546E7A;
+    
+    --color-background: #F8FDF8;
+    --color-card-background: #ffffff;
+    --color-border: #E8F5E9;
+    --color-hover: rgba(76, 175, 80, 0.1);
+    --color-delete-bg: #ffebee;
+
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-xxl: 3rem;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+
+    --shadow-sm: 0 4px 6px rgba(27, 94, 32, 0.08);
+    --shadow-md: 0 8px 24px rgba(27, 94, 32, 0.1);
+    --shadow-lg: 0 12px 32px rgba(27, 94, 32, 0.15);
+
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Enhanced Sidebar */
+.sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #2c3e50 0%, #1a2530 100%);
+    color: #fff;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 100;
+}
+
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.sidebar.collapsed .church-logo span,
+.sidebar.collapsed .nav-links a span,
+.sidebar.collapsed .dropdown-icon {
+    display: none;
+}
+
+.sidebar.collapsed .nav-links a {
+    justify-content: center;
+    padding: 15px;
+}
+
+.sidebar.collapsed .dropdown-menu {
+    display: none !important;
+}
+
+.church-logo {
+    display: flex;
+    align-items: center;
+    padding: 20px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.church-logo i {
+    font-size: 24px;
+    margin-right: 10px;
+    color: #4CAF50;
+}
+
+.church-logo span {
+    font-weight: 700;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+.main-nav {
+    padding: 15px 0;
+}
+
+.nav-links {
+    list-style: none;
+}
+
+.nav-links li {
+    position: relative;
+}
+
+.nav-links a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    padding-left: 25px;
+}
+
+.nav-links a.active {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    border-left: 4px solid #4CAF50;
+}
+
+.nav-links a i {
+    margin-right: 12px;
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.nav-links a:hover i {
+    transform: scale(1.1);
+}
+
+.nav-dropdown {
+    position: relative;
+}
+
+.dropdown-icon {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+
+.nav-dropdown.open .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    list-style: none;
+    background-color: rgba(0, 0, 0, 0.2);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.nav-dropdown.open .dropdown-menu {
+    max-height: 300px;
+}
+
+.dropdown-menu li a {
+    padding-left: 50px;
+    font-size: 14px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.dropdown-menu li a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nav-logout {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-logout a {
+    color: #e74c3c;
+}
+
+.nav-logout a:hover {
+    background-color: rgba(231, 76, 60, 0.1);
+}
+
+/* Toggle Button */
+.sidebar-toggle {
+    position: absolute;
+    top: 20px;
+    right: -15px;
+    background: #2c3e50;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 101;
+}
+
+.sidebar-toggle:hover {
+    background: #34495e;
+    transform: scale(1.1);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: #f5f7fb;
+    border-radius: 20px;
+    padding: 8px 15px;
+    width: 300px;
+}
+
+.search-bar i {
+    color: #7a7a7a;
+    margin-right: 10px;
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-profile i {
+    font-size: 20px;
+    color: #7a7a7a;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-profile i:hover {
+    color: #4CAF50;
+    transform: scale(1.1);
+}
+
+.user-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Dashboard Widgets */
+.dashboard-widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 25px 30px 0;
+}
+
+.widget-card {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.5s ease;
+}
+
+.widget-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.widget-card i {
+    font-size: 2.5rem;
+    margin-right: 15px;
+    transition: transform var(--transition-fast);
+}
+
+.widget-card:hover i {
+    transform: scale(1.1);
+}
+
+.widget-content h4 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    opacity: 0.9;
+}
+
+.widget-content p {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.card-blue {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.card-green {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.card-purple {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+.card-orange {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+}
+
+/* Status badges */
+.status-badge.pending {
+    background-color: #FFF9C4;
+    color: #F57F17;
+    border: 1px solid #F57F17;
+}
+.status-badge.in-process {
+    background-color: #B3E5FC;
+    color: #0288D1;
+    border: 1px solid #0288D1;
+}
+.status-badge.scheduled {
+    background-color: #E1BEE7;
+    color: #7B1FA2;
+    border: 1px solid #7B1FA2;
+}
+.status-badge.completed {
+    background-color: #C8E6C9;
+    color: #388E3C;
+    border: 1px solid #388E3C;
+}
+.status-badge.approved {
+    background-color: #A5D6A7;
+    color: #1B5E20;
+    border: 1px solid #1B5E20;
+}
+.status-badge.rejected {
+    background-color: #FFCDD2;
+    color: #C62828;
+    border: 1px solid #C62828;
+}
+.status-badge.cancelled {
+    background-color: #F5F5F5;
+    color: #616161;
+    border: 1px solid #616161;
+}
+
+/* Status Workflow Guide */
+.status-workflow {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 0 30px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.status-workflow h4 {
+    margin-bottom: 15px;
+    color: var(--color-primary);
+    font-size: 1.1rem;
+}
+
+.workflow-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.workflow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.step-icon.pending { background: #FFF9C4; color: #F57F17; }
+.step-icon.in-process { background: #B3E5FC; color: #0288D1; }
+.step-icon.scheduled { background: #E1BEE7; color: #7B1FA2; }
+.step-icon.completed { background: #C8E6C9; color: #388E3C; }
+.step-icon.approved { background: #BBDEFB; color: #1976D2; }
+
+.step-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.workflow-arrow {
+    color: var(--color-text-secondary);
+}
+
+/* Requests Section */
+.requests-section {
+    padding: 0 30px 30px;
+    flex: 1;
+}
+
+.box {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    animation: slideUp 0.5s ease;
+}
+
+.box:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.box-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.table-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.box-header .search-bar {
+    flex-grow: 1;
+    max-width: 300px;
+}
+
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.add-request-btn, .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-medium);
+    box-shadow: var(--shadow-sm);
+}
+
+.export-btn {
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+}
+
+.add-request-btn:hover, .export-btn:hover {
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filter-buttons button {
+    background: none;
+    border: 1px solid var(--color-border);
+    padding: 8px 15px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    transition: all var(--transition-medium);
+    font-size: 0.85rem;
+}
+
+.filter-buttons button.active, .filter-buttons button:hover {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: #fff;
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+}
+
+/* Table Styles */
+.pamisa-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 var(--space-md);
+}
+
+.pamisa-table thead th {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    text-align: left;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.pamisa-table tbody tr {
+    background: var(--color-card-background);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-medium);
+    cursor: pointer;
+    animation: fadeIn 0.5s ease;
+}
+
+.pamisa-table tbody tr:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-left: 5px solid var(--color-primary);
+}
+
+.pamisa-table td {
+    padding: var(--space-md);
+    vertical-align: middle;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--color-text-secondary);
+    padding: var(--space-xl);
+    font-size: 1.1rem;
+    display: none;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all var(--transition-fast);
+}
+
+/* Payment Badges */
+.payment-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.payment-badge.paid {
+    background-color: #C8E6C9;
+    color: #2E7D32;
+    border: 1px solid #2E7D32;
+}
+.payment-badge.pending {
+    background-color: #FFF9C4;
+    color: #F57F17;
+    border: 1px solid #F57F17;
+}
+.payment-badge.overdue {
+    background-color: #FFCDD2;
+    color: #C62828;
+    border: 1px solid #C62828;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.action-buttons button {
+    border: none;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--transition-medium);
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: var(--shadow-sm);
+}
+
+.action-buttons .process-btn {
+    background: linear-gradient(135deg, #0288D1, #03A9F4);
+    color: #fff;
+}
+.action-buttons .schedule-btn {
+    background: linear-gradient(135deg, #7B1FA2, #9C27B0);
+    color: #fff;
+}
+.action-buttons .complete-btn {
+    background: linear-gradient(135deg, #388E3C, #4CAF50);
+    color: #fff;
+}
+.action-buttons .approve-btn {
+    background: linear-gradient(135deg, #1b5e20, #388E3C);
+    color: #fff;
+}
+.action-buttons .reject-btn {
+    background: linear-gradient(135deg, #c62828, #EF5350);
+    color: #fff;
+}
+.action-buttons .cancel-btn {
+    background: linear-gradient(135deg, #616161, #9E9E9E);
+    color: #fff;
+}
+.action-buttons .reset-btn {
+    background: linear-gradient(135deg, #FFA000, #FFB300);
+    color: #fff;
+}
+.action-buttons .payment-btn {
+    background: linear-gradient(135deg, #FF6F00, #FF8F00);
+    color: #fff;
+}
+.action-buttons .export-individual-btn {
+    background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+    color: #fff;
+}
+
+.action-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.action-buttons button:disabled {
+    background: #e0e0e0;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    border-top: 1px solid var(--color-border);
+}
+
+.pagination-info {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.pagination-controls {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-medium);
+    box-shadow: var(--shadow-sm);
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.pagination-btn:disabled {
+    background: #e0e0e0;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
+    display: block;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 800px;
+    border-radius: var(--radius-md);
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.4s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.modal .close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.modal .close-btn:hover,
+.modal .close-btn:focus {
+    color: var(--color-primary);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: var(--space-md);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+}
+
+@media (min-width: 768px) {
+    .form-row.double {
+        grid-template-columns: 1fr 1fr;
+    }
+    .form-row.triple {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal;
+    color: var(--color-text-primary);
+}
+
+.submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: white;
+    padding: 12px 15px;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all var(--transition-medium);
+    box-shadow: var(--shadow-sm);
+}
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.custom-alert-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.custom-alert {
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease-in-out;
+    animation: slideInRight 0.5s ease-out forwards;
+}
+
+.custom-alert.success {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+}
+
+.custom-alert.error {
+    background: linear-gradient(135deg, var(--color-error), #E53935);
+}
+
+.custom-alert .close-notif {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+.custom-alert .close-notif:hover {
+    transform: scale(1.2);
+}
+
+.custom-alert.hide {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.form-section-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+/* Details Modal Styles */
+.details-section {
+    margin-bottom: var(--space-lg);
+}
+
+.details-section-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+}
+
+@media (min-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail-value {
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    font-size: 0.9rem;
+}
+
+.detail-textarea {
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    min-height: 80px;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+}
+
+/* Reason Modal */
+.reason-modal .modal-content {
+    max-width: 500px;
+}
+
+/* Payment Modal */
+.payment-modal .modal-content {
+    max-width: 500px;
+}
+
+.payment-details {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 15px;
+}
+
+.payment-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.payment-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.payment-info span:first-child {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 70px;
+    }
+    
+    .sidebar .church-logo span,
+    .sidebar .nav-links a span,
+    .sidebar .dropdown-icon {
+        display: none;
+    }
+    
+    .sidebar .nav-links a {
+        justify-content: center;
+        padding: 15px;
+    }
+    
+    .sidebar .dropdown-menu {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-widgets {
+        grid-template-columns: 1fr;
+    }
+    
+    .header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .search-bar {
+        width: 100%;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .table-header-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .box-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .box-header .search-bar {
+        max-width: 100%;
+    }
+    
+    .filter-buttons {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .workflow-steps {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .workflow-arrow {
+        transform: rotate(90deg);
+        margin: 5px 0;
+    }
+    
+    .pagination {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+}
+
+/* Reason System Styles */
+.detail-textarea {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.5;
+    color: #495057;
+    font-size: 14px;
+    min-height: 80px;
+}
+
+.detail-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.details-section-header {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+/* Reason Modal Specific Styles */
+.reason-modal .modal-content {
+    max-width: 500px;
+}
+
+.reason-modal textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Status badges */
+.status-badge.cancelled {
+    background: #dc3545;
+    color: white;
+}
+
+.status-badge.rejected {
+    background: #6c757d;
+    color: white;
+}
+
+.status-badge.pending {
+    background: #ffc107;
+    color: black;
+}
+
+.status-badge.in-process {
+    background: #17a2b8;
+    color: white;
+}
+
+.status-badge.scheduled {
+    background: #007bff;
+    color: white;
+}
+
+.status-badge.completed {
+    background: #28a745;
+    color: white;
+}
+
+.status-badge.approved {
+    background: #20c997;
+    color: white;
+}
+</style>
 </head>
 <body>
 <div class="dashboard-container">
@@ -23,11 +1246,9 @@
         <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
         <li class="nav-dropdown open">
           <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
-          <ul class="dropdown-menu">
+            <ul class="dropdown-menu">
             <li><a href="baptism.html"><span>Baptism</span></a></li>
             <li><a href="kumpil.html"><span>Confirmation</span></a></li>
-            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
-            <li><a href="confession.html"><span>Confession</span></a></li>
             <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
             <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
             <li><a href="matrimony.html"><span>Matrimony</span></a></li>
@@ -172,6 +1393,21 @@
                         <tbody></tbody>
                     </table>
                     <div class="empty-state" id="emptyState">No pamisa sa patay requests found.</div>
+                    
+                    <!-- Pagination Controls -->
+                    <div class="pagination" id="paginationControls" style="display: none;">
+                        <div class="pagination-info" id="paginationInfo">
+                            Showing 0 to 0 of 0 entries
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="pagination-btn" id="prevPageBtn" disabled>
+                                <i class="fa-solid fa-chevron-left"></i> Previous
+                            </button>
+                            <button class="pagination-btn" id="nextPageBtn" disabled>
+                                Next <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -356,134 +1592,892 @@
     </div>
 </div>
 
-<!-- Export Modal -->
-<div id="exportModal" class="modal export-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Export Funeral Requests to PDF</h2>
-            <span class="close-btn">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div class="export-options">
-                <label class="export-option" for="exportAll">
-                    <input type="radio" id="exportAll" name="exportType" value="all" checked>
-                    <div class="export-option-content">
-                        <div class="export-option-title">Export All Requests</div>
-                        <div class="export-option-description">Export all funeral requests with complete details</div>
-                    </div>
-                </label>
-                
-                <label class="export-option" for="exportFiltered">
-                    <input type="radio" id="exportFiltered" name="exportType" value="filtered">
-                    <div class="export-option-content">
-                        <div class="export-option-title">Export Filtered Results</div>
-                        <div class="export-option-description">Export only the currently filtered and searched requests</div>
-                    </div>
-                </label>
-                
-                <label class="export-option" for="exportDateRange">
-                    <input type="radio" id="exportDateRange" name="exportType" value="dateRange">
-                    <div class="export-option-content">
-                        <div class="export-option-title">Export by Date Range</div>
-                        <div class="export-option-description">Export requests within a specific date range</div>
-                    </div>
-                </label>
-            </div>
-            
-            <div class="export-date-range" id="dateRangeSection">
-                <div class="date-range-inputs">
-                    <div class="form-group">
-                        <label for="startDate">From Date:</label>
-                        <input type="date" id="startDate">
-                    </div>
-                    <div class="form-group">
-                        <label for="endDate">To Date:</label>
-                        <input type="date" id="endDate">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="export-stats" id="exportStats">
-                <div class="stat-item">
-                    <div class="stat-value" id="totalRecords">0</div>
-                    <div class="stat-label">Total Records</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="dateRange">-</div>
-                    <div class="stat-label">Date Range</div>
-                </div>
-            </div>
-            
-            <div class="export-progress" id="exportProgress" style="display: none;">
-                <div>Generating PDF...</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-                </div>
-                <div id="progressText">0%</div>
-            </div>
-            
-            <button class="submit-btn" id="startExportBtn">
-                <i class="fa-solid fa-file-pdf"></i> Generate PDF Report
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Individual Export Modal -->
-<div id="individualExportModal" class="modal individual-export-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Export Individual Funeral Request</h2>
-            <span class="close-btn">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div class="request-details-preview">
-                <h4>Request Details Preview</h4>
-                <div class="preview-content" id="previewContent">
-                    <!-- Preview content will be populated by JavaScript -->
-                </div>
-            </div>
-            
-            <div class="export-options">
-                <div class="form-group">
-                    <label for="includePaymentInfo">
-                        <input type="checkbox" id="includePaymentInfo" checked>
-                        Include Payment Information
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="includeContactInfo">
-                        <input type="checkbox" id="includeContactInfo" checked>
-                        Include Contact Information
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="includeReasonInfo">
-                        <input type="checkbox" id="includeReasonInfo" checked>
-                        Include Cancellation/Rejection Reasons (if applicable)
-                    </label>
-                </div>
-            </div>
-            
-            <div class="export-progress" id="individualExportProgress" style="display: none;">
-                <div>Generating PDF...</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="individualProgressFill" style="width: 0%"></div>
-                </div>
-                <div id="individualProgressText">0%</div>
-            </div>
-            
-            <button class="submit-btn" id="generateIndividualPDFBtn">
-                <i class="fa-solid fa-file-pdf"></i> Generate Individual PDF
-            </button>
-        </div>
-    </div>
-</div>
-
 <div id="alertContainer" class="custom-alert-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script>
+// Initialize jsPDF
+const { jsPDF } = window.jspdf;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Sidebar toggle functionality
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+        this.querySelector('i').classList.toggle('fa-bars');
+        this.querySelector('i').classList.toggle('fa-times');
+    });
+
+    // Dropdown functionality
+    document.querySelectorAll('.nav-dropdown > a').forEach(function(dropdown) {
+        dropdown.addEventListener('click', function(e) {
+            e.preventDefault();
+            const parent = this.parentElement;
+            parent.classList.toggle('open');
+        });
+    });
+
+    const baseURL = "https://sjmpadmin.onrender.com/api/funeral";
+    const addRequestBtn = document.getElementById('addRequestBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const modal = document.getElementById('addRequestModal');
+    const closeBtn = document.querySelector('.modal .close-btn');
+    const addRequestForm = document.getElementById('addRequestForm');
+    const requestsTableBody = document.querySelector('#requestsTable tbody');
+    const emptyState = document.getElementById('emptyState');
+    const filterButtons = document.querySelectorAll('.filter-buttons button');
+    const totalRequestsCount = document.getElementById('totalRequests');
+    const pendingCount = document.getElementById('pendingCount');
+    const completedCount = document.getElementById('completedCount');
+    const upcomingCount = document.getElementById('upcomingCount');
+    const headerSearchInput = document.getElementById('headerSearch');
+    const tableSearchInput = document.getElementById('tableSearch');
+
+    // Pagination elements
+    const paginationControls = document.getElementById('paginationControls');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+
+    const detailsModal = document.getElementById('detailsModal');
+    const closeDetails = document.getElementById('closeDetails');
+    const detailsContent = document.getElementById('detailsContent');
+
+    const reasonModal = document.getElementById('reasonModal');
+    const closeReason = document.getElementById('closeReason');
+    const reasonForm = document.getElementById('reasonForm');
+    const reasonInput = document.getElementById('reason');
+    const actionTypeSpan = document.getElementById('actionType');
+    const reasonModalTitle = document.getElementById('reasonModalTitle');
+
+    const paymentModal = document.getElementById('paymentModal');
+    const closePayment = document.getElementById('closePayment');
+    const paymentForm = document.getElementById('paymentForm');
+    const paymentAmount = document.getElementById('paymentAmount');
+    const paymentRequestId = document.getElementById('paymentRequestId');
+    const paymentName = document.getElementById('paymentName');
+    const paymentContact = document.getElementById('paymentContact');
+
+    let requests = [];
+    let currentAction = { id: null, type: null };
+    let currentPaymentRequest = null;
+    let currentFilter = 'all';
+    let currentSearchTerm = '';
+    let currentRequestForExport = null;
+    
+    // Pagination variables
+    let currentPage = 1;
+    const recordsPerPage = 5;
+    let currentDisplayedData = [];
+
+    // Define status workflow
+    const statusWorkflow = {
+        'pending': ['in-process', 'rejected', 'cancelled'],
+        'in-process': ['scheduled', 'rejected', 'cancelled'],
+        'scheduled': ['completed', 'cancelled'],
+        'completed': ['approved', 'rejected'],
+        'approved': [],
+        'rejected': ['pending'],
+        'cancelled': ['pending']
+    };
+
+    // Define funeral fees
+    const funeralFee = 1000;
+
+    // Date formatting functions
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            
+            return date.toLocaleDateString('en-PH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return dateString;
+        }
+    }
+
+    function formatTime(timeString) {
+        if (!timeString) return 'N/A';
+        try {
+            if (timeString.includes(':')) {
+                const [hours, minutes] = timeString.split(':');
+                const hour = parseInt(hours);
+                const minute = parseInt(minutes);
+                
+                if (hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+                    const period = hour >= 12 ? 'PM' : 'AM';
+                    const displayHour = hour % 12 || 12;
+                    return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+                }
+            }
+            return timeString;
+        } catch (e) {
+            return timeString;
+        }
+    }
+
+    function getPaymentStatusClass(paymentStatus) {
+        switch(paymentStatus) {
+            case 'paid': return 'paid';
+            case 'pending': return 'pending';
+            case 'overdue': return 'overdue';
+            default: return 'pending';
+        }
+    }
+
+    // Function to display value or N/A if empty
+    function displayValue(value) {
+        if (!value || value === '' || value === '0' || value === 0) {
+            return 'N/A';
+        }
+        return value;
+    }
+
+    // Transform data to match what frontend expects
+    function transformFuneralData(data) {
+        return data.map(request => {
+            return {
+                _id: request._id || '',
+                nameOfDeceased: request.nameOfDeceased || '',
+                dateDied: request.dateDied || '',
+                birthday: request.birthday || '',
+                age: request.age || '',
+                civilStatus: request.civilStatus || '',
+                nameOfHusbandOrWife: request.nameOfHusbandOrWife || '',
+                causeOfDeath: request.causeOfDeath || '',
+                receivedLastSacrament: request.receivedLastSacrament || '',
+                placeOfBurialCemetery: request.placeOfBurialCemetery || '',
+                informant: request.informant || '',
+                relationship: request.relationship || '',
+                residence: request.residence || '',
+                contactNumber: request.contactNumber || '',
+                scheduleDate: request.scheduleDate || '',
+                scheduleTime: request.scheduleTime || '',
+                status: request.status || 'pending',
+                createdAt: request.createdAt || '',
+                requestNumber: request.requestNumber || '',
+                lastUpdated: request.lastUpdated || '',
+                
+                // For frontend display
+                requesterName: request.informant || 'Unknown',
+                requesterContact: displayValue(request.contactNumber),
+                requesterAddress: request.residence || 'N/A',
+                
+                // Payment fields
+                paymentStatus: request.paymentStatus || 'pending',
+                paymentDate: request.paymentDate || '',
+                paymentMethod: request.paymentMethod || '',
+                paymentReference: request.paymentReference || '',
+                paymentNotes: request.paymentNotes || '',
+                fee: request.fee || funeralFee
+            };
+        });
+    }
+
+    async function fetchRequests() {
+        try {
+            const res = await fetch(baseURL);
+            const data = await res.json();
+            requests = transformFuneralData(data);
+            
+            console.log("Fetched funeral requests:", requests);
+            applyFiltersAndSearch();
+        } catch (err) { 
+            console.error("Failed to fetch requests:", err);
+            showNotification('Failed to fetch requests from server.', 'error');
+        }
+    }
+
+    async function addRequest(request) {
+        try {
+            const res = await fetch(baseURL, {
+                method:'POST', 
+                headers:{'Content-Type':'application/json'}, 
+                body: JSON.stringify(request)
+            });
+            const result = await res.json();
+            console.log("Added request:", result);
+            showNotification('New funeral request added successfully!');
+            fetchRequests();
+        } catch (err) {
+            console.error("Failed to add request:", err);
+            showNotification('Failed to add request.', 'error');
+        }
+    }
+
+    // Complete reason system implementation
+    async function updateRequestStatus(id, status, reason = null) {
+        try {
+            const updateData = { status };
+            
+            // Add reason data based on action type
+            if (status === 'cancelled' && reason) {
+                updateData.cancellation_reason = reason;
+                updateData.cancelled_by = 'admin';
+                updateData.cancelled_at = new Date();
+            } else if (status === 'rejected' && reason) {
+                updateData.rejection_reason = reason;
+                updateData.rejected_by = 'admin';
+                updateData.rejected_at = new Date();
+            }
+            
+            console.log("Updating request with reason system:", updateData);
+            const res = await fetch(`${baseURL}/${id}`, {
+                method: 'PUT', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify(updateData)
+            });
+            const result = await res.json();
+            console.log("Update result:", result);
+            showNotification(`Request status updated to ${status}!`);
+            fetchRequests();
+        } catch (err) {
+            console.error("Failed to update request:", err);
+            showNotification('Failed to update request.', 'error');
+        }
+    }
+
+    async function updatePaymentStatus(id, paymentData) {
+        try {
+            console.log("Updating payment for:", id, paymentData);
+            
+            const res = await fetch(`${baseURL}/${id}/payment`, {
+                method:'PUT', 
+                headers:{'Content-Type':'application/json'}, 
+                body: JSON.stringify(paymentData)
+            });
+            
+            const result = await res.json();
+            console.log("Payment update result:", result);
+            showNotification('Payment status updated successfully!');
+            fetchRequests();
+        } catch (err) {
+            console.error("Failed to update payment:", err);
+            showNotification('Failed to update payment.', 'error');
+        }
+    }
+
+    function getAvailableActions(currentStatus) {
+        return statusWorkflow[currentStatus] || [];
+    }
+
+    function applyFiltersAndSearch() {
+        let filteredData = [...requests];
+        
+        // Apply status filter
+        if (currentFilter !== 'all') {
+            filteredData = filteredData.filter(r => r.status === currentFilter);
+        }
+        
+        // Apply search term
+        if (currentSearchTerm) {
+            const term = currentSearchTerm.toLowerCase();
+            filteredData = filteredData.filter(r => 
+                r.nameOfDeceased.toLowerCase().includes(term) || 
+                (r.informant && r.informant.toLowerCase().includes(term)) ||
+                (r.contactNumber && r.contactNumber.toLowerCase().includes(term)) ||
+                (r.status && r.status.toLowerCase().includes(term)) ||
+                (r.requestNumber && r.requestNumber.toLowerCase().includes(term))
+            );
+        }
+        
+        currentDisplayedData = filteredData;
+        currentPage = 1; // Reset to first page when filters change
+        renderTable();
+    }
+
+    function renderTable() {
+        requestsTableBody.innerHTML = '';
+        
+        if(currentDisplayedData.length === 0){ 
+            emptyState.style.display = 'block'; 
+            paginationControls.style.display = 'none';
+        } else {
+            emptyState.style.display = 'none';
+            paginationControls.style.display = 'flex';
+            
+            // Calculate pagination
+            const totalPages = Math.ceil(currentDisplayedData.length / recordsPerPage);
+            const startIndex = (currentPage - 1) * recordsPerPage;
+            const endIndex = Math.min(startIndex + recordsPerPage, currentDisplayedData.length);
+            const pageData = currentDisplayedData.slice(startIndex, endIndex);
+            
+            pageData.forEach(request => {
+                const row = document.createElement('tr');
+                row.dataset.id = request._id;
+                const availableActions = getAvailableActions(request.status);
+                
+                const paymentStatus = request.paymentStatus || 'pending';
+                
+                row.innerHTML = `
+                    <td>${request.nameOfDeceased}</td>
+                    <td>${formatDate(request.dateDied)}</td>
+                    <td>${formatDate(request.scheduleDate)}</td>
+                    <td>${formatTime(request.scheduleTime)}</td>
+                    <td>${request.informant}</td>
+                    <td><span class="status-badge ${request.status}">${request.status}</span></td>
+                    <td><span class="payment-badge ${getPaymentStatusClass(paymentStatus)}">${paymentStatus}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            ${availableActions.includes('in-process') ? 
+                                `<button class="process-btn" title="Mark as In Process">
+                                    <i class="fa-solid fa-gears"></i> Process
+                                </button>` : ''}
+                            ${availableActions.includes('scheduled') ? 
+                                `<button class="schedule-btn" title="Mark as Scheduled">
+                                    <i class="fa-solid fa-calendar-check"></i> Schedule
+                                </button>` : ''}
+                            ${availableActions.includes('completed') ? 
+                                `<button class="complete-btn" title="Mark as Completed">
+                                    <i class="fa-solid fa-check-circle"></i> Complete
+                                </button>` : ''}
+                            ${availableActions.includes('approved') ? 
+                                `<button class="approve-btn" title="Approve">
+                                    <i class="fa-solid fa-thumbs-up"></i> Approve
+                                </button>` : ''}
+                            ${availableActions.includes('rejected') ? 
+                                `<button class="reject-btn" title="Reject">
+                                    <i class="fa-solid fa-ban"></i> Reject
+                                </button>` : ''}
+                            ${availableActions.includes('cancelled') ? 
+                                `<button class="cancel-btn" title="Cancel">
+                                    <i class="fa-solid fa-xmark"></i> Cancel
+                                </button>` : ''}
+                            ${availableActions.includes('pending') ? 
+                                `<button class="reset-btn" title="Reset to Pending">
+                                    <i class="fa-solid fa-rotate-left"></i> Reset
+                                </button>` : ''}
+                            ${(request.status === 'scheduled' || request.status === 'completed' || request.status === 'approved') && paymentStatus !== 'paid' ? 
+                                `<button class="payment-btn" title="Confirm Payment">
+                                    <i class="fa-solid fa-money-bill-wave"></i> Payment
+                                </button>` : ''}
+                        </div>
+                    </td>
+                `;
+                requestsTableBody.appendChild(row);
+            });
+            
+            // Update pagination info and controls
+            updatePaginationInfo(totalPages, startIndex, endIndex);
+        }
+        updateCounts(currentDisplayedData);
+    }
+
+    function updatePaginationInfo(totalPages, startIndex, endIndex) {
+        // Update pagination info text
+        paginationInfo.textContent = `Showing ${startIndex + 1} to ${endIndex} of ${currentDisplayedData.length} entries`;
+        
+        // Update button states
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages;
+    }
+
+    function updateCounts(data){
+        totalRequestsCount.textContent = data.length;
+        pendingCount.textContent = data.filter(r => r.status === 'pending').length;
+        completedCount.textContent = data.filter(r => r.status === 'completed').length;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); 
+        upcomingCount.textContent = data.filter(r => {
+            if (!r.scheduleDate) return false;
+            try {
+                const funeralDate = new Date(r.scheduleDate);
+                funeralDate.setHours(0, 0, 0, 0);
+                return funeralDate >= today && (r.status === 'scheduled' || r.status === 'in-process');
+            } catch (e) {
+                return false;
+            }
+        }).length;
+    }
+
+    function showNotification(message, type='success'){
+        const alert = document.createElement('div');
+        alert.className = `custom-alert ${type}`;
+        alert.innerHTML = `<span>${message}</span><button class="close-notif">&times;</button>`;
+        document.getElementById('alertContainer').appendChild(alert);
+        setTimeout(()=>{
+            alert.classList.add('hide'); 
+            setTimeout(() => alert.remove(), 300);
+        }, 3000);
+        alert.querySelector('.close-notif').addEventListener('click',()=>alert.remove());
+    }
+
+    // Modal handling
+    addRequestBtn.addEventListener('click', ()=>modal.classList.add('show'));
+    closeBtn.addEventListener('click', ()=>{
+        modal.classList.remove('show'); 
+        addRequestForm.reset();
+    });
+    window.addEventListener('click', (e)=>{
+        if(e.target===modal){
+            modal.classList.remove('show'); 
+            addRequestForm.reset();
+        }
+    });
+
+    // Export functionality
+    exportBtn.addEventListener('click', function() {
+        exportToPDF(currentDisplayedData);
+    });
+
+    function exportToPDF(data) {
+        try {
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+            
+            let yPosition = 20;
+            
+            // Add header
+            doc.setFontSize(16);
+            doc.setTextColor(27, 94, 32);
+            doc.text('Diocese of Antipolo', 105, yPosition, { align: 'center' });
+            
+            yPosition += 6;
+            doc.setFontSize(14);
+            doc.text('SAN JOSE MANGGAGAWA PARISH', 105, yPosition, { align: 'center' });
+            
+            yPosition += 5;
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('E. Rodriguez Highway, San Jose, Rodriguez, Rizal', 105, yPosition, { align: 'center' });
+            
+            yPosition += 8;
+            doc.setDrawColor(27, 94, 32);
+            doc.line(20, yPosition, 190, yPosition);
+            
+            yPosition += 10;
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0);
+            doc.text('PAMISA SA PATAY REQUESTS REPORT', 105, yPosition, { align: 'center' });
+            
+            yPosition += 10;
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, yPosition);
+            doc.text(`Total Records: ${data.length}`, 105, yPosition, { align: 'center' });
+            doc.text(`Page: 1`, 190, yPosition, { align: 'right' });
+            
+            yPosition += 15;
+            
+            // Table headers
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            
+            doc.text('Deceased Name', 20, yPosition);
+            doc.text('Date of Death', 60, yPosition);
+            doc.text('Schedule Date', 90, yPosition);
+            doc.text('Contact Person', 130, yPosition);
+            doc.text('Status', 170, yPosition);
+            
+            yPosition += 3;
+            doc.setDrawColor(0, 0, 0);
+            doc.line(20, yPosition, 190, yPosition);
+            yPosition += 7;
+            
+            // Add request rows
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            
+            data.forEach((request, index) => {
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 20;
+                    doc.setFontSize(10);
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`Page: ${doc.internal.getNumberOfPages()}`, 190, yPosition, { align: 'right' });
+                    yPosition += 15;
+                    
+                    // Table headers for new page
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(0, 0, 0);
+                    
+                    doc.text('Deceased Name', 20, yPosition);
+                    doc.text('Date of Death', 60, yPosition);
+                    doc.text('Schedule Date', 90, yPosition);
+                    doc.text('Contact Person', 130, yPosition);
+                    doc.text('Status', 170, yPosition);
+                    
+                    yPosition += 3;
+                    doc.line(20, yPosition, 190, yPosition);
+                    yPosition += 7;
+                    
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(9);
+                }
+                
+                const name = request.nameOfDeceased.length > 20 ? request.nameOfDeceased.substring(0, 20) + '...' : request.nameOfDeceased;
+                const contact = request.informant.length > 15 ? request.informant.substring(0, 15) + '...' : request.informant;
+                
+                doc.text(name, 20, yPosition);
+                doc.text(formatDate(request.dateDied), 60, yPosition);
+                doc.text(formatDate(request.scheduleDate), 90, yPosition);
+                doc.text(contact, 130, yPosition);
+                doc.text(request.status, 170, yPosition);
+                
+                yPosition += 5;
+            });
+            
+            // Add footer
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text('San Jose Parish Management System', 105, 285, { align: 'center' });
+            
+            // Save the PDF
+            const fileName = `funeral_requests_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+            showNotification('Funeral requests exported successfully!', 'success');
+        } catch (error) {
+            console.error('Error exporting funeral requests:', error);
+            showNotification('Error exporting funeral requests to PDF.', 'error');
+        }
+    }
+
+    // Update form submission
+    addRequestForm.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        
+        // Generate request number
+        const timestamp = Date.now();
+        const randomString = Math.random().toString(36).substring(2, 10);
+        const requestNumber = `FUNERAL-${timestamp}-${randomString}`;
+        
+        const newRequest = {
+            nameOfDeceased: document.getElementById('nameOfDeceased').value,
+            dateDied: document.getElementById('dateDied').value,
+            birthday: document.getElementById('birthday').value || '',
+            age: document.getElementById('age').value || '',
+            civilStatus: document.getElementById('civilStatus').value || '',
+            nameOfHusbandOrWife: document.getElementById('nameOfHusbandOrWife').value || '',
+            causeOfDeath: document.getElementById('causeOfDeath').value,
+            receivedLastSacrament: document.getElementById('receivedLastSacrament').value,
+            placeOfBurialCemetery: document.getElementById('placeOfBurialCemetery').value,
+            informant: document.getElementById('informant').value,
+            relationship: document.getElementById('relationship').value,
+            residence: document.getElementById('residence').value,
+            contactNumber: document.getElementById('contactNumber').value,
+            scheduleDate: document.getElementById('scheduleDate').value,
+            scheduleTime: document.getElementById('scheduleTime').value,
+            status: 'pending',
+            paymentStatus: 'pending',
+            fee: funeralFee,
+            requestNumber: requestNumber
+        };
+        
+        console.log("Submitting new request:", newRequest);
+        addRequest(newRequest);
+        modal.classList.remove('show'); 
+        addRequestForm.reset();
+    });
+
+    filterButtons.forEach(button=>{
+        button.addEventListener('click', ()=>{
+            filterButtons.forEach(btn=>btn.classList.remove('active'));
+            button.classList.add('active');
+            currentFilter = button.dataset.status;
+            applyFiltersAndSearch();
+        });
+    });
+
+    // Search functionality for both search bars
+    function handleSearchInput(e) {
+        currentSearchTerm = e.target.value;
+        applyFiltersAndSearch();
+    }
+
+    headerSearchInput.addEventListener('input', handleSearchInput);
+    tableSearchInput.addEventListener('input', handleSearchInput);
+
+    // Pagination event handlers
+    prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(currentDisplayedData.length / recordsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    });
+
+    // Reason modal handling
+    closeReason.addEventListener('click', ()=>{
+        reasonModal.classList.remove('show');
+        reasonForm.reset();
+    });
+    
+    window.addEventListener('click', (e)=>{
+        if(e.target===reasonModal){
+            reasonModal.classList.remove('show');
+            reasonForm.reset();
+        }
+    });
+    
+    reasonForm.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const reason = reasonInput.value.trim();
+        if(reason){
+            console.log("Submitting reason:", reason, "for action:", currentAction);
+            updateRequestStatus(currentAction.id, currentAction.type, reason);
+            reasonModal.classList.remove('show');
+            reasonForm.reset();
+        }
+    });
+
+    // Payment modal handling
+    closePayment.addEventListener('click', ()=>{
+        paymentModal.classList.remove('show');
+        paymentForm.reset();
+    });
+    
+    window.addEventListener('click', (e)=>{
+        if(e.target===paymentModal){
+            paymentModal.classList.remove('show');
+            paymentForm.reset();
+        }
+    });
+    
+    paymentForm.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const paymentData = {
+            paymentStatus: 'paid',
+            paymentDate: document.getElementById('paymentDate').value,
+            paymentMethod: document.getElementById('paymentMethod').value,
+            paymentReference: document.getElementById('paymentReference').value || 'N/A',
+            paymentNotes: document.getElementById('paymentNotes').value || 'N/A'
+        };
+        
+        if (paymentData.paymentMethod === 'cash') {
+            paymentData.paymentReference = paymentData.paymentReference === 'N/A' ? 'CASH_PAYMENT' : paymentData.paymentReference;
+        }
+        
+        console.log("Submitting payment:", paymentData);
+        updatePaymentStatus(currentPaymentRequest._id, paymentData);
+        paymentModal.classList.remove('show');
+        paymentForm.reset();
+    });
+
+    requestsTableBody.addEventListener('click',(e)=>{
+        const row = e.target.closest('tr'); 
+        if(!row || !row.dataset.id) return;
+        const id = row.dataset.id; 
+        const request = requests.find(r=>r._id===id);
+        
+        // Handle action buttons
+        if(e.target.closest('.process-btn')) { 
+            updateRequestStatus(id,'in-process'); 
+            return; 
+        }
+        if(e.target.closest('.schedule-btn')) { 
+            updateRequestStatus(id,'scheduled'); 
+            return; 
+        }
+        if(e.target.closest('.complete-btn')) { 
+            updateRequestStatus(id,'completed'); 
+            return; 
+        }
+        if(e.target.closest('.approve-btn')) { 
+            updateRequestStatus(id,'approved'); 
+            return; 
+        }
+        if(e.target.closest('.reject-btn')) { 
+            currentAction = { id, type: 'rejected' };
+            actionTypeSpan.textContent = 'rejection';
+            reasonModalTitle.textContent = 'Reason for Rejection';
+            reasonModal.classList.add('show');
+            return; 
+        }
+        if(e.target.closest('.cancel-btn')) { 
+            currentAction = { id, type: 'cancelled' };
+            actionTypeSpan.textContent = 'cancellation';
+            reasonModalTitle.textContent = 'Reason for Cancellation';
+            reasonModal.classList.add('show');
+            return; 
+        }
+        if(e.target.closest('.reset-btn')) { 
+            updateRequestStatus(id,'pending'); 
+            return; 
+        }
+        if(e.target.closest('.payment-btn')) { 
+            currentPaymentRequest = request;
+            paymentRequestId.textContent = request.requestNumber || request._id.substring(0, 8) + '...';
+            paymentName.textContent = request.nameOfDeceased;
+            paymentContact.textContent = request.informant;
+            paymentAmount.textContent = `₱${request.fee || funeralFee}.00`;
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('paymentDate').value = today;
+            paymentModal.classList.add('show');
+            return; 
+        }
+        
+        // Show details modal
+        if(request){
+            currentRequestForExport = request; // Store for export
+            showRequestDetails(request);
+        }
+    });
+
+    // Complete details display
+    function showRequestDetails(request) {
+        let detailsHTML = `
+            <div class="details-section">
+                <h3 class="details-section-header">Deceased Information</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Name of Deceased:</span>
+                        <div class="detail-value">${displayValue(request.nameOfDeceased)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date of Death:</span>
+                        <div class="detail-value">${formatDate(request.dateDied)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Birthday:</span>
+                        <div class="detail-value">${formatDate(request.birthday)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Age:</span>
+                        <div class="detail-value">${displayValue(request.age)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Civil Status:</span>
+                        <div class="detail-value">${displayValue(request.civilStatus)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Spouse Name:</span>
+                        <div class="detail-value">${displayValue(request.nameOfHusbandOrWife)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Cause of Death:</span>
+                        <div class="detail-value">${displayValue(request.causeOfDeath)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Received Last Sacrament:</span>
+                        <div class="detail-value">${displayValue(request.receivedLastSacrament)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Burial Place:</span>
+                        <div class="detail-value">${displayValue(request.placeOfBurialCemetery)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h3 class="details-section-header">Requester Information</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Requester Name:</span>
+                        <div class="detail-value">${displayValue(request.informant)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Relationship:</span>
+                        <div class="detail-value">${displayValue(request.relationship)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Address:</span>
+                        <div class="detail-value">${displayValue(request.residence)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Contact Number:</span>
+                        <div class="detail-value">${displayValue(request.contactNumber)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h3 class="details-section-header">Funeral Mass Details</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Schedule Date:</span>
+                        <div class="detail-value">${formatDate(request.scheduleDate)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Schedule Time:</span>
+                        <div class="detail-value">${formatTime(request.scheduleTime)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <div class="detail-value"><span class="status-badge ${request.status}">${request.status}</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h3 class="details-section-header">Payment Information</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Payment Status:</span>
+                        <div class="detail-value"><span class="payment-badge ${getPaymentStatusClass(request.paymentStatus)}">${request.paymentStatus}</span></div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fee:</span>
+                        <div class="detail-value">₱${request.fee}.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h3 class="details-section-header">System Information</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Request Number:</span>
+                        <div class="detail-value">${displayValue(request.requestNumber)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Created At:</span>
+                        <div class="detail-value">${request.createdAt ? formatDate(request.createdAt) : 'N/A'}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Last Updated:</span>
+                        <div class="detail-value">${request.lastUpdated ? formatDate(request.lastUpdated) : 'N/A'}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        detailsContent.innerHTML = detailsHTML;
+        detailsModal.classList.add('show');
+    }
+
+    closeDetails.addEventListener('click',()=>detailsModal.classList.remove('show'));
+    window.addEventListener('click',(e)=>{if(e.target===detailsModal) detailsModal.classList.remove('show');});
+
+    fetchRequests();
+
+    // Logout
+    const logoutLink = document.getElementById("logoutLink");
+    logoutLink.addEventListener("click",(e)=>{
+        e.preventDefault();
+        Swal.fire({
+            title:'Are you sure you want to log out?',
+            text:"You will be redirected to the login page.",
+            icon:'warning',
+            showCancelButton:true,
+            confirmButtonColor:'#3085d6',
+            cancelButtonColor:'#d33',
+            confirmButtonText:'Yes, log me out!'
+        }).then((result)=>{
+            if(result.isConfirmed){window.location.href="index.html";}
+        });
+    });
+}); 
+</script>
 </body>
 </html>

@@ -910,6 +910,97 @@ body {
     transform: translateX(100%);
 }
 
+/* Pagination Styles */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    border-top: 1px solid var(--color-border);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.pagination-info {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--color-card-background);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all var(--transition-medium);
+    font-size: 0.9rem;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+}
+
+.pagination-btn:disabled {
+    background: #f5f5f5;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pagination-numbers {
+    display: flex;
+    gap: 4px;
+}
+
+.page-number {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all var(--transition-medium);
+    font-size: 0.9rem;
+}
+
+.page-number:hover:not(.active) {
+    background: var(--color-hover);
+    border-color: var(--color-primary);
+}
+
+.page-number.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.page-number.ellipsis {
+    border: none;
+    cursor: default;
+}
+
+.page-number.ellipsis:hover {
+    background: transparent;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -1082,6 +1173,24 @@ body {
         transform: rotate(90deg);
         margin: 5px 0;
     }
+    
+    .pagination-container {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-md);
+    }
+    
+    .pagination-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pagination-numbers {
+        order: -1;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: var(--space-sm);
+    }
 }
 
 /* Reason System Styles */
@@ -1186,11 +1295,9 @@ body {
         <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
         <li class="nav-dropdown open">
           <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
-          <ul class="dropdown-menu">
+           <ul class="dropdown-menu">
             <li><a href="baptism.html"><span>Baptism</span></a></li>
             <li><a href="kumpil.html"><span>Confirmation</span></a></li>
-            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
-            <li><a href="confession.html"><span>Confession</span></a></li>
             <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
             <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
             <li><a href="matrimony.html"><span>Matrimony</span></a></li>
@@ -1332,6 +1439,20 @@ body {
                     </table>
                     <div class="empty-state" id="emptyState">No certificate requests found.</div>
                 </div>
+                
+                <!-- Pagination Controls -->
+                <div class="pagination-container" id="paginationContainer">
+                    <div class="pagination-info" id="paginationInfo">Showing 0-0 of 0</div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" id="prevPageBtn" disabled>
+                            <i class="fa-solid fa-chevron-left"></i> Previous
+                        </button>
+                        <div class="pagination-numbers" id="paginationNumbers"></div>
+                        <button class="pagination-btn" id="nextPageBtn" disabled>
+                            Next <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -1467,7 +1588,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    const baseURL = "http://localhost:5000/api/certificates";
+    const baseURL = "https://sjmpadmin.onrender.com/api/certificates";
     const addRequestBtn = document.getElementById('addRequestBtn');
     const modal = document.getElementById('addRequestModal');
     const closeBtn = document.querySelector('.modal .close-btn');
@@ -1485,6 +1606,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const headerSearchInput = document.getElementById('headerSearch');
     const tableSearchInput = document.getElementById('tableSearch');
 
+    // Pagination elements
+    const paginationContainer = document.getElementById('paginationContainer');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const paginationNumbers = document.getElementById('paginationNumbers');
+
     const detailsModal = document.getElementById('detailsModal');
     const closeDetails = document.getElementById('closeDetails');
     const detailsContent = document.getElementById('detailsContent');
@@ -1500,6 +1628,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentAction = { id: null, type: null };
     let currentFilter = 'all';
     let currentSearchTerm = '';
+    
+    // Pagination variables
+    let currentPage = 1;
+    const recordsPerPage = 5;
+    let totalPages = 1;
+    let filteredRequests = [];
 
     // FIXED STATUS WORKFLOW - Consistent with database
     const statusWorkflow = {
@@ -1725,17 +1859,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function applyFiltersAndSearch() {
-        let filteredData = [...requests];
+        filteredRequests = [...requests];
         
         // Apply status filter
         if (currentFilter !== 'all') {
-            filteredData = filteredData.filter(r => normalizeStatus(r.status) === normalizeStatus(currentFilter));
+            filteredRequests = filteredRequests.filter(r => normalizeStatus(r.status) === normalizeStatus(currentFilter));
         }
         
         // Apply search term
         if (currentSearchTerm) {
             const term = currentSearchTerm.toLowerCase();
-            filteredData = filteredData.filter(r => 
+            filteredRequests = filteredRequests.filter(r => 
                 (r.fullName && r.fullName.toLowerCase().includes(term)) || 
                 (r.certificateType && r.certificateType.toLowerCase().includes(term)) ||
                 (r.purpose && r.purpose.toLowerCase().includes(term)) ||
@@ -1745,19 +1879,119 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
         
-        renderTable(filteredData);
+        // Reset to first page when filtering
+        currentPage = 1;
+        updatePagination();
+        renderTable();
+    }
+
+    // PAGINATION FUNCTIONS
+    function updatePagination() {
+        // Calculate total pages
+        totalPages = Math.ceil(filteredRequests.length / recordsPerPage);
+        
+        // Update pagination info
+        const startIndex = (currentPage - 1) * recordsPerPage;
+        const endIndex = Math.min(startIndex + recordsPerPage, filteredRequests.length);
+        paginationInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${filteredRequests.length}`;
+        
+        // Update button states
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+        
+        // Generate page numbers
+        generatePageNumbers();
+        
+        // Show/hide pagination based on whether we have records
+        paginationContainer.style.display = filteredRequests.length > 0 ? 'flex' : 'none';
+    }
+    
+    function generatePageNumbers() {
+        paginationNumbers.innerHTML = '';
+        
+        if (totalPages <= 1) return;
+        
+        // Always show first page
+        addPageNumber(1);
+        
+        // Show ellipsis if needed
+        if (currentPage > 3) {
+            addEllipsis();
+        }
+        
+        // Show pages around current page
+        const startPage = Math.max(2, currentPage - 1);
+        const endPage = Math.min(totalPages - 1, currentPage + 1);
+        
+        for (let i = startPage; i <= endPage; i++) {
+            addPageNumber(i);
+        }
+        
+        // Show ellipsis if needed
+        if (currentPage < totalPages - 2) {
+            addEllipsis();
+        }
+        
+        // Always show last page if there's more than one page
+        if (totalPages > 1) {
+            addPageNumber(totalPages);
+        }
+    }
+    
+    function addPageNumber(page) {
+        const pageElement = document.createElement('div');
+        pageElement.className = `page-number ${page === currentPage ? 'active' : ''}`;
+        pageElement.textContent = page;
+        pageElement.addEventListener('click', () => {
+            if (page !== currentPage) {
+                currentPage = page;
+                updatePagination();
+                renderTable();
+            }
+        });
+        paginationNumbers.appendChild(pageElement);
+    }
+    
+    function addEllipsis() {
+        const ellipsis = document.createElement('div');
+        ellipsis.className = 'page-number ellipsis';
+        ellipsis.textContent = '...';
+        paginationNumbers.appendChild(ellipsis);
+    }
+    
+    function goToPreviousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            updatePagination();
+            renderTable();
+        }
+    }
+    
+    function goToNextPage() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            updatePagination();
+            renderTable();
+        }
     }
 
     // FIXED RENDER TABLE FUNCTION
-    function renderTable(data) {
+    function renderTable() {
         requestsTableBody.innerHTML = '';
-        console.log("🔄 Rendering table with data:", data);
         
-        if(data.length === 0){ 
+        if(filteredRequests.length === 0){ 
             emptyState.style.display = 'block'; 
         } else {
             emptyState.style.display = 'none';
-            data.forEach(request => {
+            
+            // Calculate which records to show
+            const startIndex = (currentPage - 1) * recordsPerPage;
+            const endIndex = Math.min(startIndex + recordsPerPage, filteredRequests.length);
+            const currentPageData = filteredRequests.slice(startIndex, endIndex);
+            
+            console.log("🔄 Rendering table with data:", currentPageData);
+            
+            currentPageData.forEach(request => {
                 const row = document.createElement('tr');
                 row.dataset.id = request._id;
                 const availableActions = getAvailableActions(request.status);
@@ -1808,7 +2042,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 requestsTableBody.appendChild(row);
             });
         }
-        updateCounts(data);
+        updateCounts(filteredRequests);
     }
 
     function updateCounts(data){
@@ -1888,6 +2122,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     headerSearchInput.addEventListener('input', handleSearchInput);
     tableSearchInput.addEventListener('input', handleSearchInput);
+
+    // Pagination event listeners
+    prevPageBtn.addEventListener('click', goToPreviousPage);
+    nextPageBtn.addEventListener('click', goToNextPage);
 
     // Reason modal handling
     closeReason.addEventListener('click', ()=>{

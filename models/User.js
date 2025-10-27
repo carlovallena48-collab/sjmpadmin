@@ -8,6 +8,9 @@ const userSchema = new mongoose.Schema({
   address: String,
   contact: String,
   createdAt: { type: Date, default: Date.now },
-}, { suppressReservedKeysWarning: true });
+}, { 
+  collection: "users",
+  timestamps: true 
+});
 
-module.exports = mongoose.model("User", userSchema, "users");
+module.exports = mongoose.model("User", userSchema);

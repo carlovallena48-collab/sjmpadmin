@@ -1167,6 +1167,44 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+/* Navigation Buttons in Details Modal */
+.details-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--color-border);
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-medium);
+    box-shadow: var(--shadow-sm);
+}
+
+.nav-btn:hover {
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.nav-btn:disabled {
+    background: #e0e0e0;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
     .sidebar {
@@ -1244,6 +1282,16 @@ body {
     .workflow-arrow {
         transform: rotate(90deg);
         margin: 5px 0;
+    }
+    
+    .details-navigation {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 
@@ -1337,12 +1385,10 @@ body {
         <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
         <li class="nav-dropdown open">
           <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
-          <ul class="dropdown-menu">
+             <ul class="dropdown-menu">
             <li><a href="baptism.html"><span>Baptism</span></a></li>
             <li><a href="kumpil.html"><span>Confirmation</span></a></li>
-            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
-            <li><a href="confession.html"><span>Confession</span></a></li>
-            <li><a href="anointing.html" class="active"><span>Anointing of the Sick</span></a></li>
+            <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
             <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
             <li><a href="matrimony.html"><span>Matrimony</span></a></li>
           </ul>
@@ -1589,9 +1635,17 @@ body {
         <div class="modal-body" id="detailsContent">
             <!-- Details will be populated by JavaScript -->
         </div>
-        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--color-border);">
-            <button class="export-individual-btn" id="exportIndividualBtn">
-                <i class="fa-solid fa-file-export"></i> Export This Request
+        <div class="details-navigation" id="detailsNavigation">
+            <button class="nav-btn" id="prevRequestBtn">
+                <i class="fa-solid fa-chevron-left"></i> Previous
+            </button>
+            <div class="nav-actions">
+                <button class="export-individual-btn" id="exportIndividualBtn">
+                    <i class="fa-solid fa-file-export"></i> Export This Request
+                </button>
+            </div>
+            <button class="nav-btn" id="nextRequestBtn">
+                Next <i class="fa-solid fa-chevron-right"></i>
             </button>
         </div>
     </div>
@@ -1626,11 +1680,7 @@ body {
                 <label for="priestAssigned">Select Priest:</label>
                 <select id="priestAssigned" required>
                     <option value="">Select a priest</option>
-                    <option value="Fr. John Smith">Fr. John Smith</option>
-                    <option value="Fr. Michael Brown">Fr. Michael Brown</option>
-                    <option value="Fr. Robert Johnson">Fr. Robert Johnson</option>
-                    <option value="Fr. David Wilson">Fr. David Wilson</option>
-                    <option value="Fr. James Davis">Fr. James Davis</option>
+                    <option value="Rev. Fr. Francis Roi A. Madarang">Rev. Fr. Francis Roi A. Madarang</option>
                 </select>
             </div>
             <button type="submit" class="submit-btn" id="submitAssignBtn">Assign Priest</button>
@@ -1717,7 +1767,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    const baseURL = "http://localhost:5000/api/sickcall";
+    const baseURL = "https://sjmpadmin.onrender.com/api/sickcall";
     const addRequestBtn = document.getElementById('addRequestBtn');
     const exportBtn = document.getElementById('exportBtn');
     const exportIndividualBtn = document.getElementById('exportIndividualBtn');
@@ -1740,6 +1790,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const detailsModal = document.getElementById('detailsModal');
     const closeDetails = document.getElementById('closeDetails');
     const detailsContent = document.getElementById('detailsContent');
+    const prevRequestBtn = document.getElementById('prevRequestBtn');
+    const nextRequestBtn = document.getElementById('nextRequestBtn');
 
     const reasonModal = document.getElementById('reasonModal');
     const closeReason = document.getElementById('closeReason');
@@ -1768,6 +1820,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentSearchTerm = '';
     let currentFilteredData = [];
     let currentDetailsRequest = null;
+    let currentDetailsIndex = -1;
 
     // Define status workflow
     const statusWorkflow = {
@@ -2659,6 +2712,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Navigation functionality for details modal
+    prevRequestBtn.addEventListener('click', function() {
+        if (currentDetailsIndex > 0) {
+            currentDetailsIndex--;
+            const request = currentFilteredData[currentDetailsIndex];
+            showRequestDetails(request);
+        }
+    });
+
+    nextRequestBtn.addEventListener('click', function() {
+        if (currentDetailsIndex < currentFilteredData.length - 1) {
+            currentDetailsIndex++;
+            const request = currentFilteredData[currentDetailsIndex];
+            showRequestDetails(request);
+        }
+    });
+
     requestsTableBody.addEventListener('click',(e)=>{
         const row = e.target.closest('tr'); 
         if(!row || !row.dataset.id) return;
@@ -2714,6 +2784,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showRequestDetails(request) {
         currentDetailsRequest = request;
+        currentDetailsIndex = currentFilteredData.findIndex(r => r._id === request._id);
+        
+        // Update navigation buttons
+        prevRequestBtn.disabled = currentDetailsIndex <= 0;
+        nextRequestBtn.disabled = currentDetailsIndex >= currentFilteredData.length - 1;
         
         let detailsHTML = `
             <div class="details-section">
@@ -2865,11 +2940,13 @@ document.addEventListener('DOMContentLoaded', function() {
     closeDetails.addEventListener('click',()=>{
         detailsModal.classList.remove('show');
         currentDetailsRequest = null;
+        currentDetailsIndex = -1;
     });
     window.addEventListener('click',(e)=>{
         if(e.target===detailsModal) {
             detailsModal.classList.remove('show');
             currentDetailsRequest = null;
+            currentDetailsIndex = -1;
         }
     });
 

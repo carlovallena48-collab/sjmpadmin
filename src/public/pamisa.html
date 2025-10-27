@@ -756,6 +756,55 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    border-top: 1px solid var(--color-border);
+}
+
+.pagination-info {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.pagination-controls {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-medium);
+    box-shadow: var(--shadow-sm);
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.pagination-btn:disabled {
+    background: #e0e0e0;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 /* Modal Styles */
 .modal {
     display: none;
@@ -1144,6 +1193,11 @@ body {
         transform: rotate(90deg);
         margin: 5px 0;
     }
+    
+    .pagination {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
 }
 
 /* Reason System Styles */
@@ -1252,11 +1306,9 @@ body {
         <li><a href="dashboard.html"><i class="fa-solid fa-house-chimney"></i><span>Dashboard</span></a></li>
         <li class="nav-dropdown open">
           <a href="#"><i class="fa-solid fa-cross"></i><span>7 Sacraments</span><i class="fa-solid fa-chevron-down dropdown-icon"></i></a>
-          <ul class="dropdown-menu">
+            <ul class="dropdown-menu">
             <li><a href="baptism.html"><span>Baptism</span></a></li>
             <li><a href="kumpil.html"><span>Confirmation</span></a></li>
-            <li><a href="eucharist.html"><span>Eucharist</span></a></li>
-            <li><a href="confession.html"><span>Confession</span></a></li>
             <li><a href="anointing.html"><span>Anointing of the Sick</span></a></li>
             <li><a href="holy-orders.html"><span>Holy Orders</span></a></li>
             <li><a href="matrimony.html"><span>Matrimony</span></a></li>
@@ -1397,6 +1449,21 @@ body {
                         <tbody></tbody>
                     </table>
                     <div class="empty-state" id="emptyState">No pamisa requests found.</div>
+                    
+                    <!-- Pagination Controls -->
+                    <div class="pagination" id="paginationControls" style="display: none;">
+                        <div class="pagination-info" id="paginationInfo">
+                            Showing 0 to 0 of 0 entries
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="pagination-btn" id="prevPageBtn" disabled>
+                                <i class="fa-solid fa-chevron-left"></i> Previous
+                            </button>
+                            <button class="pagination-btn" id="nextPageBtn" disabled>
+                                Next <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1574,7 +1641,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    const baseURL = "http://localhost:5000/api/pamisa";
+    const baseURL = "https://sjmpadmin.onrender.com/api/pamisa";
     const addRequestBtn = document.getElementById('addRequestBtn');
     const exportFormBtn = document.getElementById('exportFormBtn');
     const modal = document.getElementById('addRequestModal');
@@ -1589,6 +1656,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const upcomingCount = document.getElementById('upcomingCount');
     const headerSearchInput = document.getElementById('headerSearch');
     const tableSearchInput = document.getElementById('tableSearch');
+
+    // Pagination elements
+    const paginationControls = document.getElementById('paginationControls');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
 
     const detailsModal = document.getElementById('detailsModal');
     const closeDetails = document.getElementById('closeDetails');
@@ -1615,6 +1688,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentFilter = 'all';
     let currentSearchTerm = '';
     let currentRequestForExport = null;
+    
+    // Pagination variables
+    let currentPage = 1;
+    const recordsPerPage = 5;
+    let currentDisplayedData = [];
 
     // Define status workflow
     const statusWorkflow = {
@@ -1880,16 +1958,28 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
         
-        renderTable(filteredData);
+        currentDisplayedData = filteredData;
+        currentPage = 1; // Reset to first page when filters change
+        renderTable();
     }
 
-    function renderTable(data) {
+    function renderTable() {
         requestsTableBody.innerHTML = '';
-        if(data.length === 0){ 
+        
+        if(currentDisplayedData.length === 0){ 
             emptyState.style.display = 'block'; 
+            paginationControls.style.display = 'none';
         } else {
             emptyState.style.display = 'none';
-            data.forEach(request => {
+            paginationControls.style.display = 'flex';
+            
+            // Calculate pagination
+            const totalPages = Math.ceil(currentDisplayedData.length / recordsPerPage);
+            const startIndex = (currentPage - 1) * recordsPerPage;
+            const endIndex = Math.min(startIndex + recordsPerPage, currentDisplayedData.length);
+            const pageData = currentDisplayedData.slice(startIndex, endIndex);
+            
+            pageData.forEach(request => {
                 const row = document.createElement('tr');
                 row.dataset.id = request._id;
                 const availableActions = getAvailableActions(request.status);
@@ -1944,8 +2034,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
                 requestsTableBody.appendChild(row);
             });
+            
+            // Update pagination info and controls
+            updatePaginationInfo(totalPages, startIndex, endIndex);
         }
-        updateCounts(data);
+        updateCounts(currentDisplayedData);
+    }
+
+    function updatePaginationInfo(totalPages, startIndex, endIndex) {
+        // Update pagination info text
+        paginationInfo.textContent = `Showing ${startIndex + 1} to ${endIndex} of ${currentDisplayedData.length} entries`;
+        
+        // Update button states
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages;
     }
 
     function updateCounts(data){
@@ -2185,6 +2287,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     headerSearchInput.addEventListener('input', handleSearchInput);
     tableSearchInput.addEventListener('input', handleSearchInput);
+
+    // Pagination event handlers
+    prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(currentDisplayedData.length / recordsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    });
 
     // Reason modal handling
     closeReason.addEventListener('click', ()=>{

@@ -1081,20 +1081,20 @@ async function fetchDashboardData() {
     console.log("🔄 Fetching dashboard data...");
     
     // --- Total Users ---
-    const totalRes = await fetch("http://localhost:5000/api/dashboard/total-users");
+    const totalRes = await fetch("https://sjmpadmin.onrender.com/api/dashboard/total-users");
     if (!totalRes.ok) throw new Error('Failed to fetch total users');
     const totalData = await totalRes.json();
     document.getElementById("total-users").textContent = totalData.total || 0;
 
     // --- Fetch data from ALL sacraments and services ---
     const endpoints = [
-      { url: "http://localhost:5000/api/baptism", type: 'Baptism' },
-      { url: "http://localhost:5000/api/confirmation", type: 'Confirmation' },
-      { url: "http://localhost:5000/api/holy-orders", type: 'Holy Orders' },
-      { url: "http://localhost:5000/api/marriage", type: 'Matrimony' },
-      { url: "http://localhost:5000/api/pamisa", type: 'Pamisa' },
-      { url: "http://localhost:5000/api/funeralrequests", type: 'Funeral Service' },
-      { url: "http://localhost:5000/api/blessing", type: 'Blessing' }
+      { url: "https://sjmpadmin.onrender.com/api/baptism", type: 'Baptism' },
+      { url: "https://sjmpadmin.onrender.com/api/confirmation", type: 'Confirmation' },
+      { url: "https://sjmpadmin.onrender.com/api/holy-orders", type: 'Holy Orders' },
+      { url: "https://sjmpadmin.onrender.com/api/marriage", type: 'Matrimony' },
+      { url: "https://sjmpadmin.onrender.com/api/pamisa", type: 'Pamisa' },
+      { url: "https://sjmpadmin.onrender.com/api/funeralrequests", type: 'Funeral Service' },
+      { url: "https://sjmpadmin.onrender.com/api/blessing", type: 'Blessing' }
     ];
 
     const fetchPromises = endpoints.map(async (endpoint) => {
@@ -1166,7 +1166,7 @@ async function fetchDashboardData() {
 
     // --- Recent Activity Log ---
     try {
-      const recentRes = await fetch("http://localhost:5000/api/dashboard/recent-users");
+      const recentRes = await fetch("https://sjmpadmin.onrender.com/api/dashboard/recent-users");
       if (recentRes.ok) {
         const recentUsers = await recentRes.json();
         const activityContainer = document.getElementById("activity-log-container");
@@ -1196,7 +1196,7 @@ async function fetchDashboardData() {
 
     // --- Monthly Users Chart ---
     try {
-      const monthlyRes = await fetch("http://localhost:5000/api/dashboard/monthly-users");
+      const monthlyRes = await fetch("https://sjmpadmin.onrender.com/api/dashboard/monthly-users");
       if (monthlyRes.ok) {
         const monthlyData = await monthlyRes.json();
         const months = Array(12).fill(0);

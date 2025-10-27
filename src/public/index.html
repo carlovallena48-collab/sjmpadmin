@@ -540,8 +540,8 @@
                     const password = document.getElementById("password").value.trim();
 
                     try {
-                        // Tiyakin na naka-run ang backend server mo sa http://localhost:5000
-                        const res = await fetch("http://localhost:5000/api/auth/login", {
+                        // Tiyakin na naka-run ang backend server mo sa https://sjmpadmin.onrender.com
+                        const res = await fetch("https://sjmpadmin.onrender.com/api/auth/login", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ username, password })
@@ -587,7 +587,7 @@
                         Swal.fire({
                             icon: 'warning',
                             title: 'Connection Issue!',
-                            text: 'Could not connect to the server. Please check the backend connection (http://localhost:5000).',
+                            text: 'Could not connect to the server. Please check the backend connection (https://sjmpadmin.onrender.com).',
                             confirmButtonColor: primaryColor
                         });
                     }
