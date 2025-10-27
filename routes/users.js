@@ -1,5 +1,5 @@
 const express = require("express");
-const bcrypt = require("bcryptjs"); // ✅ switched from bcrypt to bcryptjs
+const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const { logActivity } = require("../utils/helpers");
 
@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "User with this email already exists" });
     }
 
-    // ✅ bcryptjs hashing
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       fullName,
@@ -68,7 +68,7 @@ router.put("/:id", async (req, res) => {
   try {
     const updateData = { ...req.body };
 
-    // ✅ Only hash password if provided
+    // Only hash password if provided
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     } else {

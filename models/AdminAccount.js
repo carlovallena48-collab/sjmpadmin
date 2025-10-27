@@ -7,6 +7,9 @@ const adminSchema = new mongoose.Schema({
   role: { type: String, default: "Admin" },
   address: String,
   contact: String,
-}, { suppressReservedKeysWarning: true });
+}, { 
+  suppressReservedKeysWarning: true,
+  collection: "adminaccount" 
+});
 
-module.exports = mongoose.model("AdminAccount", adminSchema, "adminaccount");
+module.exports = mongoose.model("AdminAccount", adminSchema);

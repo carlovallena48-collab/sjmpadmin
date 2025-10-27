@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 const websiteAdminSchema = new mongoose.Schema({
   name: { 
@@ -20,7 +20,7 @@ const websiteAdminSchema = new mongoose.Schema({
   },
   role: { 
     type: String, 
-    default: "staff"  // CHANGED FROM "Website Manager" to "staff"
+    default: "staff"
   },
   address: {
     type: String,
@@ -56,7 +56,7 @@ const websiteAdminSchema = new mongoose.Schema({
   }
 }, { 
   suppressReservedKeysWarning: true,
-  collection: "adminaccount"  // ADD THIS - connect to correct collection
+  collection: "adminaccount"
 });
 
 // Pre-save middleware to hash password
