@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // CORRECTED: Use the funeral API endpoint instead of pamisa
-    const baseURL = "http://localhost:5000/api/funeralrequests";
+    const baseURL = "http://localhost:5000/api/funeral";
     const addRequestBtn = document.getElementById('addRequestBtn');
     const modal = document.getElementById('addRequestModal');
     const closeBtn = document.querySelector('.modal .close-btn');

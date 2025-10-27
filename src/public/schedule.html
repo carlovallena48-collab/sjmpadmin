@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
+       :root {
             --primary: #2c5aa0;
             --primary-dark: #1e3d72;
             --secondary: #f8f9fa;
@@ -715,14 +715,14 @@
                             <li><a href="blessing.html"><span>Blessing</span></a></li>
                             <li><a href="pamisapatay.html"><span>Pamisa sa patay</span></a></li>
                        </ul> 
-        </li>
-              <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
-              <li><a href="schedule.html"><i class="fa-solid fa-calendar-alt"></i><span>Schedule</span></a></li>
-              <li><a href="certificate.html"><i class="fa-solid fa-globe"></i><span>Certificate Request</span></a></li>
-              <li><a href="report.html"><i class="fa-solid fa-globe"></i><span>Reports And Analytics</span></a></li>
-              <li><a href="volunteer.html"><i class="fa-solid fa-hands-helping"></i><span>Volunteer Applications</span></a></li>
-              <li class="nav-logout"><a href="#" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a></li>
-      </ul>
+                    </li>
+                    <li><a href="usermanage.html"><i class="fa-solid fa-user-gear"></i><span>User Management</span></a></li>
+                    <li><a href="schedule.html" class="active"><i class="fa-solid fa-calendar-alt"></i><span>Schedule</span></a></li>
+                    <li><a href="certificate.html"><i class="fa-solid fa-globe"></i><span>Certificate Request</span></a></li>
+                    <li><a href="report.html"><i class="fa-solid fa-globe"></i><span>Reports And Analytics</span></a></li>
+                    <li><a href="volunteer.html"><i class="fa-solid fa-hands-helping"></i><span>Volunteer Applications</span></a></li>
+                    <li class="nav-logout"><a href="#" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a></li>
+                </ul>
             </nav>
         </aside>
         
@@ -911,7 +911,7 @@
             let today = new Date();
             let currentMonth = today.getMonth();
             let currentYear = today.getFullYear();
-            let events = {}; // dynamic events container
+            let events = {};
             let selectedDate = null;
 
             // Load all sacrament schedules from database
@@ -921,24 +921,32 @@
                     
                     // Fetch from all sacrament endpoints
                     const endpoints = [
-                        '/api/baptism-schedules',
-                        '/api/confirmation-schedules',
-                        '/api/holy-orders-schedules',
-                        '/api/pamisa-schedules',
-                        '/api/funeral-schedules',
-                        '/api/blessing-schedules',
-                        '/api/certificate-schedules'
+                        '/api/baptism',
+                        '/api/confirmation', 
+                        '/api/holy-orders',
+                        '/api/pamisa',
+                        '/api/funeral',
+                        '/api/blessing',
+                        '/api/certificates',
+                        '/api/marriage'
                     ];
 
                     const allPromises = endpoints.map(endpoint => 
                         fetch(`http://localhost:5000${endpoint}`)
                             .then(res => {
-                                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                                if (!res.ok) {
+                                    console.warn(`Failed to fetch from ${endpoint}: HTTP ${res.status}`);
+                                    return [];
+                                }
                                 return res.json();
                             })
+                            .then(data => {
+                                console.log(`✅ Found ${data.length || 0} records from ${endpoint}`);
+                                return data || [];
+                            })
                             .catch(err => {
-                                console.warn(`Failed to fetch from ${endpoint}:`, err);
-                                return []; // Return empty array if fetch fails
+                                console.warn(`Error fetching from ${endpoint}:`, err.message);
+                                return [];
                             })
                     );
 
@@ -957,25 +965,29 @@
                         else if (endpoint.includes('pamisa')) sacramentType = 'Pamisa';
                         else if (endpoint.includes('funeral')) sacramentType = 'Funeral Service';
                         else if (endpoint.includes('blessing')) sacramentType = 'Blessing';
-                        else if (endpoint.includes('certificate')) sacramentType = 'Certificate';
+                        else if (endpoint.includes('certificates')) sacramentType = 'Certificate';
+                        else if (endpoint.includes('marriage')) sacramentType = 'Matrimony';
                         
-                        if (schedules && schedules.length > 0) {
-                            console.log(`✅ Found ${schedules.length} ${sacramentType} schedules`);
+                        if (schedules && Array.isArray(schedules) && schedules.length > 0) {
+                            console.log(`✅ Processing ${schedules.length} ${sacramentType} schedules`);
                             schedules.forEach(schedule => {
-                                // Normalize date format to YYYY-MM-DD
-                                let dateStr = normalizeDate(schedule);
-                                if (!dateStr) return; // Skip if no valid date
-                                
-                                if (!events[dateStr]) events[dateStr] = [];
-                                
-                                // Create normalized event object with complete information
-                                const event = createEventObject(schedule, sacramentType);
-                                events[dateStr].push(event);
+                                try {
+                                    const dateStr = normalizeDate(schedule);
+                                    if (!dateStr) return;
+
+                                    if (!events[dateStr]) events[dateStr] = [];
+                                    
+                                    const event = createEventObject(schedule, sacramentType);
+                                    events[dateStr].push(event);
+                                } catch (err) {
+                                    console.warn('Error processing schedule:', err);
+                                }
                             });
                         }
                     });
 
-                    console.log("📊 Total events loaded:", Object.keys(events).reduce((sum, date) => sum + events[date].length, 0));
+                    const totalEvents = Object.keys(events).reduce((sum, date) => sum + events[date].length, 0);
+                    console.log("📊 Total events loaded:", totalEvents);
                     
                     renderCalendar(currentMonth, currentYear);
                     const initialDate = formatDateForStorage(today);
@@ -983,7 +995,7 @@
                     
                 } catch (err) {
                     console.error("❌ Failed to load schedules:", err);
-                    // Fallback to sample data if database is not available
+                    // Fallback to sample data
                     initializeSampleData();
                     renderCalendar(currentMonth, currentYear);
                     const initialDate = formatDateForStorage(today);
@@ -993,50 +1005,54 @@
 
             // Normalize date to YYYY-MM-DD format
             function normalizeDate(schedule) {
+                if (!schedule) return null;
+                
                 let dateStr = '';
                 
                 // Check different possible date fields
-                if (schedule.date) {
-                    dateStr = schedule.date;
-                } else if (schedule.baptismDate) {
-                    dateStr = schedule.baptismDate;
-                } else if (schedule.kumpilDate) {
-                    dateStr = schedule.kumpilDate;
-                } else if (schedule.scheduleDate) {
-                    dateStr = schedule.scheduleDate;
-                } else if (schedule.ordinationDate) {
-                    dateStr = schedule.ordinationDate;
-                } else if (schedule.scheduledDate) {
-                    dateStr = schedule.scheduledDate;
-                } else if (schedule.requestDate) {
-                    dateStr = schedule.requestDate;
+                const dateFields = [
+                    'date', 'baptismDate', 'kumpilDate', 'scheduleDate', 
+                    'ordinationDate', 'scheduledDate', 'requestDate',
+                    'marriageDate', 'blessingDate', 'funeralDate'
+                ];
+                
+                for (const field of dateFields) {
+                    if (schedule[field] && schedule[field] !== 'TBA' && schedule[field] !== 'N/A') {
+                        dateStr = schedule[field];
+                        break;
+                    }
                 }
                 
-                if (!dateStr || dateStr === 'TBA') return null;
+                if (!dateStr) return null;
                 
-                // Remove time part if present
-                if (dateStr.includes('T')) {
-                    dateStr = dateStr.split('T')[0];
+                try {
+                    // Remove time part if present
+                    if (dateStr.includes('T')) {
+                        dateStr = dateStr.split('T')[0];
+                    }
+                    
+                    // Parse and reformat to YYYY-MM-DD
+                    const date = new Date(dateStr);
+                    if (isNaN(date.getTime())) return null;
+                    
+                    return formatDateForStorage(date);
+                } catch (e) {
+                    console.warn('Date normalization error:', e, dateStr);
+                    return null;
                 }
-                
-                // Parse and reformat to YYYY-MM-DD
-                const date = new Date(dateStr);
-                if (isNaN(date.getTime())) return null;
-                
-                return formatDateForStorage(date);
             }
 
             // Create complete event object with all information
             function createEventObject(schedule, sacramentType) {
                 const baseEvent = {
-                    id: schedule._id || schedule.id || Date.now(),
-                    name: schedule.name || schedule.confirmandName || schedule.names?.[0] || schedule.nameOfDeceased || schedule.fullName || 'Unknown',
+                    id: schedule._id || schedule.id || `temp-${Date.now()}-${Math.random()}`,
+                    name: getEventName(schedule, sacramentType),
                     type: sacramentType,
                     date: normalizeDate(schedule),
-                    time: schedule.time || schedule.baptismTime || schedule.kumpilTime || schedule.scheduleTime || schedule.ordinationTime || 'TBA',
-                    contact: schedule.contact || schedule.contactNo || schedule.contactNumber || schedule.submittedByEmail || 'N/A',
-                    address: schedule.address || schedule.currentAddress || schedule.residence || 'N/A',
-                    notes: schedule.notes || schedule.intention || schedule.purpose || ''
+                    time: getEventTime(schedule),
+                    contact: schedule.contact || schedule.contactNo || schedule.contactNumber || schedule.phone || schedule.submittedByEmail || 'N/A',
+                    address: schedule.address || schedule.currentAddress || schedule.residence || schedule.location || 'N/A',
+                    notes: schedule.notes || schedule.intention || schedule.purpose || schedule.additionalNotes || ''
                 };
 
                 // Add sacrament-specific fields
@@ -1053,15 +1069,16 @@
                     baseEvent.baptismChurch = schedule.baptismChurch || 'N/A';
                     baseEvent.fatherName = schedule.fatherName || 'N/A';
                     baseEvent.motherName = schedule.motherName || 'N/A';
-                    baseEvent.godfather = schedule.godfatherName || 'N/A';
-                    baseEvent.godmother = schedule.godmotherName || 'N/A';
+                    baseEvent.godfather = schedule.godfatherName || schedule.godfather || 'N/A';
+                    baseEvent.godmother = schedule.godmotherName || schedule.godmother || 'N/A';
                 } else if (sacramentType === 'Holy Orders') {
                     baseEvent.ordinationType = schedule.ordinationType || 'N/A';
                     baseEvent.seminaryName = schedule.seminaryName || 'N/A';
                 } else if (sacramentType === 'Pamisa') {
                     baseEvent.intention = schedule.intention || 'N/A';
-                    baseEvent.massSponsor = schedule.massSponsor || 'N/A';
+                    baseEvent.massSponsor = schedule.massSponsor || schedule.sponsor || 'N/A';
                 } else if (sacramentType === 'Funeral Service') {
+                    baseEvent.nameOfDeceased = schedule.nameOfDeceased || schedule.name || 'N/A';
                     baseEvent.causeOfDeath = schedule.causeOfDeath || 'N/A';
                     baseEvent.age = schedule.age || 'N/A';
                 } else if (sacramentType === 'Blessing') {
@@ -1069,9 +1086,28 @@
                 } else if (sacramentType === 'Certificate') {
                     baseEvent.certificateType = schedule.certificateType || 'N/A';
                     baseEvent.purpose = schedule.purpose || 'N/A';
+                } else if (sacramentType === 'Matrimony') {
+                    baseEvent.groomName = schedule.groomName || 'N/A';
+                    baseEvent.brideName = schedule.brideName || 'N/A';
+                    baseEvent.groomParents = schedule.groomParents || 'N/A';
+                    baseEvent.brideParents = schedule.brideParents || 'N/A';
                 }
 
                 return baseEvent;
+            }
+
+            function getEventName(schedule, sacramentType) {
+                if (sacramentType === 'Matrimony') {
+                    return `${schedule.groomName || 'Groom'} & ${schedule.brideName || 'Bride'}`;
+                } else if (sacramentType === 'Funeral Service') {
+                    return schedule.nameOfDeceased || schedule.name || 'Unknown';
+                }
+                return schedule.name || schedule.confirmandName || schedule.names?.[0] || schedule.fullName || 'Unknown';
+            }
+
+            function getEventTime(schedule) {
+                return schedule.time || schedule.baptismTime || schedule.kumpilTime || 
+                       schedule.scheduleTime || schedule.ordinationTime || schedule.marriageTime || 'TBA';
             }
 
             // Format date for storage (YYYY-MM-DD)
@@ -1087,27 +1123,11 @@
                 if (!dateStr || dateStr === 'N/A' || dateStr === 'TBA') return 'N/A';
                 
                 try {
-                    // Handle different date formats
-                    let date;
-                    if (typeof dateStr === 'string' && dateStr.includes('T')) {
-                        date = new Date(dateStr);
-                    } else if (typeof dateStr === 'string') {
-                        // Handle simple date strings like "2023-12-25"
-                        const parts = dateStr.split('-');
-                        if (parts.length === 3) {
-                            date = new Date(parts[0], parts[1] - 1, parts[2]);
-                        } else {
-                            date = new Date(dateStr);
-                        }
-                    } else {
-                        date = new Date(dateStr);
-                    }
-                    
+                    const date = new Date(dateStr);
                     if (isNaN(date.getTime())) return 'Invalid Date';
                     
                     return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
                 } catch (e) {
-                    console.warn('Date formatting error:', e, dateStr);
                     return 'Invalid Date';
                 }
             }
@@ -1132,6 +1152,7 @@
 
             // Sample data for demonstration (fallback)
             function initializeSampleData() {
+                console.log("📝 Initializing sample data...");
                 const sampleEvents = [
                     {
                         id: 1,
@@ -1232,10 +1253,9 @@
                         eventItem.classList.add('event-item');
                         
                         // Create sacrament type badge
-                        const badgeClass = event.type.toLowerCase().replace(' ', '-').replace('service', '');
+                        const badgeClass = event.type.toLowerCase().replace(/[^a-z0-9]/g, '-').replace('service', '');
                         const badge = `<span class="sacrament-badge ${badgeClass}">${event.type}</span>`;
                         
-                        // Only show basic info in the list
                         const basicInfoHTML = `
                             ${badge}
                             <p><span class="label">Name:</span> ${event.name}</p>
@@ -1245,7 +1265,6 @@
                         
                         eventItem.innerHTML = basicInfoHTML;
                         
-                        // Add click event to show full details in modal
                         eventItem.addEventListener('click', () => {
                             showEventDetails(event);
                         });
@@ -1259,8 +1278,7 @@
 
             // Show event details in modal
             function showEventDetails(event) {
-                // Create sacrament type badge
-                const badgeClass = event.type.toLowerCase().replace(' ', '-').replace('service', '');
+                const badgeClass = event.type.toLowerCase().replace(/[^a-z0-9]/g, '-').replace('service', '');
                 const badge = `<span class="sacrament-badge ${badgeClass}">${event.type}</span>`;
                 
                 let detailsHTML = `
@@ -1293,129 +1311,21 @@
                 
                 // Add sacrament-specific details
                 if (event.type === 'Baptism') {
-                    detailsHTML += `
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Father's Name</div>
-                            <div class="event-detail-value">${event.fatherName || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Mother's Name</div>
-                            <div class="event-detail-value">${event.motherName || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Godfather</div>
-                            <div class="event-detail-value">${event.godfather || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Godmother</div>
-                            <div class="event-detail-value">${event.godmother || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Birth Date</div>
-                            <div class="event-detail-value">${event.birthDate || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Birth Place</div>
-                            <div class="event-detail-value">${event.birthPlace || 'N/A'}</div>
-                        </div>
-                    `;
+                    detailsHTML += addBaptismDetails(event);
                 } else if (event.type === 'Confirmation') {
-                    detailsHTML += `
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Age</div>
-                            <div class="event-detail-value">${event.age || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Baptism Date</div>
-                            <div class="event-detail-value">${event.baptismDate || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Baptism Church</div>
-                            <div class="event-detail-value">${event.baptismChurch || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Father's Name</div>
-                            <div class="event-detail-value">${event.fatherName || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Mother's Name</div>
-                            <div class="event-detail-value">${event.motherName || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Godfather</div>
-                            <div class="event-detail-value">${event.godfather || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Godmother</div>
-                            <div class="event-detail-value">${event.godmother || 'N/A'}</div>
-                        </div>
-                    `;
+                    detailsHTML += addConfirmationDetails(event);
                 } else if (event.type === 'Holy Orders') {
-                    detailsHTML += `
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Ordination Type</div>
-                            <div class="event-detail-value">${event.ordinationType || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Seminary</div>
-                            <div class="event-detail-value">${event.seminaryName || 'N/A'}</div>
-                        </div>
-                    `;
+                    detailsHTML += addHolyOrdersDetails(event);
                 } else if (event.type === 'Pamisa') {
-                    detailsHTML += `
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Intention</div>
-                            <div class="event-detail-value">${event.intention || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Mass Sponsor</div>
-                            <div class="event-detail-value">${event.massSponsor || 'N/A'}</div>
-                        </div>
-                    `;
+                    detailsHTML += addPamisaDetails(event);
                 } else if (event.type === 'Funeral Service') {
-                    detailsHTML += `
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Age at Death</div>
-                            <div class="event-detail-value">${event.age || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Cause of Death</div>
-                            <div class="event-detail-value">${event.causeOfDeath || 'N/A'}</div>
-                        </div>
-                    `;
+                    detailsHTML += addFuneralDetails(event);
                 } else if (event.type === 'Blessing') {
-                    detailsHTML += `
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Blessing Type</div>
-                            <div class="event-detail-value">${event.blessingType || 'N/A'}</div>
-                        </div>
-                    `;
+                    detailsHTML += addBlessingDetails(event);
                 } else if (event.type === 'Certificate') {
-                    detailsHTML += `
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Certificate Type</div>
-                            <div class="event-detail-value">${event.certificateType || 'N/A'}</div>
-                        </div>
-                        
-                        <div class="event-detail-item">
-                            <div class="event-detail-label">Purpose</div>
-                            <div class="event-detail-value">${event.purpose || 'N/A'}</div>
-                        </div>
-                    `;
+                    detailsHTML += addCertificateDetails(event);
+                } else if (event.type === 'Matrimony') {
+                    detailsHTML += addMatrimonyDetails(event);
                 }
                 
                 // Add notes if available
@@ -1433,6 +1343,151 @@
                 eventDetailsModal.style.display = 'flex';
             }
 
+            // Helper functions for sacrament details
+            function addBaptismDetails(event) {
+                return `
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Father's Name</div>
+                        <div class="event-detail-value">${event.fatherName || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Mother's Name</div>
+                        <div class="event-detail-value">${event.motherName || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Godfather</div>
+                        <div class="event-detail-value">${event.godfather || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Godmother</div>
+                        <div class="event-detail-value">${event.godmother || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Birth Date</div>
+                        <div class="event-detail-value">${event.birthDate || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Birth Place</div>
+                        <div class="event-detail-value">${event.birthPlace || 'N/A'}</div>
+                    </div>
+                `;
+            }
+
+            function addConfirmationDetails(event) {
+                return `
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Age</div>
+                        <div class="event-detail-value">${event.age || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Baptism Date</div>
+                        <div class="event-detail-value">${event.baptismDate || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Baptism Church</div>
+                        <div class="event-detail-value">${event.baptismChurch || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Father's Name</div>
+                        <div class="event-detail-value">${event.fatherName || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Mother's Name</div>
+                        <div class="event-detail-value">${event.motherName || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Godfather</div>
+                        <div class="event-detail-value">${event.godfather || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Godmother</div>
+                        <div class="event-detail-value">${event.godmother || 'N/A'}</div>
+                    </div>
+                `;
+            }
+
+            function addHolyOrdersDetails(event) {
+                return `
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Ordination Type</div>
+                        <div class="event-detail-value">${event.ordinationType || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Seminary</div>
+                        <div class="event-detail-value">${event.seminaryName || 'N/A'}</div>
+                    </div>
+                `;
+            }
+
+            function addPamisaDetails(event) {
+                return `
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Intention</div>
+                        <div class="event-detail-value">${event.intention || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Mass Sponsor</div>
+                        <div class="event-detail-value">${event.massSponsor || 'N/A'}</div>
+                    </div>
+                `;
+            }
+
+            function addFuneralDetails(event) {
+                return `
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Age at Death</div>
+                        <div class="event-detail-value">${event.age || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Cause of Death</div>
+                        <div class="event-detail-value">${event.causeOfDeath || 'N/A'}</div>
+                    </div>
+                `;
+            }
+
+            function addBlessingDetails(event) {
+                return `
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Blessing Type</div>
+                        <div class="event-detail-value">${event.blessingType || 'N/A'}</div>
+                    </div>
+                `;
+            }
+
+            function addCertificateDetails(event) {
+                return `
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Certificate Type</div>
+                        <div class="event-detail-value">${event.certificateType || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Purpose</div>
+                        <div class="event-detail-value">${event.purpose || 'N/A'}</div>
+                    </div>
+                `;
+            }
+
+            function addMatrimonyDetails(event) {
+                return `
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Groom's Name</div>
+                        <div class="event-detail-value">${event.groomName || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Bride's Name</div>
+                        <div class="event-detail-value">${event.brideName || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Groom's Parents</div>
+                        <div class="event-detail-value">${event.groomParents || 'N/A'}</div>
+                    </div>
+                    <div class="event-detail-item">
+                        <div class="event-detail-label">Bride's Parents</div>
+                        <div class="event-detail-value">${event.brideParents || 'N/A'}</div>
+                    </div>
+                `;
+            }
+
             function showSearchResults(results) {
                 searchResultsList.innerHTML = '';
                 if (results.length > 0) {
@@ -1440,11 +1495,9 @@
                         const eventItem = document.createElement('div');
                         eventItem.classList.add('event-item');
                         
-                        // Create sacrament type badge
-                        const badgeClass = result.type.toLowerCase().replace(' ', '-').replace('service', '');
+                        const badgeClass = result.type.toLowerCase().replace(/[^a-z0-9]/g, '-').replace('service', '');
                         const badge = `<span class="sacrament-badge ${badgeClass}">${result.type}</span>`;
                         
-                        // Only show basic info in search results
                         eventItem.innerHTML = `
                             ${badge}
                             <p><span class="label">Name:</span> ${result.name}</p>
@@ -1453,7 +1506,6 @@
                             <p><span class="label">Contact:</span> ${result.contact}</p>
                         `;
                         
-                        // Add click event to show full details
                         eventItem.addEventListener('click', () => {
                             showEventDetails(result);
                         });
@@ -1475,7 +1527,6 @@
 
             function openEventModal() {
                 eventModal.style.display = 'flex';
-                // Set default date to today
                 document.getElementById('event-date').valueAsDate = new Date();
             }
 
@@ -1508,20 +1559,108 @@
 
                 try {
                     // Determine which endpoint to use based on sacrament type
-                    let endpoint;
+                    let endpoint, payload;
+                    
                     switch(type) {
-                        case 'Baptism': endpoint = '/api/baptism'; break;
-                        case 'Confirmation': endpoint = '/api/confirmation'; break;
-                        case 'Eucharist': endpoint = '/api/eucharist'; break;
-                        case 'Confession': endpoint = '/api/confession'; break;
-                        case 'Anointing of the Sick': endpoint = '/api/anointing'; break;
-                        case 'Holy Orders': endpoint = '/api/holy-orders'; break;
-                        case 'Matrimony': endpoint = '/api/matrimony'; break;
-                        case 'Pamisa': endpoint = '/api/pamisa'; break;
-                        case 'Funeral Service': endpoint = '/api/funeralrequests'; break;
-                        case 'Blessing': endpoint = '/api/blessing'; break;
-                        case 'Certificate': endpoint = '/api/certificates'; break;
-                        default: endpoint = '/api/schedules'; break;
+                        case 'Baptism':
+                            endpoint = '/api/baptism';
+                            payload = {
+                                name: name,
+                                baptismDate: date,
+                                baptismTime: time,
+                                contact: contact,
+                                address: address,
+                                notes: notes
+                            };
+                            break;
+                        case 'Confirmation':
+                            endpoint = '/api/confirmation';
+                            payload = {
+                                confirmandName: name,
+                                kumpilDate: date,
+                                kumpilTime: time,
+                                contact: contact,
+                                address: address,
+                                notes: notes
+                            };
+                            break;
+                        case 'Holy Orders':
+                            endpoint = '/api/holy-orders';
+                            payload = {
+                                name: name,
+                                ordinationDate: date,
+                                ordinationTime: time,
+                                contact: contact,
+                                address: address,
+                                notes: notes
+                            };
+                            break;
+                        case 'Pamisa':
+                            endpoint = '/api/pamisa';
+                            payload = {
+                                name: name,
+                                scheduleDate: date,
+                                scheduleTime: time,
+                                contact: contact,
+                                address: address,
+                                intention: notes
+                            };
+                            break;
+                        case 'Funeral Service':
+                            endpoint = '/api/funeral';
+                            payload = {
+                                nameOfDeceased: name,
+                                funeralDate: date,
+                                funeralTime: time,
+                                contact: contact,
+                                address: address,
+                                notes: notes
+                            };
+                            break;
+                        case 'Blessing':
+                            endpoint = '/api/blessing';
+                            payload = {
+                                name: name,
+                                blessingDate: date,
+                                blessingTime: time,
+                                contact: contact,
+                                address: address,
+                                notes: notes
+                            };
+                            break;
+                        case 'Certificate':
+                            endpoint = '/api/certificates';
+                            payload = {
+                                fullName: name,
+                                requestDate: date,
+                                contact: contact,
+                                address: address,
+                                purpose: notes
+                            };
+                            break;
+                        case 'Matrimony':
+                            endpoint = '/api/marriage';
+                            payload = {
+                                groomName: name.split(' & ')[0] || name,
+                                brideName: name.split(' & ')[1] || 'Bride',
+                                marriageDate: date,
+                                marriageTime: time,
+                                contact: contact,
+                                address: address,
+                                notes: notes
+                            };
+                            break;
+                        default:
+                            endpoint = '/api/schedules';
+                            payload = {
+                                name: name,
+                                type: type,
+                                date: date,
+                                time: time,
+                                contact: contact,
+                                address: address,
+                                notes: notes
+                            };
                     }
 
                     const response = await fetch(`http://localhost:5000${endpoint}`, {
@@ -1529,19 +1668,11 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({
-                            name,
-                            type,
-                            date,
-                            time,
-                            contact,
-                            address,
-                            notes
-                        })
+                        body: JSON.stringify(payload)
                     });
 
                     if (!response.ok) {
-                        throw new Error('Failed to save schedule');
+                        throw new Error(`Failed to save schedule: ${response.statusText}`);
                     }
 
                     const newEvent = await response.json();
@@ -1549,7 +1680,9 @@
                     // Add to events object
                     const normalizedDate = formatDateForStorage(new Date(date));
                     if (!events[normalizedDate]) events[normalizedDate] = [];
-                    events[normalizedDate].push(newEvent);
+                    
+                    const eventObj = createEventObject({...payload, _id: newEvent._id || newEvent.id}, type);
+                    events[normalizedDate].push(eventObj);
 
                     // Re-render calendar and events
                     renderCalendar(currentMonth, currentYear);

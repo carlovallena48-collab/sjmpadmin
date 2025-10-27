@@ -173,7 +173,7 @@
 <div class="login-container">
     <h2><i class="fas fa-church"></i> Website Staff Login</h2>
     <div class="role-badge">
-        <i class="fas fa-user-shield"></i> Website Content Management
+        <i class="fas fa-user-shield"></i> STAFF ACCESS ONLY - Website Content Management
     </div>
     
     <form id="loginForm">
@@ -199,7 +199,6 @@
         
         <div class="links">
             <p>Super Admin? <a href="../index.html">Go to Super Admin Login</a></p>
-            <p>Don't have an account? <a href="../register.html">Register Here</a></p>
         </div>
     </form>
 </div>
@@ -224,7 +223,7 @@
         const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
 
         try {
-            const res = await fetch("http://localhost:5000/website/login", {
+            const res = await fetch("http://localhost:5000/api/auth/website/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)
@@ -233,38 +232,64 @@
             const result = await res.json();
 
             if (res.ok && result.success) {
-                // ✅ STORE USER DATA IN LOCALSTORAGE FOR SESSION MANAGEMENT
-                localStorage.setItem('user', JSON.stringify(result.user));
-                localStorage.setItem('userType', result.userType);
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('loginTime', new Date().toISOString());
-                
-                console.log('✅ User data stored:', result.user);
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Login Successful!',
-                    html: `Welcome back, <strong>${result.user.name}</strong>!`,
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    // Redirect to website dashboard
-                    window.location.href = "websitedashboard.html";
-                });
+                // ✅ CHECK IF USER IS STAFF
+                if (result.user && result.userType === 'staff') {
+                    
+                    // ✅ CHECK IF ACCOUNT IS ACTIVE
+                    if (result.user.status === 'inactive' || result.user.isActive === false) {
+                        Swal.fire({ 
+                            icon: 'error', 
+                            title: 'Account Deactivated', 
+                            text: 'Your account has been deactivated by admin. Please contact system administrator.',
+                            confirmButtonColor: primaryColor
+                        });
+                        document.getElementById("password").value = '';
+                        return;
+                    }
+
+                    // ✅ STORE USER DATA
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    localStorage.setItem('userType', 'staff');
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('loginTime', new Date().toISOString());
+                    
+                    console.log('✅ Staff login successful:', result.user);
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Login Successful!',
+                        html: `Welcome back, <strong>${result.user.name}</strong>!`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = "websitedashboard.html";
+                    });
+                } else {
+                    // ❌ USER IS NOT STAFF
+                    Swal.fire({ 
+                        icon: 'warning', 
+                        title: 'Access Denied', 
+                        text: 'This login is for staff members only.',
+                        confirmButtonColor: primaryColor
+                    });
+                    document.getElementById("password").value = '';
+                }
             } else {
+                // ❌ LOGIN FAILED
                 Swal.fire({ 
                     icon: 'error', 
                     title: 'Login Failed', 
-                    text: result.message || 'Invalid credentials',
+                    text: result.message || 'Invalid username or password',
                     confirmButtonColor: primaryColor
                 });
+                document.getElementById("password").value = '';
             }
         } catch (err) {
             console.error('Login error:', err);
             Swal.fire({ 
                 icon: 'warning', 
-                title: 'Server Connection Error', 
-                text: 'Cannot connect to the backend server. Please make sure the server is running on port 5000.',
+                title: 'Connection Error', 
+                text: 'Cannot connect to server. Please make sure backend is running on port 5000.',
                 confirmButtonColor: primaryColor
             });
         } finally {
@@ -274,30 +299,18 @@
         }
     });
 
-    // Optional: Check if user is already logged in
+    // Check if already logged in
     document.addEventListener('DOMContentLoaded', function() {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
         const userType = localStorage.getItem('userType');
         
         if (isLoggedIn === 'true' && userType === 'staff') {
-            // If staff is already logged in, redirect to dashboard
             const userData = JSON.parse(localStorage.getItem('user') || '{}');
-            console.log('User already logged in:', userData.name);
-            
-            // Optional: Show welcome message
-            // Swal.fire({
-            //     icon: 'info',
-            //     title: 'Already Logged In',
-            //     html: `You are already logged in as <strong>${userData.name}</strong>. Redirecting to dashboard...`,
-            //     timer: 1500,
-            //     showConfirmButton: false
-            // }).then(() => {
-            //     window.location.href = "websitedashboard.html";
-            // });
+            console.log('Staff already logged in:', userData.name);
         }
     });
 
-    // Optional: Enter key to submit form
+    // Enter key to submit form
     document.getElementById('password').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             document.getElementById('loginForm').dispatchEvent(new Event('submit'));
